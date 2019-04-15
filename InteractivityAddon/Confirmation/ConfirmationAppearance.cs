@@ -5,7 +5,7 @@ namespace InteractivityAddon.Confirmation
     /// <summary>
     /// Appearance options of a <see cref="ConfirmationRequest"/>
     /// </summary>
-    public class ConfirmationAppearance
+    public sealed class ConfirmationAppearance
     {
         public IEmote ConfirmEmote { get; }
         public IEmote DeclineEmote { get; }

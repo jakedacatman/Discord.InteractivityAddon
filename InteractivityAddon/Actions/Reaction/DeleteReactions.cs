@@ -3,7 +3,7 @@ using Discord.WebSocket;
 
 namespace InteractivityAddon.Actions
 {
-    public class DeleteReactions : IAction<SocketReaction>
+    public sealed class DeleteReactions : IAction<SocketReaction>
     {
         public bool ApplyToInvalid { get; }
         public bool ApplyToValid { get; }

@@ -9,7 +9,7 @@ namespace InteractivityAddon.Pagination
     /// <summary>
     /// Used to send a multi page message to a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>
     /// </summary>
-    public class Paginator
+    public sealed class Paginator
     {
         /// <summary>
         /// The pages of the <see cref="Paginator"/>.

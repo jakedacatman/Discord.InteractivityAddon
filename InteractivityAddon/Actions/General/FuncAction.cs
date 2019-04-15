@@ -6,7 +6,7 @@ namespace InteractivityAddon.Actions
     /// <summary>
     /// Applies an <see cref="Func{T, Task}"/> to a <see cref="T"/>
     /// </summary>
-    public class FuncAction<T> : IAction<T>
+    public sealed class FuncAction<T> : IAction<T>
     {
         private Func<T, Task> Function { get; }
 

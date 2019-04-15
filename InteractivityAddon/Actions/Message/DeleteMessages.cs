@@ -6,7 +6,7 @@ namespace InteractivityAddon.Actions
     /// <summary>
     /// Deletes Valid or Invalid messages
     /// </summary>
-    public class DeleteMessages : IAction<SocketMessage>
+    public sealed class DeleteMessages : IAction<SocketMessage>
     {
         public bool ApplyToInvalid { get; }
         public bool ApplyToValid { get; }

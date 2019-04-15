@@ -5,7 +5,7 @@ namespace InteractivityAddon.Selection
     /// <summary>
     /// Appearance options of a <see cref="SelectionRequest{T}"/>.
     /// </summary>
-    public class SelectionAppearance
+    public sealed class SelectionAppearance
     {
         public Embed SelectionEmbed { get; }
         public Embed TimeoutedEmbed { get; }

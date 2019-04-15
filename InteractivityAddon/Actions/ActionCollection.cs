@@ -8,7 +8,7 @@ namespace InteractivityAddon.Actions
     /// Represents a collection of <see cref="IAction{T}"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ActionCollection<T>
+    public sealed class ActionCollection<T>
     {
         private ImmutableList<IAction<T>> Actions { get; set; }
         public int ActionAmount => Actions.Count;

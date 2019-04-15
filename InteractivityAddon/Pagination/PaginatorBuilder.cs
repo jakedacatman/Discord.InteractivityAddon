@@ -9,7 +9,7 @@ namespace InteractivityAddon.Pagination
     /// <summary>
     /// The <see cref="PaginatorBuilder"/> is used to create paginated messages.
     /// </summary>
-    public class PaginatorBuilder
+    public sealed class PaginatorBuilder
     {
         /// <summary>
         /// Gets or sets the Pages which are used by the <see cref="Paginator"/>.

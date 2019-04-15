@@ -5,7 +5,7 @@ namespace InteractivityAddon.Pagination
     /// <summary>
     /// Appearance options of a <see cref="Paginator"/>.
     /// </summary>
-    public class PaginatorAppearance
+    public sealed class PaginatorAppearance
     {
         public IEmote BackwardEmote { get; set; }
         public IEmote ForwardEmote { get; set; }

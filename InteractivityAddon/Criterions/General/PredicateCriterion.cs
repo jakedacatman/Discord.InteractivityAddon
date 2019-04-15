@@ -6,7 +6,7 @@ namespace InteractivityAddon.Criterions
     /// <summary>
     /// Ensures that the <see cref="T"/> passes a <see cref="PredicateCriterion{T}"/>"/>
     /// </summary>
-    public class PredicateCriterion<T> : ICriterion<T>
+    public sealed class PredicateCriterion<T> : ICriterion<T>
     {
         private Predicate<T> Filter { get; }
 

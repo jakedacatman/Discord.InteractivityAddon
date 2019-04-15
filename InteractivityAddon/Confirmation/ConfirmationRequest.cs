@@ -11,7 +11,7 @@ namespace InteractivityAddon.Confirmation
     /// Used to confirm an action via reaction on a <see cref="IUserMessage"/>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ConfirmationRequest
+    public sealed class ConfirmationRequest
     {
         public ConfirmationAppearance Appearance { get; }
         public IUserMessage Message { get; }

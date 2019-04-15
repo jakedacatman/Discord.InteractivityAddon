@@ -6,7 +6,7 @@ using Discord;
 
 namespace InteractivityAddon.Pagination
 {
-    public class Page
+    public sealed class Page
     {
         /// <summary>
         /// Gets or sets the Embed color of the <see cref="Page"/>.

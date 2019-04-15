@@ -3,7 +3,7 @@
     /// <summary>
     /// Settings of a <see cref="Paginator"/>.
     /// </summary>
-    public class PaginatorSettings
+    public sealed class PaginatorSettings
     {
         /// <summary>
         /// Determites wether to delete reactions which are not associated with the <see cref="Paginator"/>.
