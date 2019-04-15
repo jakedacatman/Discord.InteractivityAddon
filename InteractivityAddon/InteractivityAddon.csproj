@@ -21,6 +21,7 @@ Moreover it includes support for any command framework.</Description>
     <DelaySign>false</DelaySign>
     <ApplicationIcon />
     <Win32Resource />
+    <Copyright>Copyright 2019 Playwo</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
