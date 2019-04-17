@@ -22,11 +22,6 @@ namespace InteractivityAddon.Pagination
         public PaginatorAppearance Appearance { get; set; } = PaginatorAppearance.Default;
 
         /// <summary>
-        /// Gets or sets the settings for the <see cref="Paginator"/>.
-        /// </summary>
-        public PaginatorSettings Settings { get; set; } = PaginatorSettings.Default;
-
-        /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.
         /// </summary>
         public bool IsUserRestricted => Users.Count > 0;
@@ -90,8 +85,7 @@ namespace InteractivityAddon.Pagination
                                  startPage, 
                                  IsUserRestricted, 
                                  Users.ToArray().ToList(), 
-                                 Appearance.DeepClone(), 
-                                 Settings.DeepClone());
+                                 Appearance.DeepClone());
         }
 
         /// <summary>
@@ -137,17 +131,6 @@ namespace InteractivityAddon.Pagination
         public PaginatorBuilder WithAppearance(PaginatorAppearance appearance)
         {
             Appearance = appearance;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the settings for the <see cref="Paginator"/>.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <returns></returns>
-        public PaginatorBuilder WithSettings(PaginatorSettings settings)
-        {
-            Settings = settings;
             return this;
         }
 

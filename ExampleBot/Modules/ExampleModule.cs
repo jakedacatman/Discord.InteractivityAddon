@@ -40,7 +40,6 @@ namespace ExampleBot_Qmmands.Modules
 
             var paginator = new PaginatorBuilder()
                 .WithEmbeds(pages.ToArray())
-                .WithSettings(PaginatorSettings.Default)
                 .WithUsers(Context.User)
                 .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
                 .Build();

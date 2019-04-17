@@ -20,6 +20,8 @@ namespace InteractivityAddon.Pagination
         public Embed CancelledEmbed { get; set; }
         public Embed TimeoutedEmbed { get; set; }
 
+        public bool RemoveOtherReactions { get; set; }
+
         /// <summary>
         /// Creates a new instance of <see cref="PaginatorAppearance"/>.
         /// </summary>
@@ -118,6 +120,17 @@ namespace InteractivityAddon.Pagination
         public PaginatorAppearance WithCancelledEmbed(Embed embed)
         {
             CancelledEmbed = embed;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets wether to delete reactions which are not associated with the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="removeOtherReactions"></param>
+        /// <returns></returns>
+        public PaginatorAppearance WithRemoveOtherReaction(bool removeOtherReactions)
+        {
+            RemoveOtherReactions = removeOtherReactions;
             return this;
         }
 

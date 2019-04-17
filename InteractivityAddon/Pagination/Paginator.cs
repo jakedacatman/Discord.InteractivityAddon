@@ -41,19 +41,13 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         public PaginatorAppearance Appearance { get; }
 
-        /// <summary>
-        /// The settings of the <see cref="Paginator"/>.
-        /// </summary>
-        public PaginatorSettings Settings { get; }
-
-        internal Paginator(List<Embed> pages, int currentPageIndex, bool isUserRestricted, List<SocketUser> users, PaginatorAppearance appearance, PaginatorSettings settings)
+        internal Paginator(List<Embed> pages, int currentPageIndex, bool isUserRestricted, List<SocketUser> users, PaginatorAppearance appearance)
         {
             Pages = pages;
             CurrentPageIndex = currentPageIndex;
             IsUserRestricted = isUserRestricted;
             Users = users;
             Appearance = appearance;
-            Settings = settings;
         }
 
         internal void ApplyAction(PaginatorAction action, out bool pageChanged)
@@ -97,7 +91,7 @@ namespace InteractivityAddon.Pagination
         }
 
         internal ActionCollection<SocketReaction> GetActions() => new ActionCollection<SocketReaction>(
-            new DeleteReactions(Settings.RemoveOtherReactions, true)
+            new DeleteReactions(Appearance.RemoveOtherReactions, true)
             );
 
     }
