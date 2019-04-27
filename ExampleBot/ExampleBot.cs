@@ -26,7 +26,7 @@ namespace ExampleBot_Qmmands
             Client = Provider.GetRequiredService<DiscordSocketClient>();
         }
 
-        public async Task Startasync()
+        public async Task StartAsync()
         {
             string discordToken = "";
 

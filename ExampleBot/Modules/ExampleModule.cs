@@ -56,7 +56,7 @@ namespace ExampleBot_Qmmands.Modules
         }
 
         [Command("nextmessage")]
-        public async Task ReplyNextMessageAsync()
+        public async Task ExampleReplyNextMessageAsync()
         {
             var result = await _interactivity.NextMessageAsync(x => x.Author == Context.User);
 
@@ -68,7 +68,7 @@ namespace ExampleBot_Qmmands.Modules
         }
 
         [Command("deleteall")]
-        public async Task DeleteAllMessagesAsync()
+        public async Task ExampleDeleteAllMessagesAsync()
         {
             await Context.Channel.SendMessageAsync("You can't send messages anymore!");
             await _interactivity.NextMessageAsync(x => false, async x => await x.DeleteAsync(), timeout: TimeSpan.FromSeconds(15));
@@ -76,7 +76,7 @@ namespace ExampleBot_Qmmands.Modules
         }
 
         [Command("select")]
-        public async Task SelectAsync()
+        public async Task ExampleSelectionAsync()
         {
             var builder = new SelectionBuilder<string>()
                             .WithSettings(allowCancel: true)

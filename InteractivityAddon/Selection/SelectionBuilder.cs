@@ -166,5 +166,16 @@ namespace InteractivityAddon.Selection
             AllowCancel = allowCancel;
             return this;
         }
+
+        /// <summary>
+        /// Sets the embed which the <see cref="Selection{T}"/> is made of.
+        /// </summary>
+        /// <param name="selectionEmbed"></param>
+        /// <returns></returns>
+        public SelectionBuilder<T> WithSelectionEmbed(EmbedBuilder selectionEmbed)
+        {
+            SelectionEmbed = selectionEmbed;
+            return this;
+        }
     }
 }

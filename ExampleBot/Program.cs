@@ -10,7 +10,7 @@ namespace ExampleBot_Qmmands
 
             Task.Run(async () => {
                 Bot.Initialize();
-                await Bot.Startasync();
+                await Bot.StartAsync();
 
             }).GetAwaiter().GetResult();
         }
