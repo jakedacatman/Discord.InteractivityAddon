@@ -7,62 +7,99 @@ namespace InteractivityAddon.Selection
     /// </summary>
     public sealed class SelectionAppearance
     {
-        public Embed SelectionEmbed { get; }
-        public Embed TimeoutedEmbed { get; }
-        public Embed CancelledEmbed { get; }
+        /// <summary>
+        /// Gets or sets the <see cref="Embed"/> which the <see cref="Selection"/> gets modified to after cancellation.
+        /// </summary>
+        public Embed CancelledEmbed { get; set; } = new EmbedBuilder().WithColor(Color.Orange).WithTitle("Cancelled! :thumbsup:").Build();
 
-        public bool DeleteInvalidMessages { get; }
-        public bool DeleteValidMessage { get; }
+        /// <summary>
+        /// Gets or sets the <see cref="Embed"/> which the <see cref="Selection"/> gets modified to after a timeout.
+        /// </summary>
+        public Embed TimeoutedEmbed { get; set; } = new EmbedBuilder().WithColor(Color.Red).WithTitle("Timed out! :alarm_clock:").Build();
+
+        /// <summary>
+        /// Gets or sets the string which can be selected to cancel the <see cref="Selection{T}"/>.
+        /// </summary>
+        public string CancelString { get; set; } = "Cancel";
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="Selection"/> will delete invalid messages.
+        /// </summary>
+        public bool DeleteInvalidMessages { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="Selection"/> will delete the valid message.
+        /// </summary>
+        public bool DeleteValidMessage { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets whether the <see cref="Selection"/> will get deleted after a <see cref="InteractivityResult{T}"/> has been captured.
+        /// </summary>
+        public bool DeleteSelectionAfterCapturedResult { get; set; } = false;
 
         /// <summary>
         /// Creates a new instance of <see cref="SelectionAppearance"/>.
         /// </summary>
-        /// <param name="selectionEmbed">The <see cref="Embed"/> which is sent in the selection.</param>
-        /// <param name="timeoutedEmbed">The <see cref="Embed"/> which the <paramref name="selectionEmbed"/> gets modified to when the selection is timeouted.</param>
         /// <param name="cancelledEmbed">The <see cref="Embed"/> which the <paramref name="selectionEmbed"/> gets modified to when the selection is cancelled.</param>
+        /// <param name="timeoutedEmbed">The <see cref="Embed"/> which the <paramref name="selectionEmbed"/> gets modified to when the selection is timeouted.</param>
         /// <param name="deleteInvalidMessages">Whether to delete all messages which do not interact with the selection.</param>
         /// <param name="deleteValidMessage">Whether to delete the message that completes the selection.</param>
-        public SelectionAppearance(Embed selectionEmbed = null, Embed timeoutedEmbed = null, Embed cancelledEmbed = null,
-            bool deleteInvalidMessages = false, bool deleteValidMessage = false)
+        /// <param name="deleteSelectionAfterCapturedResult">Whether the <see cref="Selection"/> will get deleted after a <see cref="InteractivityResult{T}"/> has been captured.</param>
+        public SelectionAppearance(Embed cancelledEmbed = null, Embed timeoutedEmbed = null,
+            bool? deleteInvalidMessages = null, bool? deleteValidMessage = null, bool? deleteSelectionAfterCapturedResult = null)
         {
-            SelectionEmbed = selectionEmbed ?? Default.SelectionEmbed;
-            TimeoutedEmbed = timeoutedEmbed ?? Default.TimeoutedEmbed;
-            CancelledEmbed = cancelledEmbed ?? Default.CancelledEmbed;
-
-            DeleteInvalidMessages = deleteInvalidMessages;
-            DeleteValidMessage = deleteValidMessage;
+            CancelledEmbed = cancelledEmbed ?? new EmbedBuilder().WithColor(Color.Orange).WithTitle("Cancelled! :thumbsup:").Build();
+            TimeoutedEmbed = timeoutedEmbed ?? new EmbedBuilder().WithColor(Color.Red).WithTitle("Timed out! :alarm_clock:").Build();
+            DeleteInvalidMessages = deleteInvalidMessages ?? false;
+            DeleteValidMessage = deleteValidMessage ?? false;
+            DeleteSelectionAfterCapturedResult = deleteSelectionAfterCapturedResult ?? false;
         }
 
         /// <summary>
-        /// The standart appearance of a <see cref="SelectionRequest{T}"/>.
+        /// Creates a new instane of <see cref="SelectionAppearance"/> with the default values.
         /// </summary>
-        public static SelectionAppearance Default => new SelectionAppearance(
-            selectionEmbed: new EmbedBuilder().WithColor(Color.Blue).WithTitle("Select one of these :arrow_double_down:").Build(),
-            timeoutedEmbed: new EmbedBuilder().WithColor(Color.Red).WithTitle("Timed out! :alarm_clock:").Build(),
-            cancelledEmbed: new EmbedBuilder().WithColor(Color.Orange).WithTitle("Cancelled! :thumbsup:").Build(),
-            deleteInvalidMessages: false,
-            deleteValidMessage: false
-            );
+        public SelectionAppearance() { }
 
         /// <summary>
-        /// Creates a default <see cref="SelectionAppearance"/> with a custom <paramref name="selectionEmbed"/>.
+        /// Creates a new instane of <see cref="SelectionAppearance"/> with the default values.
         /// </summary>
-        /// <param name="selectionEmbed">Your custom <paramref name="selectionEmbed"/>.</param>
-        /// <returns></returns>
-        public static SelectionAppearance FromSelectionEmbed(Embed selectionEmbed) => new SelectionAppearance(selectionEmbed: selectionEmbed);
+        public static SelectionAppearance Default => new SelectionAppearance();
 
         /// <summary>
-        /// Creates a default <see cref="SelectionAppearance"/> with a custom <paramref name="timeoutedEmbed"/>.
+        /// Sets the cancelledembed of the <see cref="Selection"/>.
         /// </summary>
-        /// <param name="timeoutedEmbed">Your custom <paramref name="timeoutedEmbed"/>.</param>
+        /// <param name="embed"></param>
         /// <returns></returns>
-        public static SelectionAppearance FromTimeoutedEmbed(Embed timeoutedEmbed) => new SelectionAppearance(timeoutedEmbed: timeoutedEmbed);
+        public SelectionAppearance WithCancelledEmbed(Embed embed)
+        {
+            CancelledEmbed = embed;
+            return this;
+        }
 
         /// <summary>
-        /// Creates a default <see cref="SelectionAppearance"/> with a custom <paramref name="cancelledEmbed"/>.
+        /// Sets the timeoutedembed of the <see cref="Selection"/>.
         /// </summary>
-        /// <param name="cancelledEmbed">Your custom <paramref name="cancelledEmbed"/>.</param>
+        /// <param name="embed"></param>
         /// <returns></returns>
-        public static SelectionAppearance FromCancelledEmbed(Embed cancelledEmbed) => new SelectionAppearance(cancelledEmbed: cancelledEmbed);
+        public SelectionAppearance WithTimeoutedEmbed(Embed embed)
+        {
+            TimeoutedEmbed = embed;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the deletion settings of the <see cref="Selection{T}"/>.
+        /// </summary>
+        /// <param name="deleteInvalidMessages"></param>
+        /// <param name="deleteValidMessage"></param>
+        /// <param name="deleteSelectionAfterCapturedResult"></param>
+        /// <returns></returns>
+        public SelectionAppearance WithSettings(bool deleteInvalidMessages = false, bool deleteValidMessage = false, bool deleteSelectionAfterCapturedResult = false)
+        {
+            DeleteInvalidMessages = deleteInvalidMessages;
+            DeleteValidMessage = deleteValidMessage;
+            DeleteSelectionAfterCapturedResult = deleteSelectionAfterCapturedResult;
+            return this;
+        }
     }
 }

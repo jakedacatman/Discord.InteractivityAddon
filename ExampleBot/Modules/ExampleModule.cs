@@ -78,9 +78,14 @@ namespace ExampleBot_Qmmands.Modules
         [Command("select")]
         public async Task SelectAsync()
         {
-            var request = new SelectionRequest<string>(new List<string>() { "Hi", "How", "Hey", "Huh?!" }, selectingUser: Context.User.Id, allowCancel: true);
-
-            var result = await _interactivity.GetUserSelectionAsync(request, Context.Channel, TimeSpan.FromSeconds(50));
+            var builder = new SelectionBuilder<string>()
+                            .WithSettings(allowCancel: true)
+                            .WithUsers(Context.User)
+                            .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
+                            .WithAppearance(SelectionAppearance.Default
+                            .WithSettings(deleteSelectionAfterCapturedResult: true));
+                            
+            var result = await _interactivity.GetUserSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
             if (result.IsSuccess == true) {
                 await Context.Channel.SendMessageAsync(result.Value);

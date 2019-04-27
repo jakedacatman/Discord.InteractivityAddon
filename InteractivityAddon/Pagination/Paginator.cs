@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Discord;
 using Discord.WebSocket;
 using InteractivityAddon.Actions;
@@ -14,7 +16,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// The pages of the <see cref="Paginator"/>.
         /// </summary>
-        public List<Embed> Pages { get; }
+        public ImmutableList<Embed> Pages { get; }
 
         /// <summary>
         /// The index of the current page of the <see cref="Paginator"/>.
@@ -29,24 +31,23 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.
         /// </summary>
-        public bool IsUserRestricted { get; }
+        public bool IsUserRestricted => Users.Count > 0;
 
         /// <summary>
         /// Determites which users can interact with the <see cref="Paginator"/>.
         /// </summary>
-        public List<SocketUser> Users { get; }
+        public ImmutableList<SocketUser> Users { get; }
 
         /// <summary>
         /// The appearance of the <see cref="Paginator"/>.
         /// </summary>
         public PaginatorAppearance Appearance { get; }
 
-        internal Paginator(List<Embed> pages, int currentPageIndex, bool isUserRestricted, List<SocketUser> users, PaginatorAppearance appearance)
+        internal Paginator(List<Embed> pages, int currentPageIndex, List<SocketUser> users, PaginatorAppearance appearance)
         {
-            Pages = pages;
+            Pages = pages.ToImmutableList();
             CurrentPageIndex = currentPageIndex;
-            IsUserRestricted = isUserRestricted;
-            Users = users;
+            Users = users.ToImmutableList();
             Appearance = appearance;
         }
 
@@ -78,10 +79,11 @@ namespace InteractivityAddon.Pagination
                           : false;
         }
 
-        internal Criteria<SocketReaction> GetCriterions()
+        internal Criteria<SocketReaction> GetCriteria()
         {
             var criteria = new Criteria<SocketReaction>(
-                new EnsureReactionEmote(Appearance.Emotes));
+                new EnsureReactionEmote(Appearance.Emotes)
+                );
 
             if (IsUserRestricted == true) {
                 criteria.AddCriterion(new EnsureReactionUser(Users.ToArray()));
@@ -91,7 +93,7 @@ namespace InteractivityAddon.Pagination
         }
 
         internal ActionCollection<SocketReaction> GetActions() => new ActionCollection<SocketReaction>(
-            new DeleteReactions(Appearance.RemoveOtherReactions, true)
+            new DeleteReactions(Appearance.DeleteOtherReactions, true)
             );
 
     }

@@ -7,7 +7,7 @@ using Discord.WebSocket;
 namespace InteractivityAddon.Pagination
 {
     /// <summary>
-    /// The <see cref="PaginatorBuilder"/> is used to create paginated messages.
+    /// The <see cref="PaginatorBuilder"/> is used to create a <see cref="Paginator"/>.
     /// </summary>
     public sealed class PaginatorBuilder
     {
@@ -22,12 +22,12 @@ namespace InteractivityAddon.Pagination
         public PaginatorAppearance Appearance { get; set; } = PaginatorAppearance.Default;
 
         /// <summary>
-        /// Determited whether everyone can interact with the <see cref="Paginator"/>.
+        /// Determites whether everyone can interact with the <see cref="Paginator"/>.
         /// </summary>
         public bool IsUserRestricted => Users.Count > 0;
 
         /// <summary>
-        /// Determites which users can interact with the <see cref="Paginator"/>.
+        /// Gets or sets which users can interact with the <see cref="Paginator"/>.
         /// </summary>
         public List<SocketUser> Users { get; set; } = new List<SocketUser>();
 
@@ -83,7 +83,6 @@ namespace InteractivityAddon.Pagination
 
             return new Paginator(embedPages.DeepClone(), 
                                  startPage, 
-                                 IsUserRestricted, 
                                  Users.ToArray().ToList(), 
                                  Appearance.DeepClone());
         }
@@ -131,6 +130,17 @@ namespace InteractivityAddon.Pagination
         public PaginatorBuilder WithAppearance(PaginatorAppearance appearance)
         {
             Appearance = appearance;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets which users can interact with the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="users"></param>
+        /// <returns></returns>
+        public PaginatorBuilder WithUsers(params SocketUser[] users)
+        {
+            Users = users.ToList();
             return this;
         }
 
@@ -186,17 +196,6 @@ namespace InteractivityAddon.Pagination
         public PaginatorBuilder WithImageUrl(string imageUrl)
         {
             ImageUrl = imageUrl;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets which users can interact with the <see cref="Paginator"/>.
-        /// </summary>
-        /// <param name="users"></param>
-        /// <returns></returns>
-        public PaginatorBuilder WithUsers(params SocketUser[] users)
-        {
-            Users = users.ToList();
             return this;
         }
 

@@ -22,6 +22,15 @@ namespace InteractivityAddon.Criterions
             AllowedUserIds = userIds.ToImmutableList();
         }
 
+        public EnsureMessageUser(params SocketUser[] users)
+        {
+            var allowedUserIds = new List<ulong>();
+            foreach (var user in users) {
+                allowedUserIds.Add(user.Id);
+            }
+            AllowedUserIds = allowedUserIds.ToImmutableList();
+        }
+
         public EnsureMessageUser(ImmutableList<ulong> userIds)
         {
             AllowedUserIds = userIds;

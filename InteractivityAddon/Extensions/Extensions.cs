@@ -1,4 +1,5 @@
 ﻿using System.ArrayExtensions;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using Discord;
@@ -7,7 +8,7 @@ namespace System
 {
     internal static class ObjectExtensions
     {
-        private static readonly MethodInfo CloneMethod = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly MethodInfo cloneMethod = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsPrimitive(this Type type) => type == typeof(string)
                                                           ? true
@@ -33,7 +34,7 @@ namespace System
                 return null;
             }
 
-            object cloneObject = CloneMethod.Invoke(originalObject, null);
+            object cloneObject = cloneMethod.Invoke(originalObject, null);
             if (typeToReflect.IsArray) {
                 var arrayType = typeToReflect.GetElementType();
                 if (IsPrimitive(arrayType) == false) {
@@ -142,4 +143,18 @@ namespace System
         }
     }
 
+    namespace ListOfStringExtensions
+    {
+        internal static class ListOfStringExtensions
+        {
+            public static List<string> ToLowerAll(this List<string> list)
+            {
+                for(int i = 0; i < list.Count; i++) {
+                    list[i] = list[i].ToLower();
+                }
+
+                return list;
+            }
+        }
+    }
 }

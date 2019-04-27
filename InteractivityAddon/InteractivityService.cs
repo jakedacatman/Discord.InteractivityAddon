@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using Discord;
 using Discord.WebSocket;
 using InteractivityAddon.Actions;
@@ -372,26 +373,9 @@ namespace InteractivityAddon
         /// <param name="timeout">The time before the selection returns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> GetUserSelectionAsync<T>(SelectionRequest<T> request, IMessageChannel channel,
+        public async Task<InteractivityResult<T>> GetUserSelectionAsync<T>(Selection<T> selection, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            var selectionPossibilities = new List<string>();
-            var selectionBuilder = new StringBuilder();
-            int i = 1;
-
-            foreach (string name in request.Names) {
-                string s = $"#{i} - {name}";
-                selectionPossibilities.AddRange(new[] { $"{i}", $"#{i}" });
-                selectionPossibilities.AddRange(request.IsCaseSensitive == true ? new string[] { name, s } : new string[] { name.ToLower(), s.ToLower() });
-                selectionBuilder.AppendLine(s);
-                i++;
-            }
-
-            var finalSelectionEmbed = request.Appearance.SelectionEmbed
-                .ToEmbedBuilder()
-                .WithDescription(selectionBuilder.ToString())
-                .Build();
-
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -401,7 +385,7 @@ namespace InteractivityAddon
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(embed: finalSelectionEmbed).ConfigureAwait(false);
+            var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
 
             async Task CheckMessageAsync(SocketMessage s)
             {
@@ -409,27 +393,27 @@ namespace InteractivityAddon
                     return;
                 }
 
-                if (await request.GetCriteria().JudgeAsync(s).ConfigureAwait(false) == false) {
-                    await request.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
+                if (await selection.GetCriteria().JudgeAsync(s).ConfigureAwait(false) == false) {
+                    await selection.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
                     return;
                 }
 
-                string responseContent = request.IsCaseSensitive == true
+                string responseContent = selection.IsCaseSensitive == true
                                                 ? s.Content
                                                 : s.Content.ToLower();
 
-                int index = selectionPossibilities.FindIndex(x => x == responseContent);
+                int index = selection.Possibilities.FindIndex(x => x == responseContent);
 
-                if (index != -1 && index / 4 < request.Values.Count) {
-                    await request.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
-                    selectionSource.SetResult(new InteractivityResult<T>(request.Values[index / 4], false, false));
+                if (index != -1 && index / 4 < selection.Values.Count) {
+                    await selection.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
+                    selectionSource.SetResult(new InteractivityResult<T>(selection.Values[index / 4], false, false));
                 }
-                if (index / 4 == request.Values.Count) {
-                    await request.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
+                if (index / 4 == selection.Values.Count) {
+                    await selection.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
                     selectionSource.SetResult(new InteractivityResult<T>(default, false, true));
                 }
 
-                await request.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
+                await selection.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
             }
 
             _client.MessageReceived += CheckMessageAsync;
@@ -444,12 +428,14 @@ namespace InteractivityAddon
                                     ? new InteractivityResult<T>(default, true, false)
                                     : new InteractivityResult<T>(default, false, true);
 
-            if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = request.Appearance.CancelledEmbed).ConfigureAwait(false);
+            if (selection.Appearance.DeleteSelectionAfterCapturedResult == true) {
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
-
-            if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = request.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            else if (result.IsCancelled == true) {
+                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+            }
+            else if (result.IsTimeouted == true) {
+                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;
@@ -487,7 +473,7 @@ namespace InteractivityAddon
                     return;
                 }
 
-                if (await paginator.GetCriterions().JudgeAsync(reaction).ConfigureAwait(false) == false) {
+                if (await paginator.GetCriteria().JudgeAsync(reaction).ConfigureAwait(false) == false) {
                     await paginator.GetActions().ApplyAsync(reaction, true).ConfigureAwait(false);
                     return;
                 }
@@ -524,11 +510,13 @@ namespace InteractivityAddon
                                                     ? new InteractivityResult<object>(default, true, false)
                                                     : new InteractivityResult<object>(default, false, true);
 
-            if (result.IsCancelled == true) {
+            if (paginator.Appearance.DeletePaginatorAfterExit == true) {
+                await msg.DeleteAsync();
+            }
+            else if (result.IsCancelled == true) {
                 await msg.ModifyAsync(x => x.Embed = paginator.Appearance.CancelledEmbed).ConfigureAwait(false);
             }
-
-            if (result.IsTimeouted == true) {
+            else if (result.IsTimeouted == true) {
                 await msg.ModifyAsync(x => x.Embed = paginator.Appearance.TimeoutedEmbed).ConfigureAwait(false);
             }
 
