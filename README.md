@@ -31,23 +31,44 @@ var provider = new ServiceCollection()
 ```
 This addon does not include a custom `ModuleBase` to be able to support every command framework.
 
+### Example Selection Command
+```cs
+[Command("select")]
+public async Task ExampleSelectionAsync()
+{
+    var builder = new SelectionBuilder<string>()
+                    .WithSettings(allowCancel: true)
+                    .WithUsers(Context.User)
+                    .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
+                    .WithAppearance(SelectionAppearance.Default
+                    .WithSettings(deleteSelectionAfterCapturedResult: true));
+                            
+    var result = await _interactivity.GetUserSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+
+    if (result.IsSuccess == true) {
+        await Context.Channel.SendMessageAsync(result.Value);
+    }
+}
+```
+
 ### Example Paginator Command
 ```cs
 [Command("paginator")]
-public async Task SendPaginatorAsync()
+public async Task ExamplePaginatorAsync()
 {
-      var pages = new List<Embed>() {
-      new EmbedBuilder().WithTitle("I").Build(),
-      new EmbedBuilder().WithTitle("am").Build(),
-      new EmbedBuilder().WithTitle("cool").Build(),
-      new EmbedBuilder().WithTitle(":sunglasses: ").Build()};
+    var pages = new List<Embed>() {
+        new EmbedBuilder().WithTitle("I").Build(),
+        new EmbedBuilder().WithTitle("am").Build(),
+        new EmbedBuilder().WithTitle("cool").Build(),
+        new EmbedBuilder().WithTitle(":sunglasses: ").Build(),
+    };
 
-      var paginator = new PaginatorBuilder()
-           .WithEmbeds(pages.ToArray())
-           .WithUsers(Context.User)
-           .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-           .Build();
+    var paginator = new PaginatorBuilder()
+        .WithEmbeds(pages.ToArray())
+        .WithUsers(Context.User)
+        .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+        .Build();
 
-      await _interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+    await _interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
 }
 ```
