@@ -82,6 +82,7 @@ namespace ExampleBot_Qmmands.Modules
                             .WithSettings(allowCancel: true)
                             .WithUsers(Context.User)
                             .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
+                            .WithSettings(allowCancel: true, isCaseSensitive: true)
                             .WithAppearance(SelectionAppearance.Default
                             .WithSettings(deleteSelectionAfterCapturedResult: true));
                             

@@ -82,7 +82,11 @@ namespace InteractivityAddon.Selection
                 possibilities.Add($"#{i + 1} - {possibility}");
             }
             if (AllowCancel == true) {
+                sBuilder.Append($"#{Values.Count + 1} - {Appearance.CancelString}");
+                possibilities.Add($"{Values.Count + 1}");
+                possibilities.Add($"#{Values.Count + 1}");
                 possibilities.Add(Appearance.CancelString);
+                possibilities.Add($"#{Values.Count + 1} - {Appearance.CancelString}");
             }
             if (IsCaseSensitive == false) {
                 possibilities.ToLowerAll();
