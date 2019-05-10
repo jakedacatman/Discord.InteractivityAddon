@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Discord;
@@ -9,7 +10,7 @@ using InteractivityAddon.Criterions;
 namespace InteractivityAddon.Pagination
 {
     /// <summary>
-    /// Used to send a multi page message to a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>
+    /// Represents a class which is used to send a multi paged message to a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>. This class is immutable!
     /// </summary>
     public sealed class Paginator
     {
@@ -26,7 +27,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// The current page of the <see cref="Paginator"/>.
         /// </summary>
-        public Embed CurrentPage => Pages[CurrentPageIndex];
+        public Embed CurrentPage => Pages[CurrentPageIndex].DeepClone();
 
         /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.
@@ -46,8 +47,8 @@ namespace InteractivityAddon.Pagination
         internal Paginator(List<Embed> pages, int currentPageIndex, List<SocketUser> users, PaginatorAppearance appearance)
         {
             Pages = pages.ToImmutableList();
-            CurrentPageIndex = currentPageIndex;
             Users = users.ToImmutableList();
+            CurrentPageIndex = currentPageIndex;        
             Appearance = appearance;
         }
 

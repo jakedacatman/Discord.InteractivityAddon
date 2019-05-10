@@ -6,11 +6,11 @@ namespace ExampleBot_Qmmands
     {
         public static void Main(string[] args)
         {
-            var Bot = new ExampleBot();
+            var bot = new ExampleBot();
 
             Task.Run(async () => {
-                Bot.Initialize();
-                await Bot.StartAsync();
+                bot.Initialize();
+                await bot.StartAsync();
 
             }).GetAwaiter().GetResult();
         }

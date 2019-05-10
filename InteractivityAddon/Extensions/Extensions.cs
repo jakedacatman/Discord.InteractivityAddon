@@ -8,7 +8,7 @@ namespace System
 {
     internal static class ObjectExtensions
     {
-        private static readonly MethodInfo cloneMethod = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly MethodInfo CloneMethod = typeof(object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool IsPrimitive(this Type type) => type == typeof(string)
                                                           ? true
@@ -34,7 +34,7 @@ namespace System
                 return null;
             }
 
-            object cloneObject = cloneMethod.Invoke(originalObject, null);
+            object cloneObject = CloneMethod.Invoke(originalObject, null);
             if (typeToReflect.IsArray) {
                 var arrayType = typeToReflect.GetElementType();
                 if (IsPrimitive(arrayType) == false) {

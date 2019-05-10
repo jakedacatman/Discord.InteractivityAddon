@@ -6,6 +6,9 @@ using Discord;
 
 namespace InteractivityAddon.Pagination
 {
+    /// <summary>
+    /// Represents a page of a <see cref="Paginator"/>.
+    /// </summary>
     public sealed class Page
     {
         /// <summary>

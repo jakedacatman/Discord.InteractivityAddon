@@ -30,7 +30,7 @@ namespace ExampleBot_Qmmands.Modules
 
         [Command("paginator")]
         public async Task ExamplePaginatorAsync()
-        {
+       {
             var pages = new List<Embed>() {
                 new EmbedBuilder().WithTitle("I").Build(),
                 new EmbedBuilder().WithTitle("am").Build(),
@@ -42,6 +42,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithEmbeds(pages.ToArray())
                 .WithUsers(Context.User)
                 .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+                .WithAppearance(PaginatorAppearanceBuilder.Default.WithCancelledEmbed(new EmbedBuilder()))
                 .Build();
 
             await _interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
@@ -83,7 +84,7 @@ namespace ExampleBot_Qmmands.Modules
                             .WithUsers(Context.User)
                             .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
                             .WithSettings(allowCancel: true, isCaseSensitive: true)
-                            .WithAppearance(SelectionAppearance.Default
+                            .WithAppearance(SelectionAppearanceBuilder.Default
                             .WithSettings(deleteSelectionAfterCapturedResult: true));
                             
             var result = await _interactivity.GetUserSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));

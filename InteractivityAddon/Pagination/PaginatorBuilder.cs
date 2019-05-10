@@ -19,7 +19,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// Gets or sets the appearance of the <see cref="Paginator"/>.
         /// </summary>
-        public PaginatorAppearance Appearance { get; set; } = PaginatorAppearance.Default;
+        public PaginatorAppearanceBuilder Appearance { get; set; } = PaginatorAppearanceBuilder.Default;
 
         /// <summary>
         /// Determites whether everyone can interact with the <see cref="Paginator"/>.
@@ -81,10 +81,10 @@ namespace InteractivityAddon.Pagination
                 embedPages.Add(page.Build(this));
             }
 
-            return new Paginator(embedPages.DeepClone(), 
+            return new Paginator(embedPages, 
                                  startPage, 
                                  Users.ToArray().ToList(), 
-                                 Appearance.DeepClone());
+                                 Appearance.Build());
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         /// <param name="appearance"></param>
         /// <returns></returns>
-        public PaginatorBuilder WithAppearance(PaginatorAppearance appearance)
+        public PaginatorBuilder WithAppearance(PaginatorAppearanceBuilder appearance)
         {
             Appearance = appearance;
             return this;

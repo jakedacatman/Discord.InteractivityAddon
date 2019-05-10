@@ -27,7 +27,7 @@ namespace InteractivityAddon.Selection
         /// <summary>
         /// Gets or sets the appearance of the <see cref="Selection{T}"/>.
         /// </summary>
-        public SelectionAppearance Appearance { get; set; } = SelectionAppearance.Default;
+        public SelectionAppearanceBuilder Appearance { get; set; } = SelectionAppearanceBuilder.Default;
 
         /// <summary>
         ///  Determites whether everyone can interact with the <see cref="Selection{T}"/>.
@@ -97,7 +97,7 @@ namespace InteractivityAddon.Selection
             return new Selection<T>(Values.DeepClone(),
                                     possibilities.DeepClone(),
                                     SelectionEmbed.Build(),
-                                    Appearance.DeepClone(),
+                                    Appearance.Build(),
                                     Users.ToArray().ToList(),
                                     AllowCancel,
                                     IsCaseSensitive);
@@ -141,7 +141,7 @@ namespace InteractivityAddon.Selection
         /// </summary>
         /// <param name="appearance"></param>
         /// <returns></returns>
-        public SelectionBuilder<T> WithAppearance(SelectionAppearance appearance)
+        public SelectionBuilder<T> WithAppearance(SelectionAppearanceBuilder appearance)
         {
             Appearance = appearance;
             return this;

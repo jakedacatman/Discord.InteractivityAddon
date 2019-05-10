@@ -10,22 +10,28 @@ using InteractivityAddon.Criterions;
 
 namespace InteractivityAddon.Selection
 {
+    /// <summary>
+    /// Represents a class which is used to send users selections into a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of objects to select from.</typeparam>
     public sealed class Selection<T>
     {
+        private readonly Embed selectionEmbed;
+
         /// <summary>
         /// Gets the values to select from in the <see cref="Selection{T}"/>.
         /// </summary>
         public ImmutableList<T> Values { get; }
 
         /// <summary>
-        /// Gets the selection possibilities of the <see cref="Selection{T}"/>>
+        /// Gets the selection possibilities of the <see cref="Selection{T}"/>>.
         /// </summary>
         public ImmutableList<string> Possibilities { get; }
 
         /// <summary>
         /// Gets the <see cref="Embed"/> which is sent into the channel.
         /// </summary>
-        public Embed SelectionEmbed { get; }
+        public Embed SelectionEmbed => selectionEmbed.DeepClone();
 
         /// <summary>
         /// Gets the appearance of the <see cref="Selection{T}"/>.
@@ -52,13 +58,13 @@ namespace InteractivityAddon.Selection
         /// </summary>
         public bool IsCaseSensitive { get; }
 
-        internal Selection(List<T> values, List<string> possibilities, Embed selectionEmbed,
+        internal Selection(List<T> values, List<string> possibilities, Embed selection,
                               SelectionAppearance appearance, List<SocketUser> users,
                               bool allowCancel, bool isCaseSensitive)
         {
+            selectionEmbed = selection;
             Values = values.ToImmutableList();
             Possibilities = possibilities.ToImmutableList();
-            SelectionEmbed = selectionEmbed;
             Appearance = appearance;
             Users = users.ToImmutableList();
             AllowCancel = allowCancel;

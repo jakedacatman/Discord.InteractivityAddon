@@ -57,16 +57,16 @@ namespace ExampleBot_Qmmands
                     return;
                 }
 
-                var Context = new ExampleCommandContext(msg);
+                var context = new ExampleCommandContext(msg);
 
-                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string UsedPrefix, out string cmd) == true) {
+                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string usedPrefix, out string cmd) == true) {
                     return;
                 }
 
-                var Result = await Commands.ExecuteAsync(cmd, Context, Provider); //Try to run Command
+                var result = await Commands.ExecuteAsync(cmd, context, Provider); //Try to run Command
 
-                if (Result is FailedResult FailResult) {
-                    await Context.Channel.SendMessageAsync(FailResult.Reason);
+                if (result is FailedResult failResult) {
+                    await context.Channel.SendMessageAsync(failResult.Reason);
                 }
 
                 return;

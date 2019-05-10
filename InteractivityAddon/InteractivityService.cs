@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using InteractivityAddon.Actions;
@@ -47,7 +46,7 @@ namespace InteractivityAddon
         /// <param name="client">Your instance of <see cref="DiscordSocketClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
         public InteractivityService(DiscordSocketClient client, TimeSpan? defaultTimeout = null)
-            : this((BaseSocketClient)client, defaultTimeout)
+            : this((BaseSocketClient) client, defaultTimeout)
         {
         }
 
@@ -57,7 +56,7 @@ namespace InteractivityAddon
         /// <param name="client">Your instance of <see cref="DiscordShardedClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
         public InteractivityService(DiscordShardedClient client, TimeSpan? defaultTimeout = null)
-            :this((BaseSocketClient)client, defaultTimeout)
+            : this((BaseSocketClient) client, defaultTimeout)
         {
         }
 
