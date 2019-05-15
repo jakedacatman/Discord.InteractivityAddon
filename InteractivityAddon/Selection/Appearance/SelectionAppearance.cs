@@ -1,54 +1,32 @@
-﻿using System;
-using Discord;
+﻿using Discord;
 
 namespace InteractivityAddon.Selection
 {
     /// <summary>
-    /// Represents the appearance options of a <see cref="Selection{T}"/>. This class is immutable!
+    /// Represents a abstract class to create your own SelectionAppearances. The child classes should be immutable!
     /// </summary>
-    public sealed class SelectionAppearance
+    public abstract class SelectionAppearance
     {
-        private readonly Embed cancelledEmbed;
-        private readonly Embed timeoutedEmbed;
-
         /// <summary>
         /// Gets the <see cref="EmbedBuilder"/> which the <see cref="Selection{T}"/> gets modified to after cancellation.
         /// </summary>
-        public Embed CancelledEmbed => cancelledEmbed.DeepClone();
+        public Embed CancelledEmbed { get; }
 
         /// <summary>
         /// Gets the <see cref="EmbedBuilder"/> which the <see cref="Selection{T}"/> gets modified to after a timeout.
         /// </summary>
-        public Embed TimeoutedEmbed => timeoutedEmbed.DeepClone();
+        public Embed TimeoutedEmbed { get; }
 
         /// <summary>
-        /// Gets the string which can be selected to cancel the <see cref="Selection{T}"/>.
+        /// Gets an ORing determiting what the <see cref="Selection{T1, T2}"/> will delete.
         /// </summary>
-        public string CancelString { get; }
+        public DeletionOption Deletion { get; }
 
-        /// <summary>
-        /// Gets whether the <see cref="Selection{T}"/> will delete invalid messages.
-        /// </summary>
-        public bool DeleteInvalidMessages { get; }
-
-        /// <summary>
-        /// Gets whether the <see cref="Selection{T}"/> will delete the valid message.
-        /// </summary>
-        public bool DeleteValidMessage { get; }
-
-        /// <summary>
-        /// Gets whether the <see cref="Selection{T}"/> will get deleted after a <see cref="InteractivityResult{T}"/> has been captured.
-        /// </summary>
-        public bool DeleteSelectionAfterCapturedResult { get; }
-
-        internal SelectionAppearance(Embed cancelled, Embed timeouted, string cancelString, bool deleteInvalidMessages, bool deleteValidMessage, bool deleteSelectionAfterCapturedResult)
+        protected SelectionAppearance(Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion)
         {
-            cancelledEmbed = cancelled;
-            timeoutedEmbed = timeouted;
-            CancelString = cancelString;
-            DeleteInvalidMessages = deleteInvalidMessages;
-            DeleteValidMessage = deleteValidMessage;
-            DeleteSelectionAfterCapturedResult = deleteSelectionAfterCapturedResult;
+            CancelledEmbed = cancelledEmbed;
+            TimeoutedEmbed = timeoutedEmbed;
+            Deletion = deletion;
         }
     }
 }

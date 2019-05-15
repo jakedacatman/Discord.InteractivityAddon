@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.EmbedFieldExtensions;
 using System.Linq;
 using System.Text;
 using Discord;
+using InteractivityAddon.Extensions;
 
 namespace InteractivityAddon.Pagination
 {

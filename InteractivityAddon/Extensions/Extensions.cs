@@ -131,30 +131,4 @@ namespace System
             }
         }
     }
-
-    namespace EmbedFieldExtensions
-    {
-        internal static class EmbedFieldExtensions
-        {
-            public static EmbedFieldBuilder ToBuilder(this EmbedField field) => new EmbedFieldBuilder()
-                    .WithIsInline(field.Inline)
-                    .WithName(field.Name)
-                    .WithValue(field.Value);
-        }
-    }
-
-    namespace ListOfStringExtensions
-    {
-        internal static class ListOfStringExtensions
-        {
-            public static List<string> ToLowerAll(this List<string> list)
-            {
-                for(int i = 0; i < list.Count; i++) {
-                    list[i] = list[i].ToLower();
-                }
-
-                return list;
-            }
-        }
-    }
 }

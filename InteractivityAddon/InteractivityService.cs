@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -364,16 +362,17 @@ namespace InteractivityAddon
         }
 
         /// <summary>
-        /// Asks users to select something from a <see cref="List{T}"/>.
+        /// Sends a user selection into a discord channel.
         /// </summary>
-        /// <typeparam name="T">The type of the values to select from.</typeparam>
-        /// <param name="request">The <see cref="SelectionRequest{T}"/> containing required informations about the selection.</param>
+        /// <typeparam name="T">The type of values the user can select from.</typeparam>
+        /// <typeparam name="TAppearance">The appearance class of the selection</typeparam>
+        /// <param name="selection">The selection to send in the channel.</param>
         /// <param name="channel">The <see cref="IMessageChannel"/> to send the selection to.</param>
-        /// <param name="timeout">The time before the selection returns a timeout result.</param>
+        /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> GetUserSelectionAsync<T>(Selection<T> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default)
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketMessage, TAppearance> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
         {
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -388,37 +387,28 @@ namespace InteractivityAddon
 
             async Task CheckMessageAsync(SocketMessage s)
             {
-                if (s.Author.Id == _client.CurrentUser.Id) { //Ignore own messages
+                if (s.Channel != channel) {
+                    return;
+                }
+                if (s.Author.Id == _client.CurrentUser.Id) {
+                    return;
+                }
+                if (await selection.HandleResponseAsync(_client, msg, s).ConfigureAwait(false) == false) {
                     return;
                 }
 
-                if (await selection.GetCriteria().JudgeAsync(s).ConfigureAwait(false) == false) {
-                    await selection.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
+                var sResult = await selection.ParseAsync(s).ConfigureAwait(false);
+                if (sResult.IsSpecified == false) {
                     return;
                 }
 
-                string responseContent = selection.IsCaseSensitive == true
-                                                ? s.Content
-                                                : s.Content.ToLower();
-
-                int index = selection.Possibilities.FindIndex(x => x == responseContent);
-
-                if (index != -1 && index / 4 < selection.Values.Count) {
-                    await selection.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
-                    selectionSource.SetResult(new InteractivityResult<T>(selection.Values[index / 4], false, false));
-                }
-                if (index / 4 == selection.Values.Count) {
-                    await selection.GetActions().ApplyAsync(s, false).ConfigureAwait(false);
-                    selectionSource.SetResult(new InteractivityResult<T>(default, false, true));
-                }
-
-                await selection.GetActions().ApplyAsync(s, true).ConfigureAwait(false);
+                selectionSource.SetResult(sResult.Value);
+                await selection.RunActionsAsync(_client, msg, s, true).ConfigureAwait(false);
             }
 
             _client.MessageReceived += CheckMessageAsync;
-
+            await selection.InitializeMessageAsync(msg);
             var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
-
             _client.MessageReceived -= CheckMessageAsync;
 
             var result = task_result == selectionTask
@@ -427,7 +417,76 @@ namespace InteractivityAddon
                                     ? new InteractivityResult<T>(default, true, false)
                                     : new InteractivityResult<T>(default, false, true);
 
-            if (selection.Appearance.DeleteSelectionAfterCapturedResult == true) {
+            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
+                await msg.DeleteAsync().ConfigureAwait(false);
+            }
+            else if (result.IsCancelled == true) {
+                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+            }
+            else if (result.IsTimeouted == true) {
+                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Sends a user selection into a discord channel.
+        /// </summary>
+        /// <typeparam name="T">The type of values the user can select from.</typeparam>
+        /// <typeparam name="TAppearance">The appearance class of the selection</typeparam>
+        /// <param name="selection">The selection to send in the channel.</param>
+        /// <param name="channel">The <see cref="IMessageChannel"/> to send the selection to.</param>
+        /// <param name="timeout">The time until the selection times out.</param>
+        /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
+        /// <returns></returns>
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketReaction, TAppearance> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
+        {
+            var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
+            var cancelSource = new TaskCompletionSource<bool>();
+
+            token.Register(() => cancelSource.SetResult(true));
+
+            var selectionTask = selectionSource.Task;
+            var cancelTask = cancelSource.Task;
+            var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
+
+            var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            {
+                if (m.Id != msg.Id) {
+                    return;
+                }
+                if (r.UserId == _client.CurrentUser.Id) {
+                    return;
+                }
+                if (await selection.HandleResponseAsync(_client, msg, r).ConfigureAwait(false) == false) {
+                    return;
+                }
+
+                var sResult = await selection.ParseAsync(r).ConfigureAwait(false);
+                if (sResult.IsSpecified == false) {
+                    return;
+                }
+
+                selectionSource.SetResult(sResult.Value);
+                await selection.RunActionsAsync(_client, msg, r, true).ConfigureAwait(false);
+            }
+
+            _client.ReactionAdded += CheckReactionAsync;
+            await selection.InitializeMessageAsync(msg);
+            var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
+            _client.ReactionAdded -= CheckReactionAsync;
+
+            var result = task_result == selectionTask
+                                ? await selectionTask.ConfigureAwait(false)
+                                : task_result == timeoutTask
+                                    ? new InteractivityResult<T>(default, true, false)
+                                    : new InteractivityResult<T>(default, false, true);
+
+            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
             else if (result.IsCancelled == true) {
@@ -445,7 +504,7 @@ namespace InteractivityAddon
         /// </summary>
         /// <param name="paginator">The paginator to send.</param>
         /// <param name="channel">The <see cref="IMessageChannel"/> to send the paginator to.</param>
-        /// <param name="timeout">The time before the paginator times out.</param>
+        /// <param name="timeout">The time until the paginator times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
@@ -509,7 +568,7 @@ namespace InteractivityAddon
                                                     ? new InteractivityResult<object>(default, true, false)
                                                     : new InteractivityResult<object>(default, false, true);
 
-            if (paginator.Appearance.DeletePaginatorAfterExit == true) {
+            if (paginator.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
                 await msg.DeleteAsync();
             }
             else if (result.IsCancelled == true) {

@@ -7,6 +7,7 @@ using InteractivityAddon;
 using InteractivityAddon.Confirmation;
 using InteractivityAddon.Pagination;
 using InteractivityAddon.Selection;
+using InteractivityAddon.Selection.Appearance;
 using Qmmands;
 
 namespace ExampleBot_Qmmands.Modules
@@ -30,12 +31,12 @@ namespace ExampleBot_Qmmands.Modules
 
         [Command("paginator")]
         public async Task ExamplePaginatorAsync()
-       {
+        {
             var pages = new List<Embed>() {
                 new EmbedBuilder().WithTitle("I").Build(),
                 new EmbedBuilder().WithTitle("am").Build(),
                 new EmbedBuilder().WithTitle("cool").Build(),
-                new EmbedBuilder().WithTitle(":sunglasses: ").Build(),
+                new EmbedBuilder().WithTitle(":sunglasses:").Build(),
             };
 
             var paginator = new PaginatorBuilder()
@@ -64,8 +65,6 @@ namespace ExampleBot_Qmmands.Modules
             if (result.IsSuccess == true) {
                 _interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
             }
-
-
         }
 
         [Command("deleteall")]
@@ -79,18 +78,16 @@ namespace ExampleBot_Qmmands.Modules
         [Command("select")]
         public async Task ExampleSelectionAsync()
         {
-            var builder = new SelectionBuilder<string>()
-                            .WithSettings(allowCancel: true)
-                            .WithUsers(Context.User)
-                            .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
-                            .WithSettings(allowCancel: true, isCaseSensitive: true)
-                            .WithAppearance(SelectionAppearanceBuilder.Default
-                            .WithSettings(deleteSelectionAfterCapturedResult: true));
-                            
-            var result = await _interactivity.GetUserSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+            var builder = new ReactionSelectionBuilder<string>()
+                .WithValues("Hi", "How", "Hey", "Huh?!")
+                .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
+                .WithUsers(Context.User)
+                .WithAppearance(ReactionSelectionAppearanceBuilder.Default.WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids));
+
+            var result = await _interactivity.SendSelectionAsync(await builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
             if (result.IsSuccess == true) {
-                await Context.Channel.SendMessageAsync(result.Value);
+                await Context.Channel.SendMessageAsync(result.Value.ToString());
             }
         }
     }

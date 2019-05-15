@@ -94,7 +94,7 @@ namespace InteractivityAddon.Pagination
         }
 
         internal ActionCollection<SocketReaction> GetActions() => new ActionCollection<SocketReaction>(
-            new DeleteReactions(Appearance.DeleteOtherReactions, true)
+            new DeleteReactions(Appearance.Deletion.HasFlag(DeletionOption.Invalids), Appearance.Deletion.HasFlag(DeletionOption.Valid))
             );
 
     }

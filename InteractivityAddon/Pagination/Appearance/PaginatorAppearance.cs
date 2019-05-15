@@ -54,18 +54,13 @@ namespace InteractivityAddon.Pagination
         public Embed TimeoutedEmbed => timeoutedEmbed.DeepClone();
 
         /// <summary>
-        /// Gets whether the <see cref="Paginator"/> will delete reactions which are not associated with the <see cref="Paginator"/>.
+        /// Gets what the <see cref="Paginator"/> should delete.
         /// </summary>
-        public bool DeleteOtherReactions { get; }
-
-        /// <summary>
-        /// Gets whether the <see cref="Paginator"/> will get deleted after it exited.
-        /// </summary>
-        public bool DeletePaginatorAfterExit { get; }
+        public DeletionOption Deletion { get; }
 
         internal PaginatorAppearance(IEmote backward, IEmote forward, IEmote skipToStart, IEmote skipToEnd, IEmote exit,
             Embed cancelled, Embed timeouted,
-            bool deleteOtherReactions, bool deletePaginatorAfterExit)
+            DeletionOption deletion)
         {
             backwardEmote = backward;
             forwardEmote = forward;
@@ -74,8 +69,7 @@ namespace InteractivityAddon.Pagination
             exitEmote = exit;
             cancelledEmbed = cancelled;
             timeoutedEmbed = timeouted;
-            DeleteOtherReactions = deleteOtherReactions;
-            DeletePaginatorAfterExit = deletePaginatorAfterExit;
+            Deletion = deletion;
         }
 
         internal PaginatorAction ParseAction(IEmote emote) => emote.Equals(ForwardEmote)

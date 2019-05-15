@@ -82,14 +82,9 @@ namespace InteractivityAddon.Pagination
         }
 
         /// <summary>
-        /// Gets or sets whether the <see cref="Paginator"/> will delete reactions which are not associated with the <see cref="Paginator"/>.
+        /// Gets or sets what the <see cref="Paginator"/> should delete.
         /// </summary>
-        public bool DeleteOtherReactions { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets whether the <see cref="Paginator"/> will get deleted after it exited.
-        /// </summary>
-        public bool DeletePaginatorAfterExit { get; set; } = false;
+        public DeletionOption Deletion { get; set; } = DeletionOption.Valid | DeletionOption.Invalids;
 
         /// <summary>
         /// Builds the the <see cref="PaginatorAppearanceBuilder"/> to a immutable <see cref="PaginatorAppearance"/>.
@@ -103,8 +98,7 @@ namespace InteractivityAddon.Pagination
             ExitEmote.DeepClone(),
             CancelledEmbed.Build(),
             TimeoutedEmbed.Build(),
-            DeleteOtherReactions,
-            DeletePaginatorAfterExit);
+            Deletion);
 
         /// <summary>
         /// Creates a new instance of <see cref="PaginatorAppearance"/> with the default values.
@@ -194,15 +188,13 @@ namespace InteractivityAddon.Pagination
         }
 
         /// <summary>
-        /// Sets the deletion settings of the <see cref="Paginator"/>.
+        /// Sets the deletion options of the <see cref="Paginator"/>.
         /// </summary>
-        /// <param name="deleteOtherReactions"></param>
-        /// <param name="deletePaginatorAfterExit"></param>
+        /// <param name="deletion"></param>
         /// <returns></returns>
-        public PaginatorAppearanceBuilder WithSettings(bool deleteOtherReactions = true, bool deletePaginatorAfterExit = false)
+        public PaginatorAppearanceBuilder WithDeletion(DeletionOption deletion)
         {
-            DeleteOtherReactions = deleteOtherReactions;
-            DeletePaginatorAfterExit = deletePaginatorAfterExit;
+            Deletion = deletion;
             return this;
         }
     }
