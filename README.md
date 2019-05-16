@@ -14,15 +14,21 @@ The package can be pulled easily from [NuGet](https://www.nuget.org/packages/Dis
 
 ## Features
  - Waiting for a specific message or reaction using a powerful criteria system
- - Applying a custom action to every message / reaction which passes your criteria
+ - Waiting for a message / reaction which passes your criteria
+   - Run actions on filtered messages / reactions
  - Send and delete messages & files with delays
- - A powerful Paginator
- - Selection from a custom list of objects
+ - A powerful fully customizable Paginator
+   - Send multi page messages
+   - Move through pages using reactions
+ - Fully customizable selection from a list of objects
+   - Makes user input easy
+   - Works via messages or reactions
+   - For more customizability you can create your own child of the selection class 
  - Confirmation of an action
  - Uptime counter
  
 ## Usage
-To use this addons features you need to add an `InteractivityService` to your service provider.
+To properly use the features this addon provides you need the `InteractivityService` to your service provider.
 
 ```cs
 var provider = new ServiceCollection()
@@ -37,18 +43,16 @@ This addon does not include a custom `ModuleBase` in order to support every comm
 [Command("select")]
 public async Task ExampleSelectionAsync()
 {
-    var builder = new SelectionBuilder<string>()
-                    .WithSettings(allowCancel: true)
-                    .WithUsers(Context.User)
-                    .WithValues(new[] { "Hi", "How", "Hey", "Huh?!" })
-                    .WithAppearance(SelectionAppearanceBuilder.Default
-                    .WithSettings(deleteSelectionAfterCapturedResult: true));
-    
-    //Note that the selection will not return the original ref but a clone!
-    var result = await _interactivity.GetUserSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+    var builder = new ReactionSelectionBuilder<string>()
+        .WithValues("Hi", "How", "Hey", "Huh?!")
+        .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
+        .WithUsers(Context.User)
+        .WithAppearance(ReactionSelectionAppearanceBuilder.Default.WithDeletion(DeletionOption.AfterCapturedContext);
+
+    var result = await _interactivity.SendSelectionAsync(await builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
     if (result.IsSuccess == true) {
-        await Context.Channel.SendMessageAsync(result.Value);
+        await Context.Channel.SendMessageAsync(result.Value.ToString());
     }
 }
 ```
