@@ -6,7 +6,6 @@
 This is an addon for the Discord API Wrapper [Discord.Net](https://github.com/discord-net/Discord.Net) which makes it easy to add interactivity to your discord bot.
 
 ## Credits
- - The package has been created with the support of [TwentyFourMinutes](https://github.com/TwentyFourMinutes). Check out his [UtilityAddon](https://github.com/TwentyFourMinutes/Discord.UtilityAddon) which provides some great features for your bot :)
  - The criterion system is inspired by foxbot's [Discord.Addons.Interactive](https://github.com/foxbot/Discord.Addons.Interactive) package.
 
 ## Installation
