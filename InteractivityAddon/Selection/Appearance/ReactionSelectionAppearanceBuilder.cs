@@ -31,7 +31,7 @@ namespace InteractivityAddon.Selection
                 CancelledEmbed.Build(),
                 TimeoutedEmbed.Build(),
                 Deletion,
-                CancelEmote.DeepClone());
+                CancelEmote.DeepClone()); //Required because Emote is ref type
 
         /// <summary>
         /// Sets the cancel embed of the <see cref="ReactionSelection{T}"/>.

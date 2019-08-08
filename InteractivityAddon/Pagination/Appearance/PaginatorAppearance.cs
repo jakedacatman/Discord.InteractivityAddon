@@ -1,5 +1,4 @@
-﻿using System;
-using Discord;
+﻿using Discord;
 
 namespace InteractivityAddon.Pagination
 {
@@ -8,50 +7,42 @@ namespace InteractivityAddon.Pagination
     /// </summary>
     public sealed class PaginatorAppearance
     {
-        private readonly IEmote backwardEmote;
-        private readonly IEmote forwardEmote;
-        private readonly IEmote skipToStartEmote;
-        private readonly IEmote skipToEndEmote;
-        private readonly IEmote exitEmote;
-        private readonly Embed cancelledEmbed;
-        private readonly Embed timeoutedEmbed;
-
         /// <summary>
         /// Gets the <see cref="IEmote"/> to navigate a page backward in the <see cref="Paginator"/>.
         /// </summary>
-        public IEmote BackwardEmote => backwardEmote.DeepClone();
+        public IEmote BackwardEmote { get; }
 
         /// <summary>
         /// Gets the <see cref="IEmote"/> to navigate a page forward in the <see cref="Paginator"/>.
         /// </summary>
-        public IEmote ForwardEmote => forwardEmote.DeepClone();
+        public IEmote ForwardEmote { get; }
 
         /// <summary>
         /// Gets the <see cref="IEmote"/> to navigate to the first page of the <see cref="Paginator"/>.
         /// </summary>
-        public IEmote SkipToStartEmote => skipToStartEmote.DeepClone();
+        public IEmote SkipToStartEmote { get; }
 
         /// <summary>
         /// Gets the <see cref="IEmote"/> to navigate to the last page of the <see cref="Paginator"/>.
         /// </summary>
-        public IEmote SkipToEndEmote => skipToEndEmote.DeepClone();
+        public IEmote SkipToEndEmote { get; }
 
         /// <summary>
         /// Gets the <see cref="IEmote"/> to exit the <see cref="Paginator"/>.
         /// </summary>
-        public IEmote ExitEmote => exitEmote.DeepClone();
+        public IEmote ExitEmote { get; }
 
         internal IEmote[] Emotes => new IEmote[] { BackwardEmote, ForwardEmote, SkipToStartEmote, SkipToEndEmote, ExitEmote };
 
         /// <summary>
         /// Gets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after cancellation.
         /// </summary>
-        public Embed CancelledEmbed => cancelledEmbed.DeepClone();
+        public Embed CancelledEmbed { get; }
 
         /// <summary>
         /// Gets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after a timeout.
         /// </summary>
-        public Embed TimeoutedEmbed => timeoutedEmbed.DeepClone();
+        public Embed TimeoutedEmbed { get; }
 
         /// <summary>
         /// Gets what the <see cref="Paginator"/> should delete.
@@ -62,13 +53,13 @@ namespace InteractivityAddon.Pagination
             Embed cancelled, Embed timeouted,
             DeletionOption deletion)
         {
-            backwardEmote = backward;
-            forwardEmote = forward;
-            skipToStartEmote = skipToStart;
-            skipToEndEmote = skipToEnd;
-            exitEmote = exit;
-            cancelledEmbed = cancelled;
-            timeoutedEmbed = timeouted;
+            BackwardEmote = backward;
+            ForwardEmote = forward;
+            SkipToStartEmote = skipToStart;
+            SkipToEndEmote = skipToEnd;
+            ExitEmote = exit;
+            CancelledEmbed = cancelled;
+            TimeoutedEmbed = timeouted;
             Deletion = deletion;
         }
 

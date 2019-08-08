@@ -27,7 +27,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// The current page of the <see cref="Paginator"/>.
         /// </summary>
-        public Embed CurrentPage => Pages[CurrentPageIndex].DeepClone();
+        public Embed CurrentPage => Pages[CurrentPageIndex];
 
         /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.

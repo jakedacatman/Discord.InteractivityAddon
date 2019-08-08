@@ -91,7 +91,7 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         /// <returns></returns>
         public PaginatorAppearance Build() => new PaginatorAppearance(
-            BackwardEmote.DeepClone(),
+            BackwardEmote.DeepClone(), //Required because Emote is ref type
             ForwardEmote.DeepClone(),
             SkipToStartEmote.DeepClone(),
             SkipToEndEmote.DeepClone(),
