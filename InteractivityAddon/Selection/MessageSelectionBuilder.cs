@@ -18,7 +18,7 @@ namespace InteractivityAddon.Selection
         /// <summary>
         /// Gets or sets the function to convert the values into possibilites.
         /// </summary>
-        public Func<T, Task<string>> StringConverter { get; set; } = x => Task.FromResult(x.ToString());
+        public Func<T, string> StringConverter { get; set; } = x => x.ToString();
 
         /// <summary>
         /// Gets or sets whether the <see cref="Selection{T, T1, TSelectionAppearance}"/> allows for cancellation.
@@ -49,7 +49,7 @@ namespace InteractivityAddon.Selection
         /// 
         /// </summary>
         /// <returns></returns>
-        public async override Task<Selection<T, SocketMessage, MessageSelectionAppearance>> Build()
+        public override Selection<T, SocketMessage, MessageSelectionAppearance> Build()
         {
             if (Values.Count == 0) {
                 throw new InvalidOperationException("Your Selection needs at least one value");
@@ -59,7 +59,7 @@ namespace InteractivityAddon.Selection
             var sBuilder = new StringBuilder();
 
             for (int i = 0; i < Values.Count; i++) {
-                string possibility = await StringConverter.Invoke(Values[i]);
+                string possibility = StringConverter.Invoke(Values[i]);
                 sBuilder.AppendLine($"#{i + 1} - {possibility}");
                 possibilities.Add($"{i + 1}");
                 possibilities.Add($"#{i + 1}");
@@ -122,7 +122,7 @@ namespace InteractivityAddon.Selection
             return this;
         }
 
-        public MessageSelectionBuilder<T> WithStringConverter(Func<T, Task<string>> stringConverter)
+        public MessageSelectionBuilder<T> WithStringConverter(Func<T, string> stringConverter)
         {
             StringConverter = stringConverter;
             return this;

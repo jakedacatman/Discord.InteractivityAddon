@@ -52,6 +52,6 @@ namespace InteractivityAddon.Selection
         /// Build the <see cref="SelectionBuilder{T, T1, TAppearanceBuilder, TAppearance}"/> to a immutable <see cref="Selection{T, T1, TSelectionAppearance}"/>.
         /// </summary>
         /// <returns></returns>
-        public abstract Task<Selection<T, T1, TAppearance>> Build();
+        public abstract Selection<T, T1, TAppearance> Build();
     }
 }

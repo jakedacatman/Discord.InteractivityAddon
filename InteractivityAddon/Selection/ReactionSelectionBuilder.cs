@@ -23,7 +23,7 @@ namespace InteractivityAddon.Selection.Appearance
         /// <summary>
         /// Gets or sets the function to convert the values into possibilites.
         /// </summary>
-        public Func<T, Task<string>> StringConverter { get; set; } = x => Task.FromResult(x.ToString());
+        public Func<T, string> StringConverter { get; set; } = x => x.ToString();
 
         /// <summary>
         /// Gets or sets the title of the selection.
@@ -52,7 +52,7 @@ namespace InteractivityAddon.Selection.Appearance
         /// </summary>
         public static ReactionSelectionBuilder<T> Default => new ReactionSelectionBuilder<T>();
 
-        public async override Task<Selection<T, SocketReaction, ReactionSelectionAppearance>> Build()
+        public override Selection<T, SocketReaction, ReactionSelectionAppearance> Build()
         {
             if (Emotes.Count < Values.Count) {
                 throw new InvalidOperationException("Value count larger than emote count! Please add more Emotes to the selection!");
@@ -64,7 +64,7 @@ namespace InteractivityAddon.Selection.Appearance
             var builder = new StringBuilder();
 
             for (int i = 0; i < Values.Count; i++) {
-                string possibility = await StringConverter.Invoke(Values[i]);
+                string possibility = StringConverter.Invoke(Values[i]);
                 builder.AppendLine($"{Emotes[i]} - {possibility}");
             }
 
@@ -136,7 +136,7 @@ namespace InteractivityAddon.Selection.Appearance
             return this;
         }
 
-        public ReactionSelectionBuilder<T> WithStringConverter(Func<T, Task<string>> stringConverter)
+        public ReactionSelectionBuilder<T> WithStringConverter(Func<T, string> stringConverter)
         {
             StringConverter = stringConverter;
             return this;
