@@ -28,7 +28,7 @@ namespace ExampleBot_Qmmands
 
         public async Task StartAsync()
         {
-            string discordToken = "NDc4OTM5NDg5NTExNjY5Nzkz.XVGxCg.TAyi_HK7YZ3wRn9DOTqp0Sg2I-k";
+            string discordToken = "";
 
             await Client.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
             await Client.StartAsync();                                // Start message receiving
