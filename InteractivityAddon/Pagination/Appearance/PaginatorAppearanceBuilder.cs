@@ -61,8 +61,6 @@ namespace InteractivityAddon.Pagination
             set => exitEmote = value ?? throw new ArgumentNullException();
         }
 
-        internal IEmote[] Emotes => new IEmote[] { BackwardEmote, ForwardEmote, SkipToStartEmote, SkipToEndEmote, ExitEmote };
-
         /// <summary>
         /// Gets or sets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after cancellation.
         /// </summary>
@@ -92,7 +90,7 @@ namespace InteractivityAddon.Pagination
         /// <returns></returns>
         public PaginatorAppearance Build() => new PaginatorAppearance(
             BackwardEmote.DeepClone(), //Required because Emote is ref type
-            ForwardEmote.DeepClone(),
+            ForwardEmote.DeepClone(),  //User could change ref in Builder and it would affect the built instance
             SkipToStartEmote.DeepClone(),
             SkipToEndEmote.DeepClone(),
             ExitEmote.DeepClone(),

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Actions;
-using InteractivityAddon.Criterions;
 
 namespace InteractivityAddon.Pagination
 {
@@ -19,10 +17,25 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         public ImmutableList<Embed> Pages { get; }
 
+        private int _currentPageIndex;
+
         /// <summary>
         /// The index of the current page of the <see cref="Paginator"/>.
         /// </summary>
-        public int CurrentPageIndex { get; private set; }
+        public int CurrentPageIndex
+        {
+            get => _currentPageIndex; internal set {
+                _currentPageIndex = value;
+                if (value < 0)
+                {
+                    _currentPageIndex = 0;
+                }
+                if (value > Pages.Count - 1)
+                {
+                    _currentPageIndex = Pages.Count - 1;
+                }
+            }
+        }
 
         /// <summary>
         /// The current page of the <see cref="Paginator"/>.
@@ -44,28 +57,25 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         public PaginatorAppearance Appearance { get; }
 
-        internal Paginator(List<Embed> pages, int currentPageIndex, List<SocketUser> users, PaginatorAppearance appearance)
+        internal Paginator(ImmutableList<Embed> pages, int currentPageIndex, ImmutableList<SocketUser> users, PaginatorAppearance appearance)
         {
-            Pages = pages.ToImmutableList();
-            Users = users.ToImmutableList();
-            CurrentPageIndex = currentPageIndex;        
+            Pages = pages;
+            Users = users;
+            CurrentPageIndex = currentPageIndex;
             Appearance = appearance;
         }
 
-        internal void ApplyAction(PaginatorAction action, out bool pageChanged)
+        internal bool ApplyAction(PaginatorAction action)
         {
             int pageBeforeChangeApply = CurrentPageIndex;
-
-            switch (action) {
+           
+            switch (action)
+            {
                 case PaginatorAction.Backward:
-                    if (CurrentPageIndex > 0) {
-                        CurrentPageIndex--;
-                    }
+                    CurrentPageIndex--;
                     break;
                 case PaginatorAction.Forward:
-                    if (CurrentPageIndex < Pages.Count - 1) {
-                        CurrentPageIndex++;
-                    }
+                    CurrentPageIndex++;
                     break;
                 case PaginatorAction.SkipToStart:
                     CurrentPageIndex = 0;
@@ -75,27 +85,24 @@ namespace InteractivityAddon.Pagination
                     break;
             }
 
-            pageChanged = pageBeforeChangeApply != CurrentPageIndex
+            return pageBeforeChangeApply != CurrentPageIndex
                           ? true
                           : false;
         }
 
-        internal Criteria<SocketReaction> GetCriteria()
-        {
-            var criteria = new Criteria<SocketReaction>(
-                new EnsureReactionEmote(Appearance.Emotes)
-                );
+        internal Predicate<SocketReaction> GetReactionFilter() => reaction =>
+            Appearance.Emotes.Contains(reaction.Emote)
+            &&
+            (!IsUserRestricted || Users.Exists(x => x.Id == reaction.UserId));
 
-            if (IsUserRestricted == true) {
-                criteria.AddCriterion(new EnsureReactionUser(Users.ToArray()));
-            }
-
-            return criteria;
-        }
-
-        internal ActionCollection<SocketReaction> GetActions() => new ActionCollection<SocketReaction>(
-            new DeleteReactions(Appearance.Deletion.HasFlag(DeletionOption.Invalids), Appearance.Deletion.HasFlag(DeletionOption.Valid))
-            );
-
+        internal Func<SocketReaction, bool, Task> GetActions() => async (reaction, invalid) =>
+            {
+                if ((Appearance.Deletion.HasFlag(DeletionOption.Invalids) && invalid)
+                    ||
+                    (Appearance.Deletion.HasFlag(DeletionOption.Valid) && !invalid))
+                {
+                    await reaction.Message.Value.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+                }
+            };
     }
 }

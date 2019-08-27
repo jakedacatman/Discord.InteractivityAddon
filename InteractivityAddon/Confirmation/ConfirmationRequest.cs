@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Actions;
-using InteractivityAddon.Criterions;
 
 namespace InteractivityAddon.Confirmation
 {
@@ -42,20 +43,12 @@ namespace InteractivityAddon.Confirmation
         {
         }
 
-        internal Criteria<SocketReaction> GetCriterions()
+        internal Predicate<SocketReaction> GetFilter() => reaction 
+            => Appearance.Emotes.Contains(reaction.Emote) && (Users.IsEmpty || Users.Exists(x => x == reaction.UserId));
+
+        internal Func<SocketReaction, bool, Task> GetActions() => async (reaction, valid) =>
         {
-            var criteria = new Criteria<SocketReaction>(
-                new EnsureReactionEmote(Appearance.Emotes));
-
-            if (Users.IsEmpty == false) {
-                criteria.AddCriterion(new EnsureReactionUser(Users));
-            }
-
-            return criteria;
-        }
-
-        internal ActionCollection<SocketReaction> GetActions() => new ActionCollection<SocketReaction>(
-            new DeleteReactions(true, true)
-            );
+            await reaction.Message.Value.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+        };
     }
 }

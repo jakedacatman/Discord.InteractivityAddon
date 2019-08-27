@@ -14,7 +14,7 @@ namespace ExampleBot_Qmmands.Modules
 {
     public class ExampleModule : ModuleBase<ExampleCommandContext>
     {
-        public InteractivityService _interactivity { get; set; }
+        public InteractivityService Interactivity { get; set; }
 
         [Command("confirm")]
         public async Task ExampleConfirmationAsync()
@@ -22,7 +22,7 @@ namespace ExampleBot_Qmmands.Modules
             var message = await Context.Channel.SendMessageAsync("Please confirm!");
             var request = new ConfirmationRequest(message, Context.User.Id);
 
-            var result = await _interactivity.GetUserConfirmationAsync(request);
+            var result = await Interactivity.GetUserConfirmationAsync(request);
 
             if (result.Value == true) {
                 await message.ModifyAsync(x => x.Content = "Confirmed :thumbsup:!");
@@ -43,27 +43,27 @@ namespace ExampleBot_Qmmands.Modules
                 .WithEmbeds(pages.ToArray())
                 .WithUsers(Context.User)
                 .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-                .WithAppearance(PaginatorAppearanceBuilder.Default.WithCancelledEmbed(new EmbedBuilder()))
+                .WithAppearance(PaginatorAppearanceBuilder.Default.WithCancelledEmbed(new EmbedBuilder()).WithDeletion(DeletionOption.Invalids))
                 .Build();
 
-            await _interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+            await Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
         }
 
         [Command("delete")]
         public async Task ExampleReactAsync()
         {
-            _interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), "How are you? :D");
+            Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), "How are you? :D");
 
-            _interactivity.DelayedDeleteMessageAsync(await Context.Channel.SendMessageAsync("Hello"), TimeSpan.FromSeconds(3));
+            Interactivity.DelayedDeleteMessageAsync(await Context.Channel.SendMessageAsync("Hello"), TimeSpan.FromSeconds(3));
         }
 
         [Command("nextmessage")]
         public async Task ExampleReplyNextMessageAsync()
         {
-            var result = await _interactivity.NextMessageAsync(x => x.Author == Context.User);
+            var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
 
             if (result.IsSuccess == true) {
-                _interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
+                Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
             }
         }
 
@@ -71,7 +71,7 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExampleDeleteAllMessagesAsync()
         {
             await Context.Channel.SendMessageAsync("You can't send messages anymore!");
-            await _interactivity.NextMessageAsync(x => false, async x => await x.DeleteAsync(), timeout: TimeSpan.FromSeconds(15));
+            await Interactivity.NextMessageAsync(x => false, async (x,v) => await x.DeleteAsync(), timeout: TimeSpan.FromSeconds(15));
             await Context.Channel.SendMessageAsync("You can now send messages!");
         }
 
@@ -84,7 +84,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithUsers(Context.User)
                 .WithAppearance(ReactionSelectionAppearanceBuilder.Default.WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids));
 
-            var result = await _interactivity.SendSelectionAsync(await builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+            var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
             if (result.IsSuccess == true) {
                 await Context.Channel.SendMessageAsync(result.Value.ToString());

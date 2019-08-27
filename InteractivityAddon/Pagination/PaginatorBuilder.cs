@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Discord;
 using Discord.WebSocket;
@@ -81,9 +82,9 @@ namespace InteractivityAddon.Pagination
                 embedPages.Add(page.Build(this));
             }
 
-            return new Paginator(embedPages, 
+            return new Paginator(embedPages.ToImmutableList(), 
                                  startPage, 
-                                 Users.ToArray().ToList(), 
+                                 Users.ToImmutableList(), 
                                  Appearance.Build());
         }
 
