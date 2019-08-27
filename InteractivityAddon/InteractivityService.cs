@@ -320,8 +320,8 @@ namespace InteractivityAddon
         /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketMessage, TAppearance> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketMessage> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default)
         {
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -366,14 +366,14 @@ namespace InteractivityAddon
                                     ? new InteractivityResult<T>(default, true, false)
                                     : new InteractivityResult<T>(default, false, true);
 
-            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
+            if (selection.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
             else if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
             }
             else if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;
@@ -389,8 +389,8 @@ namespace InteractivityAddon
         /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketReaction, TAppearance> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketReaction> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default)
         {
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -435,14 +435,14 @@ namespace InteractivityAddon
                                     ? new InteractivityResult<T>(default, true, false)
                                     : new InteractivityResult<T>(default, false, true);
 
-            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
+            if (selection.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
             else if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
             }
             else if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;

@@ -42,4 +42,8 @@ Moreover it includes support for any command framework.</Description>
     <PackageReference Include="Discord.Net.WebSocket" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Selection\Reaction\Confirmation\" />
+  </ItemGroup>
+
 </Project>

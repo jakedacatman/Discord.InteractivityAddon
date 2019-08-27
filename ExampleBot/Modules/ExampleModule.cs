@@ -7,7 +7,6 @@ using InteractivityAddon;
 using InteractivityAddon.Confirmation;
 using InteractivityAddon.Pagination;
 using InteractivityAddon.Selection;
-using InteractivityAddon.Selection.Appearance;
 using Qmmands;
 
 namespace ExampleBot_Qmmands.Modules
@@ -43,7 +42,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithEmbeds(pages.ToArray())
                 .WithUsers(Context.User)
                 .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-                .WithAppearance(PaginatorAppearanceBuilder.Default.WithCancelledEmbed(new EmbedBuilder()).WithDeletion(DeletionOption.Invalids))
+                .WithAppearance(PaginatorAppearanceBuilder.Default.WithDeletion(DeletionOption.Invalids))
                 .Build();
 
             await Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
@@ -82,7 +81,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithValues("Hi", "How", "Hey", "Huh?!")
                 .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
                 .WithUsers(Context.User)
-                .WithAppearance(ReactionSelectionAppearanceBuilder.Default.WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids));
+                .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
