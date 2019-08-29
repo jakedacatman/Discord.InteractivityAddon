@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -35,14 +36,14 @@ namespace InteractivityAddon.Selection
         #endregion
 
         #region Methods
-        public override Task<Optional<InteractivityResult<T>>> ParseAsync(SocketMessage value)
+        public override Task<Optional<InteractivityResult<T>>> ParseAsync(SocketMessage value, DateTime startTime)
         {
             int index = Possibilities.FindIndex(x => x == value.Content) / 4;
 
             return Task.FromResult(Optional.Create(
                 index >= Values.Count
-                ? new InteractivityResult<T>(default, false, true)
-                : new InteractivityResult<T>(Values[index], false, false)
+                ? new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true)
+                : new InteractivityResult<T>(Values[index], DateTime.UtcNow - value.Timestamp, false, false)
                 ));
         }
 

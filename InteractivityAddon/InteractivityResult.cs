@@ -1,4 +1,6 @@
-﻿namespace InteractivityAddon
+﻿using System;
+
+namespace InteractivityAddon
 {
     /// <summary>
     /// The result of interactivityrequests.
@@ -7,13 +9,15 @@
     public sealed class InteractivityResult<T>
     {
         public T Value { get; }
+        public TimeSpan Elapsed { get; }
         public bool IsTimeouted { get; }
         public bool IsCancelled { get; }
         public bool IsSuccess => !IsCancelled && !IsTimeouted;
 
-        public InteractivityResult(T value, bool isTimeouted, bool isCancelled)
+        public InteractivityResult(T value, TimeSpan elapsed, bool isTimeouted, bool isCancelled)
         {
             Value = value;
+            Elapsed = elapsed;
             IsTimeouted = isTimeouted;
             IsCancelled = isCancelled;
         }

@@ -136,7 +136,7 @@ namespace InteractivityAddon.Selection
         /// </summary>
         /// <param name="value">The value to parse</param>
         /// <returns></returns>
-        public abstract Task<Optional<InteractivityResult<T>>> ParseAsync(T1 value);
+        public abstract Task<Optional<InteractivityResult<T>>> ParseAsync(T1 value, DateTime startTime);
         #endregion
     }
 }

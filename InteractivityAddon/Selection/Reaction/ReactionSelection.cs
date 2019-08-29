@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -49,14 +50,14 @@ namespace InteractivityAddon.Selection
         public override async Task InitializeMessageAsync(IUserMessage message) 
             => await message.AddReactionsAsync(Emotes.ToArray());
 
-        public override Task<Optional<InteractivityResult<T>>> ParseAsync(SocketReaction value)
+        public override Task<Optional<InteractivityResult<T>>> ParseAsync(SocketReaction value, DateTime startTime)
         { 
             int index = Emotes.FindIndex(x => x.Equals(value.Emote));
 
             return Task.FromResult(Optional.Create( 
                 index >= Values.Count
-                ? new InteractivityResult<T>(default, false, true)
-                : new InteractivityResult<T>(Values[index], false, false)
+                ? new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true)
+                : new InteractivityResult<T>(Values[index], DateTime.UtcNow - startTime, false, false)
                 ));
         }
 
