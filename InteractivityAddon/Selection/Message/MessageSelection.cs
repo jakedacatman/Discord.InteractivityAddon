@@ -43,7 +43,7 @@ namespace InteractivityAddon.Selection
             return Task.FromResult(Optional.Create(
                 index >= Values.Count
                 ? new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true)
-                : new InteractivityResult<T>(Values[index], DateTime.UtcNow - value.Timestamp, false, false)
+                : new InteractivityResult<T>(Values[index], value.Timestamp - startTime, false, false)
                 ));
         }
 
