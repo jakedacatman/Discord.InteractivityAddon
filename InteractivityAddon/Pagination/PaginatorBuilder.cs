@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 using Discord;
 using Discord.WebSocket;
 
@@ -15,7 +16,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// Gets or sets the Pages which are used by the <see cref="Paginator"/>.
         /// </summary>
-        public List<Page> Pages { get; set; } = new List<Page>();
+        public List<PageBuilder> Pages { get; set; } = new List<PageBuilder>();
 
         /// <summary>
         /// Gets or sets the appearance of the <see cref="Paginator"/>.
@@ -31,6 +32,11 @@ namespace InteractivityAddon.Pagination
         /// Gets or sets which users can interact with the <see cref="Paginator"/>.
         /// </summary>
         public List<SocketUser> Users { get; set; } = new List<SocketUser>();
+
+        /// <summary>
+        /// Gets or sets the default Text for all Pages of the <see cref="Paginator"/>.
+        /// </summary>
+        public string Text { get; set; } = "";
 
         /// <summary>
         /// Gets or sets the default Embed color for all Pages of the <see cref="Paginator"/>.
@@ -72,20 +78,66 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         public Paginator Build(int startPage = 0)
         {
+            if (Pages == null)
+            {
+                throw new ArgumentNullException(nameof(Pages));
+            }
             if (Pages.Count == 0) {
                 throw new InvalidOperationException("Your Builder needs at least one page!");
             }
 
-            var embedPages = new List<Embed>();
+            var pages = new List<Page>();
 
-            foreach (var page in Pages) {
-                embedPages.Add(page.Build(this));
+            for(int i = 0; i < Pages.Count; i++)
+            {
+                var footer = new EmbedFooterBuilder();
+
+                if (Footer.HasFlag(PaginatorFooter.Users))
+                {
+                    if (IsUserRestricted == false)
+                    {
+                        footer.Text += "Interactors : Everyone\n";
+                    }
+                    else
+                    {
+                        if (Users.Count == 1)
+                        {
+                            footer.IconUrl = Users.First().GetAvatarUrl();
+                            footer.Text += $"Interactors : {Users.First()}\n";
+                        }
+                        else
+                        {
+                            var interactorBuilder = new StringBuilder().Append("Interactors : ");
+
+                            foreach (var user in Users)
+                            {
+                                interactorBuilder.Append($"{user}, ");
+                            }
+
+                            interactorBuilder.Remove(interactorBuilder.Length - 2, 2);
+
+                            footer.Text += $"{interactorBuilder}\n";
+                        }
+                    }
+                }
+
+                if (Footer.HasFlag(PaginatorFooter.PageNumber))
+                {
+                    footer.Text += $"Page {i + 1}/{Pages.Count}";
+                }
+
+                if (Footer.HasFlag(PaginatorFooter.None))
+                {
+                    footer = null;
+                }
+
+                pages.Add(Pages[i].Build(Text, Color, Description, Title, ThumbnailUrl, ImageUrl, Fields, footer));
             }
 
-            return new Paginator(embedPages.ToImmutableList(), 
+            return new Paginator(pages.ToImmutableArray(), 
                                  startPage, 
-                                 Users.ToImmutableList(), 
-                                 Appearance.Build());
+                                 Users?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(Users)), 
+                                 Appearance?.Build() ?? throw new ArgumentNullException(nameof(Appearance)));
         }
 
         /// <summary>
@@ -93,7 +145,7 @@ namespace InteractivityAddon.Pagination
         /// </summary>
         /// <param name="pages"></param>
         /// <returns></returns>
-        public PaginatorBuilder WithPages(params Page[] pages)
+        public PaginatorBuilder WithPages(params PageBuilder[] pages)
         {
             Pages.AddRange(pages);
             return this;
@@ -107,8 +159,19 @@ namespace InteractivityAddon.Pagination
         public PaginatorBuilder WithEmbeds(params Embed[] embeds)
         {
             foreach (var embed in embeds) {
-                Pages.Add(Page.FromEmbed(embed));
+                Pages.Add(PageBuilder.FromEmbed(embed));
             }
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the default Text for all Pages of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public PaginatorBuilder WithText(string text)
+        {
+            Text = text;
             return this;
         }
 

@@ -18,31 +18,37 @@ namespace ExampleBot_Qmmands.Modules
         [Command("confirm")]
         public async Task ExampleConfirmationAsync()
         {
-            var message = await Context.Channel.SendMessageAsync("Please confirm!");
-            var request = new ConfirmationRequest(message, Context.User.Id);
+            var request = new ConfirmationBuilder()
+                .WithContent(new PageBuilder(text:"Please Confirm!"))
+                .Build();
 
-            var result = await Interactivity.GetUserConfirmationAsync(request);
+            var result = await Interactivity.GetUserConfirmationAsync(request, Context.Channel);
 
             if (result.Value == true) {
-                await message.ModifyAsync(x => x.Content = "Confirmed :thumbsup:!");
+                await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Declined :thumbsup:!");
             }
         }
 
         [Command("paginator")]
         public async Task ExamplePaginatorAsync()
         {
-            var pages = new List<Embed>() {
-                new EmbedBuilder().WithTitle("I").Build(),
-                new EmbedBuilder().WithTitle("am").Build(),
-                new EmbedBuilder().WithTitle("cool").Build(),
-                new EmbedBuilder().WithTitle(":sunglasses:").Build(),
+            var pages = new PageBuilder[] {
+                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("I").Build()),
+                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("am").Build()),
+                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("cool").Build()),
+                PageBuilder.FromEmbed(new EmbedBuilder().WithTitle(":sunglasses:").Build()),
+                new PageBuilder("I am cool :crown:")
             };
 
             var paginator = new PaginatorBuilder()
-                .WithEmbeds(pages.ToArray())
+                .WithPages(pages)
                 .WithUsers(Context.User)
                 .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-                .WithAppearance(PaginatorAppearanceBuilder.Default.WithDeletion(DeletionOption.Invalids))
+                .WithAppearance(PaginatorAppearanceBuilder.Default.WithDeletion(DeletionOption.Valid | DeletionOption.AfterCapturedContext))
                 .Build();
 
             await Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));

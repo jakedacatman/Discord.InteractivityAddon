@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// The pages of the <see cref="Paginator"/>.
         /// </summary>
-        public ImmutableList<Embed> Pages { get; }
+        public IReadOnlyList<Page> Pages { get; }
 
         private int _currentPageIndex;
 
@@ -40,7 +41,7 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// The current page of the <see cref="Paginator"/>.
         /// </summary>
-        public Embed CurrentPage => Pages[CurrentPageIndex];
+        public Page CurrentPage => Pages[CurrentPageIndex];
 
         /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.
@@ -50,14 +51,14 @@ namespace InteractivityAddon.Pagination
         /// <summary>
         /// Determites which users can interact with the <see cref="Paginator"/>.
         /// </summary>
-        public ImmutableList<SocketUser> Users { get; }
+        public IReadOnlyList<SocketUser> Users { get; }
 
         /// <summary>
         /// The appearance of the <see cref="Paginator"/>.
         /// </summary>
         public PaginatorAppearance Appearance { get; }
 
-        internal Paginator(ImmutableList<Embed> pages, int currentPageIndex, ImmutableList<SocketUser> users, PaginatorAppearance appearance)
+        internal Paginator(ImmutableArray<Page> pages, int currentPageIndex, ImmutableArray<SocketUser> users, PaginatorAppearance appearance)
         {
             Pages = pages;
             Users = users;
@@ -93,7 +94,7 @@ namespace InteractivityAddon.Pagination
         internal Predicate<SocketReaction> GetReactionFilter() => reaction =>
             Appearance.Emotes.Contains(reaction.Emote)
             &&
-            (!IsUserRestricted || Users.Exists(x => x.Id == reaction.UserId));
+            (!IsUserRestricted || Users.Where(x => x.Id == reaction.UserId).Any());
 
         internal Func<SocketReaction, bool, Task> GetActions() => async (reaction, invalid) =>
             {

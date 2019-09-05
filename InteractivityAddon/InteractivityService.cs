@@ -254,11 +254,11 @@ namespace InteractivityAddon
         /// <summary>
         /// Waits for a user/users to confirm something.
         /// </summary>
-        /// <param name="request">The <see cref="ConfirmationRequest"/> containing required informations about the confirmation.</param>
+        /// <param name="confirmation">The <see cref="Confirmation.Confirmation"/> containing required informations about the confirmation.</param>
         /// <param name="timeout">The time before the confirmation returns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<bool>> GetUserConfirmationAsync(ConfirmationRequest request,
+        public async Task<InteractivityResult<bool>> GetUserConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
@@ -271,6 +271,8 @@ namespace InteractivityAddon
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
+            var msg = await channel.SendMessageAsync(confirmation.Content.Text, embed: confirmation.Content.Embed).ConfigureAwait(false);
+
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
                 if (reaction.UserId == Client.CurrentUser.Id)
@@ -278,36 +280,34 @@ namespace InteractivityAddon
                     return;
                 }
 
-                if (reaction.MessageId != request.Message.Id)
+                if (reaction.MessageId != msg.Id)
                 {
                     return;
                 }
 
-                if (!request.GetFilter().Invoke(reaction))
+                if (!confirmation.GetFilter().Invoke(reaction))
                 {
-                    await request.GetActions().Invoke(reaction, true).ConfigureAwait(false);
+                    await confirmation.GetActions().Invoke(reaction, true).ConfigureAwait(false);
                     return;
                 }
 
-                await request.GetActions().Invoke(reaction, false).ConfigureAwait(false);
+                await confirmation.GetActions().Invoke(reaction, false).ConfigureAwait(false);
 
-                var action = request.Appearance.ParseAction(reaction.Emote);
-
-                if (action == ConfirmationAction.Decline)
-                {
-                    confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
-                    return;
-                }
-                if (action == ConfirmationAction.Confirm)
+                if (reaction.Emote.Equals(confirmation.ConfirmEmote))
                 {
                     confirmationSource.SetResult(new InteractivityResult<bool>(true, DateTime.UtcNow - startTime, false, false));
+                    return;
+                }
+                else
+                {
+                    confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
                     return;
                 }
             }
 
             Client.ReactionAdded += CheckReactionAsync;
 
-            await request.Message.AddReactionsAsync(request.Appearance.Emotes).ConfigureAwait(false);
+            await msg.AddReactionsAsync(confirmation.Emotes).ConfigureAwait(false);
             var task_result = await Task.WhenAny(confirmationTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
             Client.ReactionAdded -= CheckReactionAsync;
@@ -318,14 +318,18 @@ namespace InteractivityAddon
                         ? new InteractivityResult<bool>(default, timeout ?? DefaultTimeout, true, false)
                         : new InteractivityResult<bool>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (result.IsCancelled == true)
+            if (confirmation.Deletion.HasFlag(DeletionOption.AfterCapturedContext))
             {
-                await request.Message.ModifyAsync(x => x.Embed = request.Appearance.CancelledEmbed).ConfigureAwait(false);
+                await msg.DeleteAsync().ConfigureAwait(false);
+            }
+            else if (result.IsCancelled == true)
+            {
+                await msg.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
             }
 
-            if (result.IsTimeouted == true)
+            else if (result.IsTimeouted == true)
             {
-                await request.Message.ModifyAsync(x => x.Embed = request.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;
@@ -509,7 +513,7 @@ namespace InteractivityAddon
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(embed: paginator.CurrentPage).ConfigureAwait(false);
+            var msg = await channel.SendMessageAsync(paginator.CurrentPage.Text, embed: paginator.CurrentPage.Embed).ConfigureAwait(false);
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel c, SocketReaction reaction)
             {
@@ -544,7 +548,12 @@ namespace InteractivityAddon
 
                     if (pageChanged)
                     {
-                        await msg.ModifyAsync(x => x.Embed = paginator.CurrentPage).ConfigureAwait(false);
+                        await msg.ModifyAsync(x =>
+                        {
+                            x.Embed = paginator.CurrentPage.Embed;
+                            x.Content = paginator.CurrentPage.Text;
+                        })
+                        .ConfigureAwait(false);
                     }
                 }
             }
