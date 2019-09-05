@@ -6,7 +6,7 @@ on:
     - master
 
 jobs:
-  pack with dotnet:
+  Build-And-Publish:
     runs-on: ubuntu-latest
     
     steps:
