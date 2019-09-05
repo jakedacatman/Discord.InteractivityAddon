@@ -20,4 +20,4 @@ jobs:
     - name: Build with dotnet
       run: dotnet pack ./InteractivityAddon --output Packages
     - name: Push to Nuget
-      run: dotnet nuget push InteractivityAddon/Packages/ -s nuget.org -k ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push Packages/ -s nuget.org -k ${{ secrets.NUGET_API_KEY }}
