@@ -1,0 +1,22 @@
+name: CI
+
+on: 
+	push:
+    branches:
+    - master
+
+jobs:
+  pack with dotnet:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Pull Repository
+      uses: actions/checkout@master
+    - name: Setup .Net Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '2.2.108'
+    - name: Build with dotnet
+      run: dotnet pack ./InteractivityAddon --output Packages
+    - name: Publish to Nuget
+      run: dotnet nuget push dotnet nuget push Packages/ -s nuget.org -k ${{ secrets.NUGET_API_KEY }}
