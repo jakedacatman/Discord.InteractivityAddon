@@ -371,7 +371,7 @@ namespace InteractivityAddon
                 {
                     return;
                 }
-                if (await selection.HandleResponseAsync(Client, msg, s).ConfigureAwait(false) == false)
+                if (await selection.HandleResponseAsync(Client, s).ConfigureAwait(false) == false)
                 {
                     return;
                 }
@@ -449,7 +449,7 @@ namespace InteractivityAddon
                 {
                     return;
                 }
-                if (await selection.HandleResponseAsync(Client, msg, r).ConfigureAwait(false) == false)
+                if (await selection.HandleResponseAsync(Client, r).ConfigureAwait(false) == false)
                 {
                     return;
                 }

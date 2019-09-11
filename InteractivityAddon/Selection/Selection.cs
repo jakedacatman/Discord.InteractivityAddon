@@ -76,12 +76,12 @@ namespace InteractivityAddon.Selection
         #endregion
 
         #region Methods
-        internal async Task<bool> HandleResponseAsync(BaseSocketClient client, IUserMessage message, T1 response)
+        internal async Task<bool> HandleResponseAsync(BaseSocketClient client, T1 response)
         {
             bool valid = false;
 
             if (response is SocketMessage s) {
-                valid = await RunChecksAsync(client, message, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(s.Author));
+                valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(s.Author));
                 if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false) {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
@@ -91,7 +91,7 @@ namespace InteractivityAddon.Selection
             }
             if (response is SocketReaction r) {
                 var user = r.User.Value as SocketUser ?? client.GetUser(r.UserId);
-                valid = await RunChecksAsync(client, message, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(user));
+                valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(user));
                 if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false) {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }
@@ -117,7 +117,7 @@ namespace InteractivityAddon.Selection
         /// <param name="message">The selection message.</param>
         /// <param name="value">The value to run checks on.</param>
         /// <returns></returns>
-        public virtual Task<bool> RunChecksAsync(BaseSocketClient client, IUserMessage message, T1 value) 
+        public virtual Task<bool> RunChecksAsync(BaseSocketClient client, T1 value) 
             => Task.FromResult(true);
 
         /// <summary>

@@ -61,7 +61,7 @@ namespace InteractivityAddon.Selection
                 ));
         }
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, IUserMessage message, SocketReaction value) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction value) 
             => Task.FromResult(Emotes.Contains(value.Emote));
         #endregion
     }

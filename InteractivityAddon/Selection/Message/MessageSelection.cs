@@ -47,7 +47,7 @@ namespace InteractivityAddon.Selection
                 ));
         }
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, IUserMessage message, SocketMessage value) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketMessage value) 
             => Task.FromResult(Possibilities.Contains(value.Content));
         #endregion
     }
