@@ -348,8 +348,6 @@ namespace InteractivityAddon
         public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketMessage> selection, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            var startTime = DateTime.UtcNow;
-
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -360,6 +358,7 @@ namespace InteractivityAddon
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
             var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+            var startTime = msg.Timestamp.UtcDateTime;
 
             async Task CheckMessageAsync(SocketMessage s)
             {

@@ -80,8 +80,8 @@ namespace ExampleBot_Qmmands.Modules
             await Context.Channel.SendMessageAsync("You can now send messages!");
         }
 
-        [Command("select")]
-        public async Task ExampleSelectionAsync()
+        [Command("reactionselection")]
+        public async Task ExampleReactionSelectionAsync()
         {
             var builder = new ReactionSelectionBuilder<string>()
                 .WithValues("Hi", "How", "Hey", "Huh?!")
@@ -92,6 +92,22 @@ namespace ExampleBot_Qmmands.Modules
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
             if (result.IsSuccess == true) {
+                await Context.Channel.SendMessageAsync(result.Value.ToString());
+            }
+        }
+
+        [Command("messageselection")]
+        public async Task ExampleMessageSelectionAsync()
+        {
+            var builder = new MessageSelectionBuilder<string>()
+                .WithValues("Hi", "How", "Hey", "Huh?!")
+                .WithUsers(Context.User)
+                .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
+
+            var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+
+            if (result.IsSuccess == true)
+            {
                 await Context.Channel.SendMessageAsync(result.Value.ToString());
             }
         }
