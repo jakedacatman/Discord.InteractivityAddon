@@ -22,7 +22,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithContent(new PageBuilder().WithText("Please Confirm"))
                 .Build();
 
-            var result = await Interactivity.GetUserConfirmationAsync(request, Context.Channel);
+            var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
 
             if (result.Value == true) {
                 await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");

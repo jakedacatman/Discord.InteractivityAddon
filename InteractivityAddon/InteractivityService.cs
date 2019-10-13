@@ -258,7 +258,7 @@ namespace InteractivityAddon
         /// <param name="timeout">The time before the confirmation returns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<bool>> GetUserConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
+        public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
