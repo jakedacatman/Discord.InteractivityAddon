@@ -17,37 +17,37 @@ namespace InteractivityAddon
         /// <summary>
         /// Gets or sets the Text of the <see cref="PageBuilder"/>
         /// </summary>
-        public string Text { get; set; }
+        public string Text { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the Color of the <see cref="PageBuilder"/>.
         /// </summary>
-        public sys.Color? Color { get; set; }
+        public sys.Color? Color { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the Description of the <see cref="PageBuilder"/>.
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the Title of the <see cref="PageBuilder"/>.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the Thumbnailurl of the <see cref="PageBuilder"/>.
         /// </summary>
-        public string ThumbnailUrl { get; set; }
+        public string ThumbnailUrl { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the ImageUrl of the <see cref="PageBuilder"/>.
         /// </summary>
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = null;
 
         /// <summary>
         /// Gets or sets the Fields of the <see cref="PageBuilder"/>.
         /// </summary>
-        public List<EmbedFieldBuilder> Fields { get; set; }
+        public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/>.
@@ -58,16 +58,7 @@ namespace InteractivityAddon
         /// <param name="thumbnailUrl">The Embed thumbnailurl of the <see cref="PageBuilder"/>.</param>
         /// <param name="imageUrl">The Embed imageUrl of the <see cref="PageBuilder"/>.</param>
         /// <param name="fields">The Embed fields of the <see cref="PageBuilder"/>.</param>
-        public PageBuilder(string text = null, sys.Color? color = null, string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null, List<EmbedFieldBuilder> fields = null)
-        {
-            Text = text;
-            Color = color;
-            Description = description;
-            Title = title;
-            ThumbnailUrl = thumbnailUrl;
-            ImageUrl = imageUrl;
-            Fields = fields;
-        }
+        
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
@@ -75,12 +66,13 @@ namespace InteractivityAddon
         /// <param name="embed"></param>
         /// <returns></returns>
         public static PageBuilder FromEmbed(Embed embed)
-            => new PageBuilder(color: embed.Color,
-                description: embed.Description,
-                title: embed.Title,
-                thumbnailUrl: embed.Thumbnail?.Url,
-                imageUrl: embed.Image?.Url,
-                fields: embed.Fields.Select(x => x.ToBuilder()).ToList());
+            => new PageBuilder()
+                .WithColor((sys.Color)embed.Color)
+                .WithDescription(embed.Description)
+                .WithTitle(embed.Title)
+                .WithThumbnailUrl(embed.Thumbnail?.Url)
+                .WithImageUrl(embed.Image?.Url)
+                .WithFields(embed.Fields.Select(x => x.ToBuilder()));
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="EmbedBuilder"/>.
@@ -88,12 +80,13 @@ namespace InteractivityAddon
         /// <param name="builder"></param>
         /// <returns></returns>
         public static PageBuilder FromEmbedBuilder(EmbedBuilder builder)
-            => new PageBuilder(color: builder.Color,
-                description: builder.Description,
-                title: builder.Title,
-                thumbnailUrl: builder.ThumbnailUrl,
-                imageUrl: builder.ImageUrl,
-                fields: builder.Fields);
+            => new PageBuilder()
+                .WithColor((sys.Color) builder.Color)
+                .WithDescription(builder.Description)
+                .WithTitle(builder.Title)
+                .WithThumbnailUrl(builder.ThumbnailUrl)
+                .WithImageUrl(builder.ImageUrl)
+                .WithFields(builder.Fields);
 
         /// <summary>
         /// Sets the Text of the <see cref="PageBuilder"/>.
@@ -144,7 +137,7 @@ namespace InteractivityAddon
         /// </summary>
         /// <param name="thumbnailUrl"></param>
         /// <returns></returns>
-        public PageBuilder SetThumbnailUrl(string thumbnailUrl)
+        public PageBuilder WithThumbnailUrl(string thumbnailUrl)
         {
             ThumbnailUrl = thumbnailUrl;
             return this;
@@ -155,9 +148,31 @@ namespace InteractivityAddon
         /// </summary>
         /// <param name="imageUrl"></param>
         /// <returns></returns>
-        public PageBuilder SetImageUrl(string imageUrl)
+        public PageBuilder WithImageUrl(string imageUrl)
         {
             ImageUrl = imageUrl;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the Fields of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public PageBuilder WithFields(params EmbedFieldBuilder[] fields)
+        {
+            Fields = fields?.ToList();
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the Fields of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        public PageBuilder WithFields(IEnumerable<EmbedFieldBuilder> fields)
+        {
+            Fields = fields?.ToList();
             return this;
         }
 
