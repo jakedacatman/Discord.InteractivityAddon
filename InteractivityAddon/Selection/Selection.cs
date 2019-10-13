@@ -58,11 +58,12 @@ namespace InteractivityAddon.Selection
         #endregion
 
         #region Constructor
-        protected Selection(ImmutableList<T> values, ImmutableList<SocketUser> users, 
+        protected Selection(ImmutableList<T> values, ImmutableList<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed,
             DeletionOption deletion)
         {
-            if (typeof(T1) != typeof(SocketReaction) && typeof(T1) != typeof(SocketMessage)) {
+            if (typeof(T1) != typeof(SocketReaction) && typeof(T1) != typeof(SocketMessage))
+            {
                 throw new InvalidOperationException("T2 can ONLY be SocketMessage or SocketReaction!");
             }
 
@@ -80,22 +81,28 @@ namespace InteractivityAddon.Selection
         {
             bool valid = false;
 
-            if (response is SocketMessage s) {
+            if (response is SocketMessage s)
+            {
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(s.Author));
-                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false) {
+                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false)
+                {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
-                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true) {
+                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true)
+                {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
             }
-            if (response is SocketReaction r) {
+            if (response is SocketReaction r)
+            {
                 var user = r.User.Value as SocketUser ?? client.GetUser(r.UserId);
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(user));
-                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false) {
+                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false)
+                {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }
-                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true) {
+                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true)
+                {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }
             }
@@ -107,7 +114,7 @@ namespace InteractivityAddon.Selection
         /// </summary>
         /// <param name="message">The selection message.</param>
         /// <returns></returns>
-        public virtual Task InitializeMessageAsync(IUserMessage message) 
+        public virtual Task InitializeMessageAsync(IUserMessage message)
             => Task.CompletedTask;
 
         /// <summary>
@@ -117,7 +124,7 @@ namespace InteractivityAddon.Selection
         /// <param name="message">The selection message.</param>
         /// <param name="value">The value to run checks on.</param>
         /// <returns></returns>
-        public virtual Task<bool> RunChecksAsync(BaseSocketClient client, T1 value) 
+        public virtual Task<bool> RunChecksAsync(BaseSocketClient client, T1 value)
             => Task.FromResult(true);
 
         /// <summary>
@@ -128,7 +135,7 @@ namespace InteractivityAddon.Selection
         /// <param name="value">The user input.</param>
         /// <param name="isValid">Whether the user input passed the checks.</param>
         /// <returns></returns>
-        public virtual Task RunActionsAsync(BaseSocketClient client, IUserMessage message, T1 value, bool isValid) 
+        public virtual Task RunActionsAsync(BaseSocketClient client, IUserMessage message, T1 value, bool isValid)
             => Task.CompletedTask;
 
         /// <summary>

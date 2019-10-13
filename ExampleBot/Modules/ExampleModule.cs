@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -24,7 +23,8 @@ namespace ExampleBot_Qmmands.Modules
 
             var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
 
-            if (result.Value == true) {
+            if (result.Value == true)
+            {
                 await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
             }
             else
@@ -67,7 +67,8 @@ namespace ExampleBot_Qmmands.Modules
         {
             var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
 
-            if (result.IsSuccess == true) {
+            if (result.IsSuccess == true)
+            {
                 Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, deleteDelay: TimeSpan.FromSeconds(20), text: result.Value.Content, embed: result.Value.Embeds.FirstOrDefault());
             }
         }
@@ -76,7 +77,7 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExampleDeleteAllMessagesAsync()
         {
             await Context.Channel.SendMessageAsync("You can't send messages anymore!");
-            await Interactivity.NextMessageAsync(x => false, async (x,v) => await x.DeleteAsync(), timeout: TimeSpan.FromSeconds(15));
+            await Interactivity.NextMessageAsync(x => false, async (x, v) => await x.DeleteAsync(), timeout: TimeSpan.FromSeconds(15));
             await Context.Channel.SendMessageAsync("You can now send messages!");
         }
 
@@ -91,7 +92,8 @@ namespace ExampleBot_Qmmands.Modules
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
-            if (result.IsSuccess == true) {
+            if (result.IsSuccess == true)
+            {
                 await Context.Channel.SendMessageAsync(result.Value.ToString());
             }
         }

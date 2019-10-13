@@ -55,7 +55,8 @@ namespace InteractivityAddon.Selection
         #region Constructor
         protected SelectionBuilder()
         {
-            if (typeof(T1) != typeof(SocketReaction) && typeof(T1) != typeof(SocketMessage)) {
+            if (typeof(T1) != typeof(SocketReaction) && typeof(T1) != typeof(SocketMessage))
+            {
                 throw new InvalidOperationException($"{nameof(T1)} can ONLY be SocketMessage or SocketReaction!");
             }
         }

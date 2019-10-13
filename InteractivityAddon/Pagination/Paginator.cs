@@ -69,7 +69,7 @@ namespace InteractivityAddon.Pagination
         internal bool ApplyAction(PaginatorAction action)
         {
             int pageBeforeChangeApply = CurrentPageIndex;
-           
+
             switch (action)
             {
                 case PaginatorAction.Backward:

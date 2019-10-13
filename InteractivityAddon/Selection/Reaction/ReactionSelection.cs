@@ -31,7 +31,7 @@ namespace InteractivityAddon.Selection
         #endregion
 
         #region Constructor
-        internal ReactionSelection(ImmutableList<T> values, ImmutableList<SocketUser> users, 
+        internal ReactionSelection(ImmutableList<T> values, ImmutableList<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
             ImmutableList<IEmote> emotes, IEmote cancelEmote, bool allowCancel)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
@@ -40,28 +40,29 @@ namespace InteractivityAddon.Selection
             CancelEmote = cancelEmote;
             AllowCancel = allowCancel;
 
-            if (AllowCancel == true) {
+            if (AllowCancel == true)
+            {
                 Emotes = Emotes.Add(CancelEmote);
             }
         }
         #endregion
 
         #region Methods
-        public override async Task InitializeMessageAsync(IUserMessage message) 
+        public override async Task InitializeMessageAsync(IUserMessage message)
             => await message.AddReactionsAsync(Emotes.ToArray());
 
         public override Task<Optional<InteractivityResult<T>>> ParseAsync(SocketReaction value, DateTime startTime)
-        { 
+        {
             int index = Emotes.FindIndex(x => x.Equals(value.Emote));
 
-            return Task.FromResult(Optional.Create( 
+            return Task.FromResult(Optional.Create(
                 index >= Values.Count
                 ? new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true)
                 : new InteractivityResult<T>(Values[index], DateTime.UtcNow - startTime, false, false)
                 ));
         }
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction value) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction value)
             => Task.FromResult(Emotes.Contains(value.Emote));
         #endregion
     }

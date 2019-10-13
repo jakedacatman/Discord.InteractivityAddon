@@ -82,13 +82,14 @@ namespace InteractivityAddon.Pagination
             {
                 throw new ArgumentNullException(nameof(Pages));
             }
-            if (Pages.Count == 0) {
+            if (Pages.Count == 0)
+            {
                 throw new InvalidOperationException("Your Builder needs at least one page!");
             }
 
             var pages = new List<Page>();
 
-            for(int i = 0; i < Pages.Count; i++)
+            for (int i = 0; i < Pages.Count; i++)
             {
                 var footer = new EmbedFooterBuilder();
 
@@ -134,9 +135,9 @@ namespace InteractivityAddon.Pagination
                 pages.Add(Pages[i].Build(Text, Color, Description, Title, ThumbnailUrl, ImageUrl, Fields, footer));
             }
 
-            return new Paginator(pages.ToImmutableArray(), 
-                                 startPage, 
-                                 Users?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(Users)), 
+            return new Paginator(pages.ToImmutableArray(),
+                                 startPage,
+                                 Users?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(Users)),
                                  Appearance?.Build() ?? throw new ArgumentNullException(nameof(Appearance)));
         }
 
@@ -158,7 +159,8 @@ namespace InteractivityAddon.Pagination
         /// <returns></returns>
         public PaginatorBuilder WithEmbeds(params Embed[] embeds)
         {
-            foreach (var embed in embeds) {
+            foreach (var embed in embeds)
+            {
                 Pages.Add(PageBuilder.FromEmbed(embed));
             }
             return this;

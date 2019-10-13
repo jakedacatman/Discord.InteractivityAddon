@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Confirmation;
 using InteractivityAddon.Pagination;
 using InteractivityAddon.Selection;
 
@@ -563,7 +562,7 @@ namespace InteractivityAddon
             var task_result = await Task.WhenAny(resultTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
             Client.ReactionAdded -= CheckReactionAsync;
-            
+
             await msg.RemoveAllReactionsAsync().ConfigureAwait(false);
 
             var result = task_result == resultTask

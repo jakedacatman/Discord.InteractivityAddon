@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using sys = System.Drawing;
-using Discord;
-using System;
-using InteractivityAddon.Pagination;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Discord;
 using InteractivityAddon.Extensions;
+using InteractivityAddon.Pagination;
+using sys = System.Drawing;
 
 namespace InteractivityAddon
 {
@@ -58,7 +58,7 @@ namespace InteractivityAddon
         /// <param name="thumbnailUrl">The Embed thumbnailurl of the <see cref="PageBuilder"/>.</param>
         /// <param name="imageUrl">The Embed imageUrl of the <see cref="PageBuilder"/>.</param>
         /// <param name="fields">The Embed fields of the <see cref="PageBuilder"/>.</param>
-        
+
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
@@ -67,7 +67,7 @@ namespace InteractivityAddon
         /// <returns></returns>
         public static PageBuilder FromEmbed(Embed embed)
             => new PageBuilder()
-                .WithColor((sys.Color)embed.Color)
+                .WithColor((sys.Color) embed.Color)
                 .WithDescription(embed.Description)
                 .WithTitle(embed.Title)
                 .WithThumbnailUrl(embed.Thumbnail?.Url)

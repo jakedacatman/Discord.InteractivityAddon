@@ -49,7 +49,7 @@ namespace InteractivityAddon.Confirmation
 
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
-        public Confirmation Build() 
+        public Confirmation Build()
             => new Confirmation(
                 Content?.Build() ?? throw new ArgumentNullException(nameof(Content)),
                 Users?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(Users)),

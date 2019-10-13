@@ -62,11 +62,11 @@ namespace InteractivityAddon.Confirmation
             Deletion = deletion;
         }
 
-        internal Predicate<SocketReaction> GetFilter() 
-            => reaction 
+        internal Predicate<SocketReaction> GetFilter()
+            => reaction
             => Emotes.Contains(reaction.Emote) && (!Users.Any() || Users.Where(x => x.Id == reaction.UserId).Any());
 
-        internal Func<SocketReaction, bool, Task> GetActions() 
+        internal Func<SocketReaction, bool, Task> GetActions()
             => async (reaction, valid) =>
         {
             if ((Deletion.HasFlag(DeletionOption.Valid) && valid) || (Deletion.HasFlag(DeletionOption.Invalids) && !valid))

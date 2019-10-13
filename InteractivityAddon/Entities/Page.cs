@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using sys = System.Drawing;
-using Discord;
-using System;
-using InteractivityAddon.Pagination;
 using System.Linq;
-using System.Text;
+using Discord;
 using InteractivityAddon.Extensions;
+using sys = System.Drawing;
 
 namespace InteractivityAddon
 {
@@ -33,8 +30,8 @@ namespace InteractivityAddon
         /// <param name="thumbnailUrl">The Embed thumbnailurl of the <see cref="Page"/>.</param>
         /// <param name="imageUrl">The Embed imageUrl of the <see cref="Page"/>.</param>
         /// <param name="fields">The Embed fields of the <see cref="Page"/>.</param>
-        internal Page(string text = null, sys.Color? color = null, 
-            string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null, 
+        internal Page(string text = null, sys.Color? color = null,
+            string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null,
             List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
         {
             Text = text;

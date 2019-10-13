@@ -25,7 +25,7 @@ namespace InteractivityAddon.Selection
         #endregion
 
         #region Constructor
-        internal MessageSelection(ImmutableList<T> values, ImmutableList<SocketUser> users, 
+        internal MessageSelection(ImmutableList<T> values, ImmutableList<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
             ImmutableList<string> possabilies, string cancelDisplayName)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
@@ -47,7 +47,7 @@ namespace InteractivityAddon.Selection
                 ));
         }
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketMessage value) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketMessage value)
             => Task.FromResult(Possibilities.Contains(value.Content));
         #endregion
     }
