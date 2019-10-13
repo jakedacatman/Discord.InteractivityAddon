@@ -172,7 +172,7 @@ namespace InteractivityAddon
         {
             if (Fields.Count == 24)
             {
-                throw new InvalidOperationException("The field limit is 19!");
+                throw new InvalidOperationException("The field limit is 24!");
             }
 
             Fields.Add(new EmbedFieldBuilder()
