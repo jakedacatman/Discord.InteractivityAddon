@@ -19,7 +19,7 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExampleConfirmationAsync()
         {
             var request = new ConfirmationBuilder()
-                .WithContent(new PageBuilder(text:"Please Confirm!"))
+                .WithContent(new PageBuilder().WithText("Please Confirm"))
                 .Build();
 
             var result = await Interactivity.GetUserConfirmationAsync(request, Context.Channel);
@@ -37,11 +37,11 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExamplePaginatorAsync()
         {
             var pages = new PageBuilder[] {
-                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("I").Build()),
-                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("am").Build()),
-                PageBuilder.FromEmbed( new EmbedBuilder().WithTitle("cool").Build()),
-                PageBuilder.FromEmbed(new EmbedBuilder().WithTitle(":sunglasses:").Build()),
-                new PageBuilder("I am cool :crown:")
+                new PageBuilder().WithTitle("I"),
+                new PageBuilder().WithTitle("am"),
+                new PageBuilder().WithTitle("cool"),
+                new PageBuilder().WithTitle(":sunglasses:"),
+                new PageBuilder().WithText("I am cool :crown:")
             };
 
             var paginator = new PaginatorBuilder()
