@@ -125,17 +125,6 @@ namespace Interactivity.Selection
             => Task.FromResult(true);
 
         /// <summary>
-        /// Run additional actions to the selection message dependent of the user input beeing valid or invalid.
-        /// </summary>
-        /// <param name="client">The standard discord client.</param>
-        /// <param name="message">The selection message.</param>
-        /// <param name="value">The user input.</param>
-        /// <param name="isValid">Whether the user input passed the checks.</param>
-        /// <returns></returns>
-        public virtual Task RunActionsAsync(BaseSocketClient client, IUserMessage message, T1 value, bool isValid)
-            => Task.CompletedTask;
-
-        /// <summary>
         /// Try to parse the user input to a <see cref="InteractivityResult{T}"/>. 
         /// </summary>
         /// <param name="value">The value to parse</param>

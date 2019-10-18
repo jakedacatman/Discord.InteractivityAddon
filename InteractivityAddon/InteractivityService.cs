@@ -381,7 +381,6 @@ namespace Interactivity
                 }
 
                 selectionSource.SetResult(sResult.Value);
-                await selection.RunActionsAsync(Client, msg, s, true).ConfigureAwait(false);
             }
 
             Client.MessageReceived += CheckMessageAsync;
@@ -459,7 +458,6 @@ namespace Interactivity
                 }
 
                 selectionSource.SetResult(sResult.Value);
-                await selection.RunActionsAsync(Client, msg, r, true).ConfigureAwait(false);
             }
 
             Client.ReactionAdded += CheckReactionAsync;
