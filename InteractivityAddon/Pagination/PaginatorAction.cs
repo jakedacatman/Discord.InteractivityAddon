@@ -1,4 +1,4 @@
-﻿namespace InteractivityAddon.Pagination
+﻿namespace Interactivity.Pagination
 {
     internal enum PaginatorAction
     {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Discord;
-using InteractivityAddon.Extensions;
+using Interactivity.Extensions;
 using sys = System.Drawing;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     /// <summary>
     /// Represents a page

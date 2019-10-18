@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Selection
+namespace Interactivity.Selection
 {
     /// <summary>
     /// Represents the default selection which uses reactions. This class is immutable!

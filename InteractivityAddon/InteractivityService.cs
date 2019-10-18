@@ -4,10 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Pagination;
-using InteractivityAddon.Selection;
+using Interactivity.Pagination;
+using Interactivity.Selection;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     /// <summary>
     /// A service containing methods to make your discordbot more interactive.

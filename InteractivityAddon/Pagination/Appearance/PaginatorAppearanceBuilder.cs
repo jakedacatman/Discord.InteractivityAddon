@@ -1,7 +1,7 @@
 ﻿using System;
 using Discord;
 
-namespace InteractivityAddon.Pagination
+namespace Interactivity.Pagination
 {
     /// <summary>
     /// Represents a builder class for creating a <see cref="PaginatorAppearance"/>.

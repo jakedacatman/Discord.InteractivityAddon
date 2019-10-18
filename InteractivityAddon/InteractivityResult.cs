@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     /// <summary>
     /// The result of interactivityrequests.

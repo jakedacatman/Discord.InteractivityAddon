@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Selection
+namespace Interactivity.Selection
 {
     /// <summary>
     /// Represents the default selection which uses messages. This class is immutable!

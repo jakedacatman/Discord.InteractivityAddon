@@ -6,7 +6,7 @@ using System.Text;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Selection
+namespace Interactivity.Selection
 {
     /// <summary>
     /// Represents a builder class for making a <see cref="ReactionSelection{T}"/>.

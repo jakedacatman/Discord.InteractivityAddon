@@ -5,7 +5,7 @@ using System.Linq;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Confirmation
+namespace Interactivity.Confirmation
 {
     /// <summary>
     /// The <see cref="ConfirmationBuilder"/> is used to create a <see cref="Confirmation"/>

@@ -1,6 +1,6 @@
 ﻿using Discord;
 
-namespace InteractivityAddon.Pagination
+namespace Interactivity.Pagination
 {
     /// <summary>
     /// Represents the appearance options of a <see cref="Paginator"/>. This class is immutable!

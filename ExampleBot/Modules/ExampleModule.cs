@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using InteractivityAddon;
-using InteractivityAddon.Confirmation;
-using InteractivityAddon.Pagination;
-using InteractivityAddon.Selection;
+using Interactivity;
+using Interactivity.Confirmation;
+using Interactivity.Pagination;
+using Interactivity.Selection;
 using Qmmands;
 
 namespace ExampleBot_Qmmands.Modules

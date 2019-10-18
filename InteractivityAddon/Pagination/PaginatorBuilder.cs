@@ -6,7 +6,7 @@ using System.Text;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Pagination
+namespace Interactivity.Pagination
 {
     /// <summary>
     /// The <see cref="PaginatorBuilder"/> is used to create a <see cref="Paginator"/>.

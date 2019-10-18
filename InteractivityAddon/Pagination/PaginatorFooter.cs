@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InteractivityAddon.Pagination
+namespace Interactivity.Pagination
 {
     /// <summary>
     /// Specifies which contents should be displayed in the footer of a <see cref="PaginatorBuilder"/>.

@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Extensions;
+using Interactivity.Extensions;
 
-namespace InteractivityAddon.Selection
+namespace Interactivity.Selection
 {
     /// <summary>
     /// Represents a <see langword="abstract"/> class which allows for user selection in discord.

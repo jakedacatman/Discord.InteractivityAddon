@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Confirmation
+namespace Interactivity.Confirmation
 {
     /// <summary>
     /// Used to confirm an action via reaction on a <see cref="IUserMessage"/>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Pagination
+namespace Interactivity.Pagination
 {
     /// <summary>
     /// Represents a class which is used to send a multi paged message to a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>. This class is immutable!

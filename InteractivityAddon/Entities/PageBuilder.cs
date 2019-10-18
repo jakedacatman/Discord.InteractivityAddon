@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Discord;
-using InteractivityAddon.Extensions;
-using InteractivityAddon.Pagination;
+using Interactivity.Extensions;
+using Interactivity.Pagination;
 using sys = System.Drawing;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     /// <summary>
     /// The <see cref="PageBuilder"/> is used to create a <see cref="Page"/>.

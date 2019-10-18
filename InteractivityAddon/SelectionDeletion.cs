@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     [Flags]
     public enum DeletionOption

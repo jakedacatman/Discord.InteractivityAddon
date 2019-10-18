@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Discord;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Selection
+namespace Interactivity.Selection
 {
     /// <summary>
     /// Represents a <see langword="abstract"/> class for creating custom selection builders.

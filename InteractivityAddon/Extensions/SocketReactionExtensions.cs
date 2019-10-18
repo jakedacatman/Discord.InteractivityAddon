@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Discord.WebSocket;
 
-namespace InteractivityAddon.Extensions
+namespace Interactivity.Extensions
 {
     internal static class SocketReactionExtensions
     {
