@@ -2,7 +2,7 @@
 
 namespace Interactivity.Extensions
 {
-    internal static class EmbedFieldExtensions
+    internal static partial class Extensions
     {
         public static EmbedFieldBuilder ToBuilder(this EmbedField field) => new EmbedFieldBuilder()
                 .WithIsInline(field.Inline)

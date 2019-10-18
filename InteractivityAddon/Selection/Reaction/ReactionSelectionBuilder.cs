@@ -90,13 +90,13 @@ namespace Interactivity.Selection
             }
 
             return new ReactionSelection<T>(
-                Values.ToImmutableList(),
-                Users.ToImmutableList(),
+                Values.ToImmutableArray(),
+                Users.ToImmutableArray(),
                 SelectionEmbed.Build(),
                 CancelledEmbed.Build(),
                 TimeoutedEmbed.Build(),
                 Deletion,
-                Emotes.ToImmutableList(),
+                Emotes.ToImmutableArray(),
                 CancelEmote,
                 AllowCancel);
         }

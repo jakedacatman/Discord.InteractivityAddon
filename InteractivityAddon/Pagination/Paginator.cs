@@ -16,7 +16,7 @@ namespace Interactivity.Pagination
         /// <summary>
         /// The pages of the <see cref="Paginator"/>.
         /// </summary>
-        public IReadOnlyList<Page> Pages { get; }
+        public IReadOnlyCollection<Page> Pages { get; }
 
         private int _currentPageIndex;
 
@@ -41,7 +41,7 @@ namespace Interactivity.Pagination
         /// <summary>
         /// The current page of the <see cref="Paginator"/>.
         /// </summary>
-        public Page CurrentPage => Pages[CurrentPageIndex];
+        public Page CurrentPage => Pages.ElementAt(CurrentPageIndex);
 
         /// <summary>
         /// Determited whether everyone can interact with the <see cref="Paginator"/>.
@@ -51,14 +51,14 @@ namespace Interactivity.Pagination
         /// <summary>
         /// Determites which users can interact with the <see cref="Paginator"/>.
         /// </summary>
-        public IReadOnlyList<SocketUser> Users { get; }
+        public IReadOnlyCollection<SocketUser> Users { get; }
 
         /// <summary>
         /// The appearance of the <see cref="Paginator"/>.
         /// </summary>
         public PaginatorAppearance Appearance { get; }
 
-        internal Paginator(ImmutableArray<Page> pages, int currentPageIndex, ImmutableArray<SocketUser> users, PaginatorAppearance appearance)
+        internal Paginator(IReadOnlyCollection<Page> pages, int currentPageIndex, IReadOnlyCollection<SocketUser> users, PaginatorAppearance appearance)
         {
             Pages = pages;
             Users = users;

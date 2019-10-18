@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
@@ -17,7 +19,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// The possibilites of emotes to select from.
         /// </summary>
-        public ImmutableList<IEmote> Emotes { get; }
+        public IReadOnlyCollection<IEmote> Emotes { get; }
 
         /// <summary>
         /// Gets the cancel emote if cancel is enabled in the <see cref="ReactionSelection{T}"/>.
@@ -31,9 +33,9 @@ namespace Interactivity.Selection
         #endregion
 
         #region Constructor
-        internal ReactionSelection(ImmutableList<T> values, ImmutableList<SocketUser> users,
+        internal ReactionSelection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
-            ImmutableList<IEmote> emotes, IEmote cancelEmote, bool allowCancel)
+            IReadOnlyCollection<IEmote> emotes, IEmote cancelEmote, bool allowCancel)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
         {
             Emotes = emotes;
@@ -42,7 +44,11 @@ namespace Interactivity.Selection
 
             if (AllowCancel == true)
             {
-                Emotes = Emotes.Add(CancelEmote);
+                Emotes = new List<IEmote>(emotes)
+                {
+                    CancelEmote
+                }
+                .ToImmutableArray();
             }
         }
         #endregion
@@ -58,7 +64,7 @@ namespace Interactivity.Selection
             return Task.FromResult(Optional.Create(
                 index >= Values.Count
                 ? new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true)
-                : new InteractivityResult<T>(Values[index], DateTime.UtcNow - startTime, false, false)
+                : new InteractivityResult<T>(Values.ElementAt(index), DateTime.UtcNow - startTime, false, false)
                 ));
         }
 

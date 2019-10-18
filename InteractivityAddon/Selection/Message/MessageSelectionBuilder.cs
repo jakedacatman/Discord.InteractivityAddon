@@ -92,13 +92,13 @@ namespace Interactivity.Selection
             }
 
             return new MessageSelection<T>(
-                Values.ToImmutableList(),
-                Users.ToImmutableList(),
+                Values.ToImmutableArray(),
+                Users.ToImmutableArray(),
                 SelectionEmbed.Build(),
                 CancelledEmbed.Build(),
                 TimeoutedEmbed.Build(),
                 Deletion,
-                possibilities.ToImmutableList(),
+                possibilities.ToImmutableArray(),
                 CancelDisplayName);
         }
         #endregion

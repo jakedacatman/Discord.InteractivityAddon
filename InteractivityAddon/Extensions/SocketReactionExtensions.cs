@@ -3,7 +3,7 @@ using Discord.WebSocket;
 
 namespace Interactivity.Extensions
 {
-    internal static class SocketReactionExtensions
+    internal static partial class Extensions
     {
         public static async Task DeleteAsync(this SocketReaction reaction, BaseSocketClient client)
         {

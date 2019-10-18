@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
@@ -16,7 +19,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// The possibilites to select from.
         /// </summary>
-        public ImmutableList<string> Possibilities { get; }
+        public IReadOnlyCollection<string> Possibilities { get; }
 
         /// <summary>
         /// Gets the cancel display name if cancel is enabled in the selection.
@@ -25,9 +28,9 @@ namespace Interactivity.Selection
         #endregion
 
         #region Constructor
-        internal MessageSelection(ImmutableList<T> values, ImmutableList<SocketUser> users,
+        internal MessageSelection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
-            ImmutableList<string> possabilies, string cancelDisplayName)
+            IReadOnlyCollection<string> possabilies, string cancelDisplayName)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
         {
             Possibilities = possabilies;
@@ -43,7 +46,7 @@ namespace Interactivity.Selection
             return Task.FromResult(Optional.Create(
                 index >= Values.Count
                 ? new InteractivityResult<T>(default, value.Timestamp.UtcDateTime - startTime, false, true)
-                : new InteractivityResult<T>(Values[index], value.Timestamp.UtcDateTime - startTime, false, false)
+                : new InteractivityResult<T>(Values.ElementAt(index), value.Timestamp.UtcDateTime - startTime, false, false)
                 ));
         }
 

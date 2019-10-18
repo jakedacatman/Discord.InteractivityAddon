@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -19,12 +21,12 @@ namespace Interactivity.Selection
         /// <summary>
         /// Gets the values to select from in the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public ImmutableList<T> Values { get; }
+        public IReadOnlyCollection<T> Values { get; }
 
         /// <summary>
         /// Gets which users can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public ImmutableList<SocketUser> Users { get; }
+        public IReadOnlyCollection<SocketUser> Users { get; }
 
         /// <summary>
         /// Gets the <see cref="Embed"/> which is sent into the channel.
@@ -58,7 +60,7 @@ namespace Interactivity.Selection
         #endregion
 
         #region Constructor
-        protected Selection(ImmutableList<T> values, ImmutableList<SocketUser> users,
+        protected Selection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed,
             DeletionOption deletion)
         {

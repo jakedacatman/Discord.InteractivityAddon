@@ -22,7 +22,7 @@ namespace Interactivity.Confirmation
         /// <summary>
         /// Gets the users allowed to interact with the <see cref="Confirmation"/>.
         /// </summary>
-        public IReadOnlyList<SocketUser> Users { get; }
+        public IReadOnlyCollection<SocketUser> Users { get; }
 
         /// <summary>
         /// Gets the <see cref="IEmote"/> to confirm the <see cref="Confirmation"/>.
@@ -51,7 +51,7 @@ namespace Interactivity.Confirmation
 
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
-        internal Confirmation(Page content, ImmutableArray<SocketUser> users, IEmote confirmEmote, IEmote declineEmote, Embed timeoutedEmbed, Embed cancelledEmbed, DeletionOption deletion)
+        internal Confirmation(Page content, IReadOnlyCollection<SocketUser> users, IEmote confirmEmote, IEmote declineEmote, Embed timeoutedEmbed, Embed cancelledEmbed, DeletionOption deletion)
         {
             Content = content;
             Users = users;
