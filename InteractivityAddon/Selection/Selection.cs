@@ -52,11 +52,6 @@ namespace Interactivity.Selection
         /// Determites whether everyone can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
         public bool IsUserRestricted => Users.Count > 0;
-
-        /// <summary>
-        /// Determites whether the selection is of <see cref="IEmote"/>.
-        /// </summary>
-        public bool IsReactionSelection => typeof(T1) == typeof(SocketReaction);
         #endregion
 
         #region Constructor
