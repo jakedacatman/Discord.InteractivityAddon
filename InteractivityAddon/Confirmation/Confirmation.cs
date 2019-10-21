@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -47,11 +46,11 @@ namespace Interactivity.Confirmation
         /// <summary>
         /// Gets what the <see cref="Confirmation"/> should delete.
         /// </summary>
-        public DeletionOption Deletion { get; }
+        public DeletionOptions Deletion { get; }
 
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
-        internal Confirmation(Page content, IReadOnlyCollection<SocketUser> users, IEmote confirmEmote, IEmote declineEmote, Embed timeoutedEmbed, Embed cancelledEmbed, DeletionOption deletion)
+        internal Confirmation(Page content, IReadOnlyCollection<SocketUser> users, IEmote confirmEmote, IEmote declineEmote, Embed timeoutedEmbed, Embed cancelledEmbed, DeletionOptions deletion)
         {
             Content = content;
             Users = users;
@@ -69,7 +68,7 @@ namespace Interactivity.Confirmation
         internal Func<SocketReaction, bool, Task> GetActions()
             => async (reaction, valid) =>
         {
-            if ((Deletion.HasFlag(DeletionOption.Valid) && valid) || (Deletion.HasFlag(DeletionOption.Invalids) && !valid))
+            if ((Deletion.HasFlag(DeletionOptions.Valid) && valid) || (Deletion.HasFlag(DeletionOptions.Invalids) && !valid))
             {
                 await reaction.Message.Value.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
             }

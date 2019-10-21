@@ -1,109 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Pagination
 {
     /// <summary>
-    /// Represents a class which is used to send a multi paged message to a <see cref="IMessageChannel"/> via a <see cref="InteractivityService"/>. This class is immutable!
+    /// Represents a <see langword="abstract"/> class which allows for multi page messages in discord.
     /// </summary>
-    public sealed class Paginator
+    public abstract class Paginator
     {
-        /// <summary>
-        /// The pages of the <see cref="Paginator"/>.
-        /// </summary>
-        public IReadOnlyCollection<Page> Pages { get; }
-
-        private int _currentPageIndex;
-
+        #region Fields
         /// <summary>
         /// The index of the current page of the <see cref="Paginator"/>.
         /// </summary>
-        public int CurrentPageIndex
-        {
-            get => _currentPageIndex; internal set {
-                _currentPageIndex = value;
-                if (value < 0)
-                {
-                    _currentPageIndex = 0;
-                }
-                if (value > Pages.Count - 1)
-                {
-                    _currentPageIndex = Pages.Count - 1;
-                }
-            }
-        }
-
+        public int CurrentPageIndex { get; protected set; }
+        
         /// <summary>
-        /// The current page of the <see cref="Paginator"/>.
-        /// </summary>
-        public Page CurrentPage => Pages.ElementAt(CurrentPageIndex);
-
-        /// <summary>
-        /// Determited whether everyone can interact with the <see cref="Paginator"/>.
-        /// </summary>
-        public bool IsUserRestricted => Users.Count > 0;
-
-        /// <summary>
-        /// Determites which users can interact with the <see cref="Paginator"/>.
+        /// Gets a list of users who can interact with the <see cref="Paginator"/>.
         /// </summary>
         public IReadOnlyCollection<SocketUser> Users { get; }
 
         /// <summary>
-        /// The appearance of the <see cref="Paginator"/>.
+        /// Gets the emotes and their related action of the <see cref="Paginator"/>.
         /// </summary>
-        public PaginatorAppearance Appearance { get; }
+        public IReadOnlyDictionary<IEmote, PaginatorAction> Emotes { get; }
 
-        internal Paginator(IReadOnlyCollection<Page> pages, int currentPageIndex, IReadOnlyCollection<SocketUser> users, PaginatorAppearance appearance)
+        /// <summary>
+        /// Gets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after cancellation.
+        /// </summary>
+        public Embed CancelledEmbed { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after a timeout.
+        /// </summary>
+        public Embed TimeoutedEmbed { get; }
+
+        /// <summary>
+        /// Gets what the <see cref="Paginator"/> should delete.
+        /// </summary>
+        public DeletionOptions Deletion { get; }
+
+        /// <summary>
+        /// Gets the maximum page of the <see cref="Paginator"/>.
+        /// </summary>
+        public abstract int MaxPageIndex { get; }
+
+        /// <summary>
+        /// Determites whether everyone can interact with the <see cref="Paginator"/>.
+        /// </summary>
+        public bool IsUserRestricted => Users.Count > 0;
+        #endregion
+
+        #region Constructor
+        internal Paginator(IReadOnlyCollection<SocketUser> users, IReadOnlyDictionary<IEmote, PaginatorAction> emotes,
+            Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOptions deletion, int startPage)
         {
-            Pages = pages;
             Users = users;
-            CurrentPageIndex = currentPageIndex;
-            Appearance = appearance;
+            Emotes = emotes;
+            CancelledEmbed = cancelledEmbed;
+            TimeoutedEmbed = timeoutedEmbed;
+            Deletion = deletion;
+            CurrentPageIndex = startPage;
+        }
+        #endregion
+
+        #region Methods
+        internal async Task<bool> HandleReactionAsync(BaseSocketClient client, SocketReaction reaction)
+        {
+            bool valid = await RunChecksAsync(client, reaction).ConfigureAwait(false) && (IsUserRestricted || Users.Any(x => x.Id == reaction.UserId));
+
+            if (Deletion.HasFlag(DeletionOptions.Invalids) && !valid)
+            {
+                await reaction.DeleteAsync(client).ConfigureAwait(false);
+            }
+            if (Deletion.HasFlag(DeletionOptions.Valid) && valid)
+            {
+                await reaction.DeleteAsync(client).ConfigureAwait(false);
+            }
+
+            return valid;
         }
 
-        internal bool ApplyAction(PaginatorAction action)
-        {
-            int pageBeforeChangeApply = CurrentPageIndex;
+        internal Task InitializeMessageAsync(IUserMessage message)
+            => message.AddReactionsAsync(Emotes.Keys.ToArray());
 
+        /// <summary>
+        /// Sets the <see cref="CurrentPageIndex"/> of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public virtual async Task<bool> SetPageAsync(int newPage)
+        {
+            if (newPage < 0 || CurrentPageIndex == newPage || newPage > MaxPageIndex)
+            {
+                return false;
+            }
+
+            var page = await GetOrLoadPageAsync(newPage).ConfigureAwait(false);
+
+            if (page == null)
+            {
+                return false;
+            }
+
+            CurrentPageIndex = newPage;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Loads a specific page of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        public abstract Task<Page> GetOrLoadPageAsync(int page);
+
+        /// <summary>
+        /// Loads the current page of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public Task<Page> GetOrLoadCurrentPageAsync()
+            => GetOrLoadPageAsync(CurrentPageIndex);
+
+        /// <summary>
+        /// Applies a <see cref="PaginatorAction"/> to the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public virtual Task<bool> ApplyActionAsync(PaginatorAction action)
+        {
             switch (action)
             {
                 case PaginatorAction.Backward:
-                    CurrentPageIndex--;
-                    break;
+                    return SetPageAsync(CurrentPageIndex - 1);
                 case PaginatorAction.Forward:
-                    CurrentPageIndex++;
-                    break;
+                    return SetPageAsync(CurrentPageIndex + 1); ;
                 case PaginatorAction.SkipToStart:
-                    CurrentPageIndex = 0;
-                    break;
+                    return SetPageAsync(0);
                 case PaginatorAction.SkipToEnd:
-                    CurrentPageIndex = Pages.Count - 1;
-                    break;
+                    return SetPageAsync(MaxPageIndex);
+                default:
+                    return Task.FromResult(false);
             }
-
-            return pageBeforeChangeApply != CurrentPageIndex
-                          ? true
-                          : false;
         }
 
-        internal Predicate<SocketReaction> GetReactionFilter() => reaction =>
-            Appearance.Emotes.Contains(reaction.Emote)
-            &&
-            (!IsUserRestricted || Users.Where(x => x.Id == reaction.UserId).Any());
-
-        internal Func<SocketReaction, bool, Task> GetActions() => async (reaction, invalid) =>
-            {
-                if ((Appearance.Deletion.HasFlag(DeletionOption.Invalids) && invalid)
-                    ||
-                    (Appearance.Deletion.HasFlag(DeletionOption.Valid) && !invalid))
-                {
-                    await reaction.Message.Value.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-                }
-            };
+    /// <summary>
+    /// Runs some checks on the <see cref="SocketReaction"/> to make sure it's working with the <see cref="Paginator"/>.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="reaction"></param>
+    /// <returns></returns>
+    public virtual Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction)
+            => Task.FromResult(true);
+        #endregion
     }
 }

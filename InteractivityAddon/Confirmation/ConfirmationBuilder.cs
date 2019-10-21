@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Confirmation
 {
@@ -45,14 +45,14 @@ namespace Interactivity.Confirmation
         /// <summary>
         /// Gets or sets what the <see cref="Confirmation"/> should delete.
         /// </summary>
-        public DeletionOption Deletion { get; set; } = DeletionOption.AfterCapturedContext | DeletionOption.Invalids;
+        public DeletionOptions Deletion { get; set; } = DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids;
 
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
         public Confirmation Build()
             => new Confirmation(
                 Content?.Build() ?? throw new ArgumentNullException(nameof(Content)),
-                Users?.ToImmutableArray() ?? throw new ArgumentNullException(nameof(Users)),
+                Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
                 ConfirmEmote ?? throw new ArgumentNullException(nameof(ConfirmEmote)),
                 DeclineEmote ?? throw new ArgumentNullException(nameof(DeclineEmote)),
                 TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
@@ -130,7 +130,7 @@ namespace Interactivity.Confirmation
         /// </summary>
         /// <param name="deletion"></param>
         /// <returns></returns>
-        public ConfirmationBuilder WithDeletion(DeletionOption deletion)
+        public ConfirmationBuilder WithDeletion(DeletionOptions deletion)
         {
             Deletion = deletion;
             return this;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -29,7 +28,7 @@ namespace Interactivity.Selection
 
         #region Constructor
         internal MessageSelection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
-            Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
+            Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOptions deletion,
             IReadOnlyCollection<string> possabilies, string cancelDisplayName)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
         {

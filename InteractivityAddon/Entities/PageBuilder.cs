@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Discord;
+using Discord.WebSocket;
 using Interactivity.Extensions;
 using Interactivity.Pagination;
 using sys = System.Drawing;
@@ -48,6 +49,8 @@ namespace Interactivity
         /// Gets or sets the Fields of the <see cref="PageBuilder"/>.
         /// </summary>
         public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
+
+        internal EmbedFooterBuilder Footer { get; set; } = new EmbedFooterBuilder();
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/>.
@@ -199,9 +202,44 @@ namespace Interactivity
             return this;
         }
 
+        internal PageBuilder WithPaginatorFooter(PaginatorFooter footer, int page, int totalPages, IList<SocketUser> users)
+        {
+            if (footer.HasFlag(PaginatorFooter.None))
+            {
+                Footer = new EmbedFooterBuilder();
+                return this;
+            }
+
+            if (footer.HasFlag(PaginatorFooter.Users))
+            {
+                if (users.Count == 0)
+                {
+                    Footer.Text += "Interactors : Everyone\n";
+                }
+                if (users.Count == 1)
+                {
+                    var user = users.First();
+
+                    Footer.IconUrl = user.GetAvatarUrl();
+                    Footer.Text += $"Interactor : {user}\n";
+                }
+                else
+                {
+                    Footer.Text += $"Interactors : {string.Join(", ", users)}";
+                }
+            }
+
+            if (footer.HasFlag(PaginatorFooter.PageNumber))
+            {
+                Footer.Text += $"Page {page + 1}/{totalPages + 1}";
+            }
+
+            return this;
+        }
+
         public Page Build(string defaultText = null, sys.Color? defaultColor = null,
             string defaultDescription = null, string defaultTitle = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
-            List<EmbedFieldBuilder> defaultFields = null, EmbedFooterBuilder footer = null)
+            List<EmbedFieldBuilder> defaultFields = null)
             => new Page(Text ?? defaultText,
                 Color ?? defaultColor,
                 Description ?? defaultDescription,
@@ -209,69 +247,6 @@ namespace Interactivity
                 ThumbnailUrl ?? defaultThumbnailUrl,
                 ImageUrl ?? defaultImageUrl,
                 Fields ?? defaultFields,
-                footer);
-
-        /// <summary>
-        /// Creates an <see cref="Embed"/> from current <see cref="PageBuilder"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="PaginatorBuilder"/> to take default values from.</param>
-        /// <returns></returns>
-        internal Embed Build(PaginatorBuilder builder)
-        {
-            var embedBuilder = new EmbedBuilder()
-            {
-                Color = (Color?) Color ?? builder.Color,
-                Description = Description ?? builder.Description,
-                Title = Title ?? builder.Title,
-                ThumbnailUrl = ThumbnailUrl ?? builder.ThumbnailUrl,
-                ImageUrl = ImageUrl ?? builder.ImageUrl,
-                Fields = Fields ?? builder.Fields,
-            };
-
-            var footerBuilder = new EmbedFooterBuilder();
-
-            if (builder.Footer.HasFlag(PaginatorFooter.Users))
-            {
-                if (builder.IsUserRestricted == false)
-                {
-                    footerBuilder.Text += "Interactors : Everyone";
-                }
-                else
-                {
-                    if (builder.Users.Count == 1)
-                    {
-                        footerBuilder.IconUrl = builder.Users.First().GetAvatarUrl();
-                        footerBuilder.Text += $"Interactors : {builder.Users.First()}";
-                    }
-                    else
-                    {
-                        var interactorBuilder = new StringBuilder().Append("Interactors : ");
-
-                        foreach (var user in builder.Users)
-                        {
-                            interactorBuilder.Append($"{user}, ");
-                        }
-
-                        interactorBuilder.Remove(interactorBuilder.Length - 2, 2);
-
-                        footerBuilder.Text += interactorBuilder.ToString();
-                    }
-                }
-            }
-
-            if (builder.Footer.HasFlag(PaginatorFooter.PageNumber))
-            {
-                footerBuilder.Text += $"\nPage {builder.Pages.FindIndex(x => x == this) + 1}/{builder.Pages.Count}";
-            }
-
-            if (builder.Footer.HasFlag(PaginatorFooter.None))
-            {
-                footerBuilder = null;
-            }
-
-            embedBuilder.WithFooter(footerBuilder);
-
-            return embedBuilder.Build();
-        }
+                Footer);
     }
 }

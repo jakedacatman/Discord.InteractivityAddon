@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
@@ -90,14 +90,14 @@ namespace Interactivity.Selection
             }
 
             return new ReactionSelection<T>(
-                Values.ToImmutableArray(),
-                Users.ToImmutableArray(),
-                SelectionEmbed.Build(),
-                CancelledEmbed.Build(),
-                TimeoutedEmbed.Build(),
+                Values?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
+                Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                SelectionEmbed?.Build() ?? throw new ArgumentNullException(nameof(SelectionEmbed)),
+                CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
+                TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
                 Deletion,
-                Emotes.ToImmutableArray(),
-                CancelEmote,
+                Emotes?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Emotes)),
+                CancelEmote ?? throw new ArgumentNullException(nameof(CancelEmote)),
                 AllowCancel);
         }
         #endregion
@@ -142,7 +142,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets what the <see cref="Selection{T, T1}"/> should delete.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithDeletion(DeletionOption deletion)
+        public ReactionSelectionBuilder<T> WithDeletion(DeletionOptions deletion)
         {
             Deletion = deletion;
             return this;

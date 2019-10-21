@@ -29,7 +29,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Gets or sets what the <see cref="Selection{T, T1}"/> should delete.
         /// </summary>
-        public DeletionOption Deletion { get; set; } = DeletionOption.Invalids;
+        public DeletionOptions Deletion { get; set; } = DeletionOptions.Invalids;
 
         /// <summary>
         /// Gets or sets the selection embed of the <see cref="Selection{T, T1}"/>.

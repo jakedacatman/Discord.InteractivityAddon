@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -46,7 +45,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Gets an ORing determiting what the <see cref="Selection{T1, T2}"/> will delete.
         /// </summary>
-        public DeletionOption Deletion { get; }
+        public DeletionOptions Deletion { get; }
 
         /// <summary>
         /// Determites whether everyone can interact with the <see cref="Selection{T, T1}"/>.
@@ -57,7 +56,7 @@ namespace Interactivity.Selection
         #region Constructor
         protected Selection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
             Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed,
-            DeletionOption deletion)
+            DeletionOptions deletion)
         {
             if (typeof(T1) != typeof(SocketReaction) && typeof(T1) != typeof(SocketMessage))
             {
@@ -81,11 +80,11 @@ namespace Interactivity.Selection
             if (response is SocketMessage s)
             {
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(s.Author));
-                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false)
+                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && valid == false)
                 {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
-                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true)
+                if (Deletion.HasFlag(DeletionOptions.Valid) == true && valid == true)
                 {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
@@ -94,11 +93,11 @@ namespace Interactivity.Selection
             {
                 var user = r.User.Value as SocketUser ?? client.GetUser(r.UserId);
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(user));
-                if (Deletion.HasFlag(DeletionOption.Invalids) == true && valid == false)
+                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && valid == false)
                 {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }
-                if (Deletion.HasFlag(DeletionOption.Valid) == true && valid == true)
+                if (Deletion.HasFlag(DeletionOptions.Valid) == true && valid == true)
                 {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }

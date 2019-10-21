@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -34,7 +33,7 @@ namespace Interactivity.Selection
 
         #region Constructor
         internal ReactionSelection(IReadOnlyCollection<T> values, IReadOnlyCollection<SocketUser> users,
-            Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOption deletion,
+            Embed selectionEmbed, Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOptions deletion,
             IReadOnlyCollection<IEmote> emotes, IEmote cancelEmote, bool allowCancel)
             : base(values, users, selectionEmbed, cancelledEmbed, timeoutedEmbed, deletion)
         {
@@ -48,7 +47,7 @@ namespace Interactivity.Selection
                 {
                     CancelEmote
                 }
-                .ToImmutableArray();
+                .ToReadOnlyCollection();
             }
         }
         #endregion

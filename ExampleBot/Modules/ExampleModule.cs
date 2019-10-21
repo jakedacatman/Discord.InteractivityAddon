@@ -33,8 +33,30 @@ namespace ExampleBot_Qmmands.Modules
             }
         }
 
-        [Command("paginator")]
-        public async Task ExamplePaginatorAsync()
+        [Command("lazypaginator")]
+        public Task LazyPaginatorAsync()
+        {
+            var paginator = new LazyPaginatorBuilder()
+                .WithUsers(Context.User)
+                .WithPageFactory(PageFactory)
+                .WithMaxPage(100)
+                .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+                .WithDefaultEmotes()
+                .Build();
+
+            return Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+
+            Task<PageBuilder> PageFactory(int page)
+            {
+                return Task.FromResult(new PageBuilder()
+                    .WithText((page + 1).ToString())
+                    .WithTitle($"Title for page {page + 1}")
+                    .WithColor(System.Drawing.Color.FromArgb(page * 1500)));
+            }
+        }
+
+        [Command("staticpaginator")]
+        public Task StaticPaginatorAsync()
         {
             var pages = new PageBuilder[] {
                 new PageBuilder().WithTitle("I"),
@@ -44,14 +66,14 @@ namespace ExampleBot_Qmmands.Modules
                 new PageBuilder().WithText("I am cool :crown:")
             };
 
-            var paginator = new PaginatorBuilder()
-                .WithPages(pages)
+            var paginator = new StaticPaginatorBuilder()
                 .WithUsers(Context.User)
-                .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-                .WithAppearance(PaginatorAppearanceBuilder.Default.WithDeletion(DeletionOption.Valid | DeletionOption.AfterCapturedContext))
+                .WithPages(pages)
+                .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+                .WithDefaultEmotes()
                 .Build();
 
-            await Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+            return Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
         }
 
         [Command("delete")]
@@ -88,7 +110,7 @@ namespace ExampleBot_Qmmands.Modules
                 .WithValues("Hi", "How", "Hey", "Huh?!")
                 .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
                 .WithUsers(Context.User)
-                .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
+                .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
@@ -104,7 +126,7 @@ namespace ExampleBot_Qmmands.Modules
             var builder = new MessageSelectionBuilder<string>()
                 .WithValues("Hi", "How", "Hey", "Huh?!")
                 .WithUsers(Context.User)
-                .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
+                .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 

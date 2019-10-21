@@ -3,7 +3,7 @@
 namespace Interactivity
 {
     [Flags]
-    public enum DeletionOption
+    public enum DeletionOptions
     {
         None = 0,
         /// <summary>

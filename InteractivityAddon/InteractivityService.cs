@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -317,7 +318,7 @@ namespace Interactivity
                         ? new InteractivityResult<bool>(default, timeout ?? DefaultTimeout, true, false)
                         : new InteractivityResult<bool>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (confirmation.Deletion.HasFlag(DeletionOption.AfterCapturedContext))
+            if (confirmation.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
             {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
@@ -394,7 +395,7 @@ namespace Interactivity
                                     ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
                                     : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (selection.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true)
+            if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
             {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
@@ -471,115 +472,100 @@ namespace Interactivity
                                     ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
                                     : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (selection.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true)
+            if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
             {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
             else if (result.IsCancelled == true)
             {
-                await msg.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => { x.Embed = selection.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
             }
             else if (result.IsTimeouted == true)
             {
-                await msg.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => { x.Embed = selection.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
             }
 
             return result;
         }
 
+
         /// <summary>
         /// Sends a page with multiple pages which the user can move through via reactions.
         /// </summary>
-        /// <param name="paginator">The paginator to send.</param>
-        /// <param name="channel">The <see cref="IMessageChannel"/> to send the paginator to.</param>
-        /// <param name="timeout">The time until the paginator times out.</param>
+        /// <param name="paginator">The <see cref="Paginator"/> to send.</param>
+        /// <param name="channel">The <see cref="IMessageChannel"/> to send the <see cref="Paginator"/> to.</param>
+        /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            var startTime = DateTime.UtcNow;
-
-            var resultSource = new TaskCompletionSource<InteractivityResult<object>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
             token.Register(() => cancelSource.SetResult(true));
 
-            var resultTask = resultSource.Task;
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(paginator.CurrentPage.Text, embed: paginator.CurrentPage.Embed).ConfigureAwait(false);
+            var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel c, SocketReaction reaction)
+            var msg = await channel.SendMessageAsync(text: page.Text, embed: page.Embed).ConfigureAwait(false);
+            var startTime = msg.Timestamp.UtcDateTime;
+
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (reaction.UserId == Client.CurrentUser.Id)
+                if (r.Channel != channel)
                 {
                     return;
                 }
-
-                if (reaction.MessageId != msg.Id)
+                if (r.UserId == Client.CurrentUser.Id)
                 {
                     return;
                 }
-
-                if (!paginator.GetReactionFilter().Invoke(reaction))
+                if (!await paginator.HandleReactionAsync(Client, r).ConfigureAwait(false))
                 {
-                    await paginator.GetActions().Invoke(reaction, true).ConfigureAwait(false);
                     return;
                 }
-
-                await paginator.GetActions().Invoke(reaction, false).ConfigureAwait(false);
-
-                var action = paginator.Appearance.ParseAction(reaction.Emote);
-
+                if(!paginator.Emotes.TryGetValue(r.Emote, out var action))
+                {
+                    return;
+                }
                 if (action == PaginatorAction.Exit)
                 {
-                    resultSource.SetResult(new InteractivityResult<object>(default, DateTime.UtcNow - startTime, false, true));
-                    return;
+                    cancelSource.SetResult(true);
                 }
-                if (action != PaginatorAction.None)
+                else
                 {
-                    bool pageChanged = paginator.ApplyAction(action);
+                    bool refreshPage = await paginator.ApplyActionAsync(action).ConfigureAwait(false);
 
-                    if (pageChanged)
+                    if (refreshPage)
                     {
-                        await msg.ModifyAsync(x =>
-                        {
-                            x.Embed = paginator.CurrentPage.Embed;
-                            x.Content = paginator.CurrentPage.Text;
-                        })
-                        .ConfigureAwait(false);
+                        var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
+                        await msg.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                     }
                 }
             }
 
             Client.ReactionAdded += CheckReactionAsync;
-
-            await msg.AddReactionsAsync(paginator.Appearance.Emotes).ConfigureAwait(false);
-            var task_result = await Task.WhenAny(resultTask, cancelTask, timeoutTask).ConfigureAwait(false);
-
+            await paginator.InitializeMessageAsync(msg);
+            var task_result = await Task.WhenAny(timeoutTask, cancelTask).ConfigureAwait(false);
             Client.ReactionAdded -= CheckReactionAsync;
 
-            await msg.RemoveAllReactionsAsync().ConfigureAwait(false);
+            var result = task_result == timeoutTask
+                            ? new InteractivityResult<object>(default, timeout ?? DefaultTimeout, true, false)
+                            : new InteractivityResult<object>(default, DateTime.UtcNow - startTime, false, true);
 
-            var result = task_result == resultTask
-                                                ? await resultTask.ConfigureAwait(false)
-                                                : task_result == timeoutTask
-                                                    ? new InteractivityResult<object>(default, timeout ?? DefaultTimeout, true, false)
-                                                    : new InteractivityResult<object>(default, DateTime.UtcNow - startTime, false, true);
-
-            if (paginator.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext))
+            if (paginator.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
             {
-                await msg.DeleteAsync();
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
             else if (result.IsCancelled == true)
             {
-                await msg.ModifyAsync(x => x.Embed = paginator.Appearance.CancelledEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => { x.Embed = paginator.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
             }
             else if (result.IsTimeouted == true)
             {
-                await msg.ModifyAsync(x => x.Embed = paginator.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+                await msg.ModifyAsync(x => { x.Embed = paginator.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
             }
 
             return result;

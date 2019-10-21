@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
@@ -92,13 +92,13 @@ namespace Interactivity.Selection
             }
 
             return new MessageSelection<T>(
-                Values.ToImmutableArray(),
-                Users.ToImmutableArray(),
-                SelectionEmbed.Build(),
-                CancelledEmbed.Build(),
-                TimeoutedEmbed.Build(),
+                Values?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
+                Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                SelectionEmbed?.Build() ?? throw new ArgumentNullException(nameof(SelectionEmbed)),
+                CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
+                TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
                 Deletion,
-                possibilities.ToImmutableArray(),
+                possibilities?.ToReadOnlyCollection(),
                 CancelDisplayName);
         }
         #endregion
@@ -143,7 +143,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets what the <see cref="Selection{T, T1}"/> should delete.
         /// </summary>
-        public MessageSelectionBuilder<T> WithDeletion(DeletionOption deletion)
+        public MessageSelectionBuilder<T> WithDeletion(DeletionOptions deletion)
         {
             Deletion = deletion;
             return this;
