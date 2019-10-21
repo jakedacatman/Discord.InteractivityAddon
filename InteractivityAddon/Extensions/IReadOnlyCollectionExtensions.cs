@@ -9,7 +9,7 @@ namespace Interactivity.Extensions
         {
             int i = 0;
 
-            foreach(var item in collection)
+            foreach (var item in collection)
             {
                 if (match.Invoke(item))
                 {

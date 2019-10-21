@@ -61,7 +61,7 @@ namespace Interactivity.Pagination
         public new LazyPaginatorBuilder WithDeletion(DeletionOptions deletion) => base.WithDeletion(deletion) as LazyPaginatorBuilder;
         public new LazyPaginatorBuilder WithFooter(PaginatorFooter footer) => base.WithFooter(footer) as LazyPaginatorBuilder;
         public LazyPaginatorBuilder WithDefaultEmotes()
-        { 
+        {
             Emotes.Add(new Emoji("⏮"), PaginatorAction.SkipToStart);
             Emotes.Add(new Emoji("◀"), PaginatorAction.Backward);
             Emotes.Add(new Emoji("▶"), PaginatorAction.Forward);

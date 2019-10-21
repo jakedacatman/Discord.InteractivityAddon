@@ -26,7 +26,7 @@ namespace Interactivity.Pagination
             Pages = pages;
         }
 
-        public override Task<Page> GetOrLoadPageAsync(int page) 
+        public override Task<Page> GetOrLoadPageAsync(int page)
             => Task.FromResult(Pages.ElementAt(page));
     }
 }

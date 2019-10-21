@@ -17,7 +17,7 @@ namespace Interactivity.Pagination
         /// The index of the current page of the <see cref="Paginator"/>.
         /// </summary>
         public int CurrentPageIndex { get; protected set; }
-        
+
         /// <summary>
         /// Gets a list of users who can interact with the <see cref="Paginator"/>.
         /// </summary>
@@ -147,14 +147,14 @@ namespace Interactivity.Pagination
             }
         }
 
-    /// <summary>
-    /// Runs some checks on the <see cref="SocketReaction"/> to make sure it's working with the <see cref="Paginator"/>.
-    /// </summary>
-    /// <param name="client"></param>
-    /// <param name="reaction"></param>
-    /// <returns></returns>
-    public virtual Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction)
-            => Task.FromResult(true);
+        /// <summary>
+        /// Runs some checks on the <see cref="SocketReaction"/> to make sure it's working with the <see cref="Paginator"/>.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="reaction"></param>
+        /// <returns></returns>
+        public virtual Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction)
+                => Task.FromResult(true);
         #endregion
     }
 }

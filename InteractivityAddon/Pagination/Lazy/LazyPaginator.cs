@@ -36,7 +36,7 @@ namespace Interactivity.Pagination
             if (!CachedPages.TryGetValue(pageNumber, out var page))
             {
                 page = await PageFactory(pageNumber).ConfigureAwait(false);
-                CachedPages.TryAdd(pageNumber, page);    
+                CachedPages.TryAdd(pageNumber, page);
             }
 
             return page;
