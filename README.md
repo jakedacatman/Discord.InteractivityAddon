@@ -15,10 +15,12 @@ The package is available to download on [NuGet](https://www.nuget.org/packages/D
  - A powerful fully customizable Paginator
    - Send multi page messages
    - Move through pages using reactions
+   - You can choose between a static and a lazy loaded one
+   - Get more customizability by creating your own child of the `Paginator` & `PaginatorBuilder` classes
  - Fully customizable selection from a list of objects
    - Works with messages or reactions
    - Makes user input easy
-   - For more customizability you can create your own child of the selection class 
+   - Get more customizability by creating your own child of the `Selection` & `SelectionBuilder` classes
  - Confirmation
  - Uptime counter
  
@@ -71,38 +73,45 @@ public async Task ExampleSelectionAsync()
 ### Example: Paginator
 ```cs
 [Command("paginator")]
-public async Task ExamplePaginatorAsync()
+public Task PaginatorAsync()
 {
-    var pages = new List<Embed>() {
-        new EmbedBuilder().WithTitle("I").Build(),
-        new EmbedBuilder().WithTitle("am").Build(),
-        new EmbedBuilder().WithTitle("cool").Build(),
-        new EmbedBuilder().WithTitle(":sunglasses:").Build(),
+    var pages = new PageBuilder[] {
+        new PageBuilder().WithTitle("I"),
+        new PageBuilder().WithTitle("am"),
+        new PageBuilder().WithTitle("cool"),
+        new PageBuilder().WithTitle(":sunglasses:"),
+        new PageBuilder().WithText("I am cool :crown:")
     };
 
-    var paginator = new PaginatorBuilder()
-        .WithEmbeds(pages.ToArray())
+    var paginator = new StaticPaginatorBuilder()
         .WithUsers(Context.User)
-        .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
-        .WithAppearance(PaginatorAppearanceBuilder.Default.WithDeletion(DeletionOption.Invalids))
+        .WithPages(pages)
+        .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+        .WithDefaultEmotes()
         .Build();
 
-    await Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+    return Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
 }
 ```
 
 ### Example: Confirmation
 ```cs
 [Command("confirm")]
-public async Task ExampleConfirmationAsync()
+public async Task ConfirmAsync()
 {
-    var message = await Context.Channel.SendMessageAsync("Please confirm!");
-    var request = new ConfirmationRequest(message, Context.User.Id);
+    var request = new ConfirmationBuilder()
+        .WithContent(new PageBuilder().WithText("Please Confirm"))
+        .Build();
 
-    var result = await Interactivity.GetUserConfirmationAsync(request);
+    var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
 
-    if (result.Value == true) {
-        await message.ModifyAsync(x => x.Content = "Confirmed :thumbsup:!");
+    if (result.Value == true)
+    {
+        await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
+    }
+    else
+    {
+        await Context.Channel.SendMessageAsync("Declined :thumbsup:!");
     }
 }
 ```
