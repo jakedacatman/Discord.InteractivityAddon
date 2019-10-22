@@ -17,7 +17,7 @@ namespace Interactivity
         private BaseSocketClient Client { get; }
 
         public TimeSpan DefaultTimeout { get; }
-        public DateTime BotStartTime { get; }
+        public DateTime UptimeStartTime { get; private set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="InteractivityService"/>.
@@ -27,7 +27,7 @@ namespace Interactivity
         public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null)
         {
             Client = client;
-            BotStartTime = DateTime.Now;
+            UptimeStartTime = DateTime.Now;
 
             DefaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(45);
             if (DefaultTimeout <= TimeSpan.Zero)
@@ -57,10 +57,16 @@ namespace Interactivity
         }
 
         /// <summary>
-        /// Get the time passed since the bot started
+        /// Get the time passed since the uptime counter started.
         /// </summary>
         /// <returns></returns>
-        public TimeSpan GetUptime() => DateTime.Now - BotStartTime;
+        public TimeSpan GetUptime() => DateTime.Now - UptimeStartTime;
+
+        /// <summary>
+        /// Resets the uptime counter.
+        /// </summary>
+        public void ResetUptime()
+            => UptimeStartTime = DateTime.Now;
 
         /// <summary>
         /// Sends a message to a channel delayed and deletes it after another delay.
@@ -234,7 +240,7 @@ namespace Interactivity
                 }
 
                 await actions.Invoke(s, false).ConfigureAwait(false);
-                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - BotStartTime, false, false));
+                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - UptimeStartTime, false, false));
             }
 
             Client.MessageReceived += CheckMessageAsync;
