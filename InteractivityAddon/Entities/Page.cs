@@ -22,14 +22,21 @@ namespace Interactivity
         public Embed Embed { get; }
 
         /// <summary>
-        /// Creates a new <see cref="Page"/>.
+        /// Creates a new instance of <see cref="PageBuilder"/> with all the values of this <see cref="Page"/>.
         /// </summary>
-        /// <param name="color">The Embed color of the <see cref="Page"/>.</param>
-        /// <param name="description">The Embed description of the <see cref="Page"/>.</param>
-        /// <param name="title">The Embed title of the <see cref="Page"/>.</param>
-        /// <param name="thumbnailUrl">The Embed thumbnailurl of the <see cref="Page"/>.</param>
-        /// <param name="imageUrl">The Embed imageUrl of the <see cref="Page"/>.</param>
-        /// <param name="fields">The Embed fields of the <see cref="Page"/>.</param>
+        /// <returns></returns>
+        public PageBuilder ToPageBuilder()
+            => new PageBuilder()
+            {
+                Color = Embed.Color,
+                Description = Embed.Description,
+                Fields = Embed.Fields.Select(x => x.ToBuilder()).ToList(),
+                ImageUrl = Embed.Image?.Url,
+                ThumbnailUrl = Embed.Thumbnail?.Url,
+                Title = Embed.Title,
+                Text = Text
+            };
+
         internal Page(string text = null, sys.Color? color = null,
             string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null,
             List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
