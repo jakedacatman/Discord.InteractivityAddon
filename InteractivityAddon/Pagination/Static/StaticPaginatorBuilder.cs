@@ -24,12 +24,12 @@ namespace Interactivity.Pagination
                 Pages[i].WithPaginatorFooter(Footer, i, Pages.Count - 1, Users);
             }
 
-            return new StaticPaginator(Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
-                                       Emotes?.ToReadOnlyDictionary() ?? throw new ArgumentNullException(nameof(Emotes)),
+            return new StaticPaginator(Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                                       Emotes?.AsReadOnlyDictionary() ?? throw new ArgumentNullException(nameof(Emotes)),
                                        CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
                                        TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
                                        Deletion,
-                                       Pages?.Select(x => x.Build()).ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Pages)),
+                                       Pages?.Select(x => x.Build()).AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Pages)),
                                        startPage);
         }
 

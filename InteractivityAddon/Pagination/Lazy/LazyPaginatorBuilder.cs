@@ -32,8 +32,8 @@ namespace Interactivity.Pagination
                 WithDefaultEmotes();
             }
 
-            return new LazyPaginator(Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
-                                     Emotes?.ToReadOnlyDictionary() ?? throw new ArgumentNullException(nameof(Emotes)),
+            return new LazyPaginator(Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                                     Emotes?.AsReadOnlyDictionary() ?? throw new ArgumentNullException(nameof(Emotes)),
                                      CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
                                      TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
                                      Deletion,

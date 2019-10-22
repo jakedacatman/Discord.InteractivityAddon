@@ -52,7 +52,7 @@ namespace Interactivity.Confirmation
         public Confirmation Build()
             => new Confirmation(
                 Content?.Build() ?? throw new ArgumentNullException(nameof(Content)),
-                Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
                 ConfirmEmote ?? throw new ArgumentNullException(nameof(ConfirmEmote)),
                 DeclineEmote ?? throw new ArgumentNullException(nameof(DeclineEmote)),
                 TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),

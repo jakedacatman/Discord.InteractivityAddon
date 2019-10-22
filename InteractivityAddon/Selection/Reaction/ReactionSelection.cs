@@ -47,7 +47,7 @@ namespace Interactivity.Selection
                 {
                     CancelEmote
                 }
-                .ToReadOnlyCollection();
+                .AsReadOnlyCollection();
             }
         }
         #endregion

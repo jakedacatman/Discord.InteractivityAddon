@@ -90,13 +90,13 @@ namespace Interactivity.Selection
             }
 
             return new ReactionSelection<T>(
-                Values?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
-                Users?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                Values?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
+                Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
                 SelectionEmbed?.Build() ?? throw new ArgumentNullException(nameof(SelectionEmbed)),
                 CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
                 TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
                 Deletion,
-                Emotes?.ToReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Emotes)),
+                Emotes?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Emotes)),
                 CancelEmote ?? throw new ArgumentNullException(nameof(CancelEmote)),
                 AllowCancel);
         }
