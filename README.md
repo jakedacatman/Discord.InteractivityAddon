@@ -25,7 +25,7 @@ The package is available to download on [NuGet](https://www.nuget.org/packages/D
  - Uptime counter
  
 ## Usage
-To properly use the features this addon provides you need the `InteractivityService` to your service provider.
+To properly use the features this addon provides you need to add the `InteractivityService` to your service provider.
 
 ```cs
 var provider = new ServiceCollection()
