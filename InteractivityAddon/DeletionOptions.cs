@@ -5,6 +5,9 @@ namespace Interactivity
     [Flags]
     public enum DeletionOptions
     {
+        /// <summary>
+        /// Dont delete anything
+        /// </summary>
         None = 0,
         /// <summary>
         /// Whether to delete the valid response.
