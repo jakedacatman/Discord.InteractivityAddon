@@ -52,17 +52,6 @@ namespace Interactivity
         internal EmbedFooterBuilder Footer { get; set; } = new EmbedFooterBuilder();
 
         /// <summary>
-        /// Creates a new <see cref="PageBuilder"/>.
-        /// </summary>
-        /// <param name="color">The Embed color of the <see cref="PageBuilder"/>.</param>
-        /// <param name="description">The Embed description of the <see cref="PageBuilder"/>.</param>
-        /// <param name="title">The Embed title of the <see cref="PageBuilder"/>.</param>
-        /// <param name="thumbnailUrl">The Embed thumbnailurl of the <see cref="PageBuilder"/>.</param>
-        /// <param name="imageUrl">The Embed imageUrl of the <see cref="PageBuilder"/>.</param>
-        /// <param name="fields">The Embed fields of the <see cref="PageBuilder"/>.</param>
-
-
-        /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
         /// </summary>
         /// <param name="embed"></param>
