@@ -71,6 +71,19 @@ namespace Interactivity.Confirmation
         }
 
         /// <summary>
+        /// Sets the content to be displayed in the <see cref="Confirmation"/>. 
+        /// The embed is converted to a Page, some fields may get lost!
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public ConfirmationBuilder WithContent(EmbedBuilder embed  = null, string text = "")
+        {
+            Content = PageBuilder.FromEmbedBuilder(embed)
+                .WithText(text);
+            return this;
+        }
+
+        /// <summary>
         /// Sets the users allowed to interact with the <see cref="Confirmation"/>.
         /// </summary>
         /// <param name="users"></param>
