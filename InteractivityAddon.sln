@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.152
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InteractivityAddon", "InteractivityAddon\InteractivityAddon.csproj", "{82B2F355-4602-40D8-B877-712F1111F852}"
 EndProject
@@ -10,6 +10,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleBot_Qmmands", "ExampleBot\ExampleBot_Qmmands.csproj", "{574A2BE7-44FD-4681-B359-13CE8A11E5C0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{82B2F355-4602-40D8-B877-712F1111F852} = {82B2F355-4602-40D8-B877-712F1111F852}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6DDBDF77-8F72-4753-A80F-E1B840E5159F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

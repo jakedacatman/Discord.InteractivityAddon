@@ -5,39 +5,53 @@
 
 This is an addon for the Discord API Wrapper [Discord.Net](https://github.com/discord-net/Discord.Net) which makes it easy to add interactivity to your discord bot.
 
-## Credits
- - The criterion system is inspired by foxbot's [Discord.Addons.Interactive](https://github.com/foxbot/Discord.Addons.Interactive) package.
-
 ## Installation
-The package can be pulled easily from [NuGet](https://www.nuget.org/packages/Discord.InteractivityAddon).
+The package is available to download on [NuGet](https://www.nuget.org/packages/Discord.InteractivityAddon).
 
 ## Features
- - Waiting for a specific message or reaction using a powerful criteria system
- - Waiting for a message / reaction which passes your criteria
+ - Waiting for a message / reaction which passes your filter
    - Run actions on filtered messages / reactions
- - Send and delete messages & files with delays
+ - Delayed sending and deleting messages & files
  - A powerful fully customizable Paginator
    - Send multi page messages
    - Move through pages using reactions
+   - You can choose between a static and a lazy loaded one
+   - Get more customizability by creating your own child of the `Paginator` & `PaginatorBuilder` classes
  - Fully customizable selection from a list of objects
+   - Works with messages or reactions
    - Makes user input easy
-   - Works via messages or reactions
-   - For more customizability you can create your own child of the selection class 
- - Confirmation of an action
+   - Get more customizability by creating your own child of the `Selection` & `SelectionBuilder` classes
+ - Confirmation
  - Uptime counter
  
 ## Usage
-To properly use the features this addon provides you need the `InteractivityService` to your service provider.
+To properly use the features this addon provides you need to add the `InteractivityService` to your service provider.
 
 ```cs
 var provider = new ServiceCollection()
-                .AddSingleton(Client)
-                .AddSingleton(CommandService)
                 .AddSingleton(new InteractivityService(Client, TimeSpan.FromMinutes(3)))
+                ....
 ```
 This addon does not include a custom `ModuleBase` in order to support every command framework. (Discord.Net.Command/Qmmands/...)
 
-### Example Selection Command
+### Example: Waiting for Message
+```cs
+[Command("nextmessage")]
+public async Task ExampleReplyNextMessageAsync()
+{
+    var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
+
+    if (result.IsSuccess == true) {
+        Interactivity.DelayedSendMessageAndDeleteAsync(
+                        Context.Channel,
+                        deleteDelay: TimeSpan.FromSeconds(20), 
+                        text: result.Value.Content, 
+                        embed: result.Value.Embeds.FirstOrDefault());
+    }
+}
+```
+
+### Example: Selection
 ```cs
 [Command("select")]
 public async Task ExampleSelectionAsync()
@@ -46,9 +60,9 @@ public async Task ExampleSelectionAsync()
         .WithValues("Hi", "How", "Hey", "Huh?!")
         .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
         .WithUsers(Context.User)
-        .WithAppearance(ReactionSelectionAppearanceBuilder.Default.WithDeletion(DeletionOption.AfterCapturedContext);
+        .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
 
-    var result = await _interactivity.SendSelectionAsync(await builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
+    var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
     if (result.IsSuccess == true) {
         await Context.Channel.SendMessageAsync(result.Value.ToString());
@@ -56,40 +70,48 @@ public async Task ExampleSelectionAsync()
 }
 ```
 
-### Example Paginator Command
+### Example: Paginator
 ```cs
 [Command("paginator")]
-public async Task ExamplePaginatorAsync()
+public Task PaginatorAsync()
 {
-    var pages = new List<Embed>() {
-        new EmbedBuilder().WithTitle("I").Build(),
-        new EmbedBuilder().WithTitle("am").Build(),
-        new EmbedBuilder().WithTitle("cool").Build(),
-        new EmbedBuilder().WithTitle(":sunglasses: ").Build(),
+    var pages = new PageBuilder[] {
+        new PageBuilder().WithTitle("I"),
+        new PageBuilder().WithTitle("am"),
+        new PageBuilder().WithTitle("cool"),
+        new PageBuilder().WithTitle(":sunglasses:"),
+        new PageBuilder().WithText("I am cool :crown:")
     };
 
-    var paginator = new PaginatorBuilder()
-        .WithEmbeds(pages.ToArray())
+    var paginator = new StaticPaginatorBuilder()
         .WithUsers(Context.User)
-        .WithPaginatorFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+        .WithPages(pages)
+        .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
+        .WithDefaultEmotes()
         .Build();
 
-    await _interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
+    return Interactivity.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(2));
 }
 ```
 
-### Example Confirmation Command
+### Example: Confirmation
 ```cs
 [Command("confirm")]
-public async Task ExampleConfirmationAsync()
+public async Task ConfirmAsync()
 {
-    var message = await Context.Channel.SendMessageAsync("Please confirm!");
-    var request = new ConfirmationRequest(message, Context.User.Id);
+    var request = new ConfirmationBuilder()
+        .WithContent(new PageBuilder().WithText("Please Confirm"))
+        .Build();
 
-    var result = await _interactivity.GetUserConfirmationAsync(request);
+    var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
 
-    if (result.Value == true) {
-        await message.ModifyAsync(x => x.Content = "Confirmed :thumbsup:!");
+    if (result.Value == true)
+    {
+        await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
+    }
+    else
+    {
+        await Context.Channel.SendMessageAsync("Declined :thumbsup:!");
     }
 }
 ```

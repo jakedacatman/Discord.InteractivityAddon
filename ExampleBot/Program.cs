@@ -8,7 +8,8 @@ namespace ExampleBot_Qmmands
         {
             var bot = new ExampleBot();
 
-            Task.Run(async () => {
+            Task.Run(async () =>
+            {
                 bot.Initialize();
                 await bot.StartAsync();
 

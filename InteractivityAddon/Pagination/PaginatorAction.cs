@@ -1,8 +1,7 @@
-﻿namespace InteractivityAddon.Pagination
+﻿namespace Interactivity.Pagination
 {
-    internal enum PaginatorAction
+    public enum PaginatorAction
     {
-        None,
         Forward,
         Backward,
         SkipToEnd,

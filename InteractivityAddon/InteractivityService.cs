@@ -4,23 +4,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon.Actions;
-using InteractivityAddon.Confirmation;
-using InteractivityAddon.Criterions;
-using InteractivityAddon.Pagination;
-using InteractivityAddon.Selection;
+using Interactivity.Pagination;
+using Interactivity.Selection;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     /// <summary>
     /// A service containing methods to make your discordbot more interactive.
     /// </summary>
     public sealed class InteractivityService
     {
-        private BaseSocketClient _client { get; }
+        private BaseSocketClient Client { get; }
 
         public TimeSpan DefaultTimeout { get; }
-        public DateTime StartTime { get; }
+        public DateTime UptimeStartTime { get; private set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="InteractivityService"/>.
@@ -29,11 +26,12 @@ namespace InteractivityAddon
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
         public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null)
         {
-            _client = client;
-            StartTime = DateTime.Now;
+            Client = client;
+            UptimeStartTime = DateTime.Now;
 
             DefaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(45);
-            if (DefaultTimeout <= TimeSpan.Zero) {
+            if (DefaultTimeout <= TimeSpan.Zero)
+            {
                 throw new Exception("Timespan cannot be negative or zero");
             }
         }
@@ -59,10 +57,16 @@ namespace InteractivityAddon
         }
 
         /// <summary>
-        /// Get the time passed since the bot started
+        /// Get the time passed since the uptime counter started.
         /// </summary>
         /// <returns></returns>
-        public TimeSpan GetUptime() => DateTime.Now - StartTime;
+        public TimeSpan GetUptime() => DateTime.Now - UptimeStartTime;
+
+        /// <summary>
+        /// Resets the uptime counter.
+        /// </summary>
+        public void ResetUptime()
+            => UptimeStartTime = DateTime.Now;
 
         /// <summary>
         /// Sends a message to a channel delayed and deletes it after another delay.
@@ -76,7 +80,8 @@ namespace InteractivityAddon
         /// <param name="options">The options to be used when sending the request.</param>
         /// <returns></returns>
         public void DelayedSendMessageAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () => {
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendMessageAsync(text, isTTS, embed, options).ConfigureAwait(false);
                 await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);
@@ -97,7 +102,8 @@ namespace InteractivityAddon
         /// <returns></returns>
         public void DelayedSendFileAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
             string filepath = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () => {
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendFileAsync(filepath, text, isTTS, embed, options).ConfigureAwait(false);
                 await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);
@@ -119,7 +125,8 @@ namespace InteractivityAddon
         /// <returns></returns>
         public void DelayedSendFileAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
             Stream filestream = null, string filename = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () => {
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendFileAsync(filestream, filename, text, isTTS, embed, options).ConfigureAwait(false);
                 await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);
@@ -132,7 +139,8 @@ namespace InteractivityAddon
         /// <param name="msg">The message to delete</param>
         /// <param name="deleteDelay">The time to wait before deleting the message</param>
         /// <returns></returns>
-        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null) => _ = Task.Run(async () => {
+        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null) => _ = Task.Run(async () =>
+        {
             await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);
             await msg.DeleteAsync().ConfigureAwait(false);
         });
@@ -141,39 +149,17 @@ namespace InteractivityAddon
         /// Retrieves the next incoming reaction that passes the <paramref name="filter"/>.
         /// </summary>
         /// <param name="filter">The <see cref="Predicate{SocketReaction}"/> which the reaction has to pass.</param>
-        /// <param name="actions">The <see cref="Func{SocketReaction, Task}"/> which gets executed to all incoming reactions.</param>
-        /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
-        /// <returns></returns>
-        public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Predicate<SocketReaction> filter = null, Func<SocketReaction, Task> actions = null,
-            TimeSpan? timeout = null, CancellationToken token = default)
-        {
-            var filterCriteria = new Criteria<SocketReaction>();
-            var funcActionCollection = new ActionCollection<SocketReaction>();
-
-            if (filter != null) {
-                filterCriteria.AddCriterion(new PredicateCriterion<SocketReaction>(filter));
-            }
-            if (actions != null) {
-                funcActionCollection.AddAction(new FuncAction<SocketReaction>(actions, true, true));
-            }
-
-            return await NextReactionAsync(filterCriteria, funcActionCollection, timeout, token).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Retrieves the next incoming reaction that passes the <paramref name="filter"/>.
-        /// </summary>
-        /// <param name="filter">The <see cref="Criteria{SocketReaction}"/> which the reaction has to pass.</param>
         /// <param name="actions">The <see cref="ActionCollection{SocketReaction}"/> which gets executed to incoming reactions.</param>
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Criteria<SocketReaction> criteria = null, ActionCollection<SocketReaction> actions = null,
+        public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Predicate<SocketReaction> filter = null, Func<SocketReaction, bool, Task> actions = null,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            criteria = criteria ?? new Criteria<SocketReaction>();
-            actions = actions ?? new ActionCollection<SocketReaction>();
+            var startTime = DateTime.UtcNow;
+
+            filter ??= (s => true);
+            actions ??= ((s, v) => Task.CompletedTask);
 
             var reactionSource = new TaskCompletionSource<InteractivityResult<SocketReaction>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -184,58 +170,35 @@ namespace InteractivityAddon
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> _m, ISocketMessageChannel _c, SocketReaction reaction)
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
-                if (reaction.UserId == _client.CurrentUser.Id) { //Ignore own reactions
-                    await actions.ApplyAsync(reaction, true).ConfigureAwait(false);
+                if (reaction.UserId == Client.CurrentUser.Id)
+                { //Ignore own reactions
+                    await actions.Invoke(reaction, true).ConfigureAwait(false);
                     return;
                 }
 
-                if (await criteria.JudgeAsync(reaction).ConfigureAwait(false) == false) {
-                    await actions.ApplyAsync(reaction, true).ConfigureAwait(false);
+                if (filter.Invoke(reaction) == false)
+                {
+                    await actions.Invoke(reaction, true).ConfigureAwait(false);
                     return;
                 }
 
-                await actions.ApplyAsync(reaction, false).ConfigureAwait(false);
-                reactionSource.SetResult(new InteractivityResult<SocketReaction>(reaction, false, false));
+                await actions.Invoke(reaction, false).ConfigureAwait(false);
+                reactionSource.SetResult(new InteractivityResult<SocketReaction>(reaction, DateTime.UtcNow - startTime, false, false));
             }
 
-            _client.ReactionAdded += CheckReactionAsync;
+            Client.ReactionAdded += CheckReactionAsync;
 
             var result = await Task.WhenAny(reactionTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
-            _client.ReactionAdded -= CheckReactionAsync;
+            Client.ReactionAdded -= CheckReactionAsync;
 
             return result == reactionTask
                 ? await reactionTask.ConfigureAwait(false)
                 : result == timeoutTask
-                    ? new InteractivityResult<SocketReaction>(default, true, false)
-                    : new InteractivityResult<SocketReaction>(default, false, true);
-        }
-
-        /// <summary>
-        /// Retrieves the next incoming message that passes the <paramref name="filter"/>.
-        /// </summary>
-        /// <param name="filter">The <see cref="Predicate{SocketMessage}"/> which the message has to pass.</param>
-        /// <param name="actions">The <see cref="Func{SocketMessage, Task}"/> which gets executed to all incoming messages.</param>
-        /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
-        /// <returns></returns>
-        public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Predicate<SocketMessage> filter = null, Func<SocketMessage, Task> action = null,
-            TimeSpan? timeout = null, CancellationToken token = default)
-        {
-            var filterCriteria = new Criteria<SocketMessage>();
-            var funcActionCollection = new ActionCollection<SocketMessage>();
-
-            if (filter != null) {
-                filterCriteria.AddCriterion(new PredicateCriterion<SocketMessage>(filter));
-            }
-
-            if (action != null) {
-                funcActionCollection.AddAction(new FuncAction<SocketMessage>(action, true, true));
-            }
-
-            return await NextMessageAsync(filterCriteria, funcActionCollection, timeout, token).ConfigureAwait(false);
+                    ? new InteractivityResult<SocketReaction>(default, timeout ?? DefaultTimeout, true, false)
+                    : new InteractivityResult<SocketReaction>(default, DateTime.UtcNow - startTime, false, true);
         }
 
         /// <summary>
@@ -246,11 +209,13 @@ namespace InteractivityAddon
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Criteria<SocketMessage> criteria = null, ActionCollection<SocketMessage> actions = null,
+        public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Predicate<SocketMessage> filter = null, Func<SocketMessage, bool, Task> actions = null,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            actions = actions ?? new ActionCollection<SocketMessage>();
-            criteria = criteria ?? new Criteria<SocketMessage>();
+            var startTime = DateTime.UtcNow;
+
+            actions ??= ((s, v) => Task.CompletedTask);
+            filter ??= (s => true);
 
             var messageSource = new TaskCompletionSource<InteractivityResult<SocketMessage>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -263,42 +228,45 @@ namespace InteractivityAddon
 
             async Task CheckMessageAsync(SocketMessage s)
             {
-                if (s.Author.Id == _client.CurrentUser.Id) { //Ignore own messages
+                if (s.Author.Id == Client.CurrentUser.Id)
+                { //Ignore own messages
                     return;
                 }
 
-                if (await criteria.JudgeAsync(s).ConfigureAwait(false) == false) {
-                    await actions.ApplyAsync(s, true).ConfigureAwait(false);
+                if (filter.Invoke(s) == false)
+                {
+                    await actions.Invoke(s, true).ConfigureAwait(false);
                     return;
                 }
 
-                await actions.ApplyAsync(s, false).ConfigureAwait(false);
-                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, false, false));
+                await actions.Invoke(s, false).ConfigureAwait(false);
+                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - UptimeStartTime, false, false));
             }
 
-            _client.MessageReceived += CheckMessageAsync;
+            Client.MessageReceived += CheckMessageAsync;
 
             var result = await Task.WhenAny(messageTask, timeoutTask, cancelTask).ConfigureAwait(false);
 
-            _client.MessageReceived -= CheckMessageAsync;
+            Client.MessageReceived -= CheckMessageAsync;
 
             return result == messageTask
                 ? await messageTask.ConfigureAwait(false)
                 : result == timeoutTask
-                    ? new InteractivityResult<SocketMessage>(default, true, false)
-                    : new InteractivityResult<SocketMessage>(default, false, true);
+                    ? new InteractivityResult<SocketMessage>(default, timeout ?? DefaultTimeout, true, false)
+                    : new InteractivityResult<SocketMessage>(default, DateTime.UtcNow - startTime, false, true);
         }
 
         /// <summary>
         /// Waits for a user/users to confirm something.
         /// </summary>
-        /// <param name="request">The <see cref="ConfirmationRequest"/> containing required informations about the confirmation.</param>
+        /// <param name="confirmation">The <see cref="Confirmation.Confirmation"/> containing required informations about the confirmation.</param>
         /// <param name="timeout">The time before the confirmation returns a timeout result.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<bool>> GetUserConfirmationAsync(ConfirmationRequest request,
+        public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
+            var startTime = DateTime.UtcNow;
             var confirmationSource = new TaskCompletionSource<InteractivityResult<bool>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -308,54 +276,65 @@ namespace InteractivityAddon
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> _m, ISocketMessageChannel _c, SocketReaction reaction)
+            var msg = await channel.SendMessageAsync(confirmation.Content.Text, embed: confirmation.Content.Embed).ConfigureAwait(false);
+
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
-                if (reaction.UserId == _client.CurrentUser.Id) {
+                if (reaction.UserId == Client.CurrentUser.Id)
+                {
                     return;
                 }
 
-                if (reaction.MessageId != request.Message.Id) {
+                if (reaction.MessageId != msg.Id)
+                {
                     return;
                 }
 
-                if (await request.GetCriterions().JudgeAsync(reaction).ConfigureAwait(false) == false) {
-                    await request.GetActions().ApplyAsync(reaction, true).ConfigureAwait(false);
+                if (!confirmation.GetFilter().Invoke(reaction))
+                {
+                    await confirmation.GetActions().Invoke(reaction, true).ConfigureAwait(false);
                     return;
                 }
 
-                await request.GetActions().ApplyAsync(reaction, false).ConfigureAwait(false);
+                await confirmation.GetActions().Invoke(reaction, false).ConfigureAwait(false);
 
-                var action = request.Appearance.ParseAction(reaction.Emote);
-
-                if (action == ConfirmationAction.Decline) {
-                    confirmationSource.SetResult(new InteractivityResult<bool>(false, false, true));
+                if (reaction.Emote.Equals(confirmation.ConfirmEmote))
+                {
+                    confirmationSource.SetResult(new InteractivityResult<bool>(true, DateTime.UtcNow - startTime, false, false));
                     return;
                 }
-                if (action == ConfirmationAction.Confirm) {
-                    confirmationSource.SetResult(new InteractivityResult<bool>(true, false, false));
+                else
+                {
+                    confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
                     return;
                 }
             }
 
-            _client.ReactionAdded += CheckReactionAsync;
+            Client.ReactionAdded += CheckReactionAsync;
 
-            await request.Message.AddReactionsAsync(request.Appearance.Emotes).ConfigureAwait(false);
+            await msg.AddReactionsAsync(confirmation.Emotes).ConfigureAwait(false);
             var task_result = await Task.WhenAny(confirmationTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
-            _client.ReactionAdded -= CheckReactionAsync;
+            Client.ReactionAdded -= CheckReactionAsync;
 
             var result = task_result == confirmationTask
                     ? await confirmationTask.ConfigureAwait(false)
                     : task_result == timeoutTask
-                        ? new InteractivityResult<bool>(default, true, false)
-                        : new InteractivityResult<bool>(default, false, true);
+                        ? new InteractivityResult<bool>(default, timeout ?? DefaultTimeout, true, false)
+                        : new InteractivityResult<bool>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (result.IsCancelled == true) {
-                await request.Message.ModifyAsync(x => x.Embed = request.Appearance.CancelledEmbed).ConfigureAwait(false);
+            if (confirmation.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
+            {
+                await msg.DeleteAsync().ConfigureAwait(false);
+            }
+            else if (result.IsCancelled == true)
+            {
+                await msg.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
             }
 
-            if (result.IsTimeouted == true) {
-                await request.Message.ModifyAsync(x => x.Embed = request.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            else if (result.IsTimeouted == true)
+            {
+                await msg.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;
@@ -371,8 +350,8 @@ namespace InteractivityAddon
         /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketMessage, TAppearance> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketMessage> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default)
         {
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -384,47 +363,54 @@ namespace InteractivityAddon
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
             var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+            var startTime = msg.Timestamp.UtcDateTime;
 
             async Task CheckMessageAsync(SocketMessage s)
             {
-                if (s.Channel != channel) {
+                if (s.Channel != channel)
+                {
                     return;
                 }
-                if (s.Author.Id == _client.CurrentUser.Id) {
+                if (s.Author.Id == Client.CurrentUser.Id)
+                {
                     return;
                 }
-                if (await selection.HandleResponseAsync(_client, msg, s).ConfigureAwait(false) == false) {
+                if (await selection.HandleResponseAsync(Client, s).ConfigureAwait(false) == false)
+                {
                     return;
                 }
 
-                var sResult = await selection.ParseAsync(s).ConfigureAwait(false);
-                if (sResult.IsSpecified == false) {
+                var sResult = await selection.ParseAsync(s, startTime).ConfigureAwait(false);
+                if (sResult.IsSpecified == false)
+                {
                     return;
                 }
 
                 selectionSource.SetResult(sResult.Value);
-                await selection.RunActionsAsync(_client, msg, s, true).ConfigureAwait(false);
             }
 
-            _client.MessageReceived += CheckMessageAsync;
+            Client.MessageReceived += CheckMessageAsync;
             await selection.InitializeMessageAsync(msg);
             var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
-            _client.MessageReceived -= CheckMessageAsync;
+            Client.MessageReceived -= CheckMessageAsync;
 
             var result = task_result == selectionTask
                                 ? await selectionTask.ConfigureAwait(false)
                                 : task_result == timeoutTask
-                                    ? new InteractivityResult<T>(default, true, false)
-                                    : new InteractivityResult<T>(default, false, true);
+                                    ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
+                                    : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
+            if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+            {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
-            else if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+            else if (result.IsCancelled == true)
+            {
+                await msg.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
             }
-            else if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            else if (result.IsTimeouted == true)
+            {
+                await msg.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
             }
 
             return result;
@@ -440,9 +426,11 @@ namespace InteractivityAddon
         /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T, TAppearance>(Selection<T, SocketReaction, TAppearance> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default) where TAppearance : SelectionAppearance
+        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketReaction> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, CancellationToken token = default)
         {
+            var startTime = DateTime.UtcNow;
+
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -456,126 +444,133 @@ namespace InteractivityAddon
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (m.Id != msg.Id) {
+                if (m.Id != msg.Id)
+                {
                     return;
                 }
-                if (r.UserId == _client.CurrentUser.Id) {
+                if (r.UserId == Client.CurrentUser.Id)
+                {
                     return;
                 }
-                if (await selection.HandleResponseAsync(_client, msg, r).ConfigureAwait(false) == false) {
+                if (await selection.HandleResponseAsync(Client, r).ConfigureAwait(false) == false)
+                {
                     return;
                 }
 
-                var sResult = await selection.ParseAsync(r).ConfigureAwait(false);
-                if (sResult.IsSpecified == false) {
+                var sResult = await selection.ParseAsync(r, startTime).ConfigureAwait(false);
+                if (sResult.IsSpecified == false)
+                {
                     return;
                 }
 
                 selectionSource.SetResult(sResult.Value);
-                await selection.RunActionsAsync(_client, msg, r, true).ConfigureAwait(false);
             }
 
-            _client.ReactionAdded += CheckReactionAsync;
+            Client.ReactionAdded += CheckReactionAsync;
             await selection.InitializeMessageAsync(msg);
             var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
-            _client.ReactionAdded -= CheckReactionAsync;
+            Client.ReactionAdded -= CheckReactionAsync;
 
             var result = task_result == selectionTask
                                 ? await selectionTask.ConfigureAwait(false)
                                 : task_result == timeoutTask
-                                    ? new InteractivityResult<T>(default, true, false)
-                                    : new InteractivityResult<T>(default, false, true);
+                                    ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
+                                    : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
 
-            if (selection.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
+            if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+            {
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
-            else if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.CancelledEmbed).ConfigureAwait(false);
+            else if (result.IsCancelled == true)
+            {
+                await msg.ModifyAsync(x => { x.Embed = selection.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
             }
-            else if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = selection.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            else if (result.IsTimeouted == true)
+            {
+                await msg.ModifyAsync(x => { x.Embed = selection.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
             }
 
             return result;
         }
 
+
         /// <summary>
         /// Sends a page with multiple pages which the user can move through via reactions.
         /// </summary>
-        /// <param name="paginator">The paginator to send.</param>
-        /// <param name="channel">The <see cref="IMessageChannel"/> to send the paginator to.</param>
-        /// <param name="timeout">The time until the paginator times out.</param>
+        /// <param name="paginator">The <see cref="Paginator"/> to send.</param>
+        /// <param name="channel">The <see cref="IMessageChannel"/> to send the <see cref="Paginator"/> to.</param>
+        /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
             TimeSpan? timeout = null, CancellationToken token = default)
         {
-            var resultSource = new TaskCompletionSource<InteractivityResult<object>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
             token.Register(() => cancelSource.SetResult(true));
 
-            var resultTask = resultSource.Task;
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(embed: paginator.CurrentPage).ConfigureAwait(false);
+            var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel _c, SocketReaction reaction)
+            var msg = await channel.SendMessageAsync(text: page.Text, embed: page.Embed).ConfigureAwait(false);
+            var startTime = msg.Timestamp.UtcDateTime;
+
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (reaction.UserId == _client.CurrentUser.Id) {
+                if (r.Channel != channel)
+                {
                     return;
                 }
-
-                if (reaction.MessageId != msg.Id) {
+                if (r.UserId == Client.CurrentUser.Id)
+                {
                     return;
                 }
-
-                if (await paginator.GetCriteria().JudgeAsync(reaction).ConfigureAwait(false) == false) {
-                    await paginator.GetActions().ApplyAsync(reaction, true).ConfigureAwait(false);
+                if (!await paginator.HandleReactionAsync(Client, r).ConfigureAwait(false))
+                {
                     return;
                 }
-
-                await paginator.GetActions().ApplyAsync(reaction, false).ConfigureAwait(false);
-
-                var action = paginator.Appearance.ParseAction(reaction.Emote);
-
-                if (action == PaginatorAction.Exit) {
-                    resultSource.SetResult(new InteractivityResult<object>(default, false, true));
+                if (!paginator.Emotes.TryGetValue(r.Emote, out var action))
+                {
                     return;
                 }
-                if (action != PaginatorAction.None) {
-                    paginator.ApplyAction(action, out bool pageChanged);
+                if (action == PaginatorAction.Exit)
+                {
+                    cancelSource.SetResult(true);
+                }
+                else
+                {
+                    bool refreshPage = await paginator.ApplyActionAsync(action).ConfigureAwait(false);
 
-                    if (pageChanged == true) {
-                        await msg.ModifyAsync(x => x.Embed = paginator.CurrentPage).ConfigureAwait(false);
+                    if (refreshPage)
+                    {
+                        var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
+                        await msg.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                     }
                 }
             }
 
-            _client.ReactionAdded += CheckReactionAsync;
+            Client.ReactionAdded += CheckReactionAsync;
+            await paginator.InitializeMessageAsync(msg);
+            var task_result = await Task.WhenAny(timeoutTask, cancelTask).ConfigureAwait(false);
+            Client.ReactionAdded -= CheckReactionAsync;
 
-            await msg.AddReactionsAsync(paginator.Appearance.Emotes).ConfigureAwait(false);
-            var task_result = await Task.WhenAny(resultTask, cancelTask, timeoutTask).ConfigureAwait(false);
+            var result = task_result == timeoutTask
+                            ? new InteractivityResult<object>(default, timeout ?? DefaultTimeout, true, false)
+                            : new InteractivityResult<object>(default, DateTime.UtcNow - startTime, false, true);
 
-            _client.ReactionAdded -= CheckReactionAsync;
-
-            await msg.RemoveAllReactionsAsync().ConfigureAwait(false);
-
-            var result = task_result == resultTask
-                                                ? await resultTask.ConfigureAwait(false)
-                                                : task_result == timeoutTask
-                                                    ? new InteractivityResult<object>(default, true, false)
-                                                    : new InteractivityResult<object>(default, false, true);
-
-            if (paginator.Appearance.Deletion.HasFlag(DeletionOption.AfterCapturedContext) == true) {
-                await msg.DeleteAsync();
+            if (paginator.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+            {
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
-            else if (result.IsCancelled == true) {
-                await msg.ModifyAsync(x => x.Embed = paginator.Appearance.CancelledEmbed).ConfigureAwait(false);
+            else if (result.IsCancelled == true)
+            {
+                await msg.ModifyAsync(x => { x.Embed = paginator.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
             }
-            else if (result.IsTimeouted == true) {
-                await msg.ModifyAsync(x => x.Embed = paginator.Appearance.TimeoutedEmbed).ConfigureAwait(false);
+            else if (result.IsTimeouted == true)
+            {
+                await msg.ModifyAsync(x => { x.Embed = paginator.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
             }
 
             return result;

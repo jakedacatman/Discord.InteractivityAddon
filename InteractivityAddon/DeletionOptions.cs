@@ -1,10 +1,13 @@
 ﻿using System;
 
-namespace InteractivityAddon
+namespace Interactivity
 {
     [Flags]
-    public enum DeletionOption
+    public enum DeletionOptions
     {
+        /// <summary>
+        /// Dont delete anything
+        /// </summary>
         None = 0,
         /// <summary>
         /// Whether to delete the valid response.

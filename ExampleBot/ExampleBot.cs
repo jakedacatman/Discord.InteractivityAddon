@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using InteractivityAddon;
+using Interactivity;
 using Microsoft.Extensions.DependencyInjection;
 using Qmmands;
 
@@ -33,39 +33,47 @@ namespace ExampleBot_Qmmands
             await Client.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
             await Client.StartAsync();                                // Start message receiving
 
-            Client.Log += x => {
+            Client.Log += x =>
+            {
                 Console.WriteLine(x.Message);
                 return Task.CompletedTask;
             };
-            Commands.CommandErrored += (result, ctx, provider) => {
+            Commands.CommandErrored += (result, ctx, provider) =>
+            {
 
                 Console.WriteLine(result.Exception.ToString());
 
                 return Task.CompletedTask;
             };
 
-            Client.MessageReceived += async s => {
-                if (!(s is SocketUserMessage msg)) {
+            Client.MessageReceived += async s =>
+            {
+                if (!(s is SocketUserMessage msg))
+                {
                     return; //Do some checks
                 }
 
-                if (msg.Author.IsBot) {
+                if (msg.Author.IsBot)
+                {
                     return;
                 }
 
-                if (msg.Author.Id == Client.CurrentUser.Id) {
+                if (msg.Author.Id == Client.CurrentUser.Id)
+                {
                     return;
                 }
 
                 var context = new ExampleCommandContext(msg);
 
-                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string usedPrefix, out string cmd) == true) {
+                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string usedPrefix, out string cmd) == true)
+                {
                     return;
                 }
 
                 var result = await Commands.ExecuteAsync(cmd, context, Provider); //Try to run Command
 
-                if (result is FailedResult failResult) {
+                if (result is FailedResult failResult)
+                {
                     await context.Channel.SendMessageAsync(failResult.Reason);
                 }
 
