@@ -76,7 +76,7 @@ namespace Interactivity.Confirmation
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
-        public ConfirmationBuilder WithContent(EmbedBuilder embed  = null, string text = "")
+        public ConfirmationBuilder WithContent(string text = "", EmbedBuilder embed  = null)
         {
             Content = PageBuilder.FromEmbedBuilder(embed)
                 .WithText(text);
