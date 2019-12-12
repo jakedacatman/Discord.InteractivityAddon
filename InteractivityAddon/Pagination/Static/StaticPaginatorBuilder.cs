@@ -19,6 +19,16 @@ namespace Interactivity.Pagination
 
         public override Paginator Build(int startPage = 0)
         {
+            if (Pages.Count == 0)
+            {
+                throw new InvalidOperationException("A paginator needs at least one page!");
+            }
+
+            if (Emotes.Count == 0)
+            {
+                WithDefaultEmotes();
+            }
+
             for (int i = 0; i < Pages.Count; i++)
             {
                 Pages[i].WithPaginatorFooter(Footer, i, Pages.Count - 1, Users);

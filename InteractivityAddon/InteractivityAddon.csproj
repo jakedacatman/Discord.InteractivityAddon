@@ -5,10 +5,10 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Discord.InteractivityAddon</AssemblyName>
     <RootNamespace>Interactivity</RootNamespace>
-    <Version>2.0.0.0</Version>
+    <Version>2.0.1.0</Version>
     <RepositoryUrl>https://github.com/Playwo/Discord.InteractivityAddon</RepositoryUrl>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>This package is an Addon for Discord.Net.
 It provides basic and advanced interactivity features for your Discord Bot.
