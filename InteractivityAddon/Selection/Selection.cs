@@ -80,7 +80,7 @@ namespace Interactivity.Selection
             if (response is SocketMessage s)
             {
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(s.Author));
-                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && valid == false)
+                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && !valid)
                 {
                     await s.DeleteAsync().ConfigureAwait(false);
                 }
@@ -93,7 +93,7 @@ namespace Interactivity.Selection
             {
                 var user = r.User.Value as SocketUser ?? client.GetUser(r.UserId);
                 valid = await RunChecksAsync(client, response).ConfigureAwait(false) && (IsUserRestricted || Users.Contains(user));
-                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && valid == false)
+                if (Deletion.HasFlag(DeletionOptions.Invalids) == true && !valid)
                 {
                     await r.DeleteAsync(client).ConfigureAwait(false);
                 }

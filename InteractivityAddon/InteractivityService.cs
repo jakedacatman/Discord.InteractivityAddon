@@ -173,12 +173,10 @@ namespace Interactivity
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
                 if (reaction.UserId == Client.CurrentUser.Id)
-                { //Ignore own reactions
-                    await actions.Invoke(reaction, true).ConfigureAwait(false);
+                {
                     return;
                 }
-
-                if (filter.Invoke(reaction) == false)
+                if (!filter.Invoke(reaction))
                 {
                     await actions.Invoke(reaction, true).ConfigureAwait(false);
                     return;
@@ -229,11 +227,10 @@ namespace Interactivity
             async Task CheckMessageAsync(SocketMessage s)
             {
                 if (s.Author.Id == Client.CurrentUser.Id)
-                { //Ignore own messages
+                {
                     return;
                 }
-
-                if (filter.Invoke(s) == false)
+                if (!filter.Invoke(s))
                 {
                     await actions.Invoke(s, true).ConfigureAwait(false);
                     return;
@@ -280,16 +277,11 @@ namespace Interactivity
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
-                if (reaction.UserId == Client.CurrentUser.Id)
+                if (reaction.MessageId != msg.Id ||
+                    reaction.UserId == Client.CurrentUser.Id)
                 {
                     return;
                 }
-
-                if (reaction.MessageId != msg.Id)
-                {
-                    return;
-                }
-
                 if (!confirmation.GetFilter().Invoke(reaction))
                 {
                     await confirmation.GetActions().Invoke(reaction, true).ConfigureAwait(false);
@@ -301,12 +293,10 @@ namespace Interactivity
                 if (reaction.Emote.Equals(confirmation.ConfirmEmote))
                 {
                     confirmationSource.SetResult(new InteractivityResult<bool>(true, DateTime.UtcNow - startTime, false, false));
-                    return;
                 }
                 else
                 {
                     confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
-                    return;
                 }
             }
 
@@ -367,21 +357,18 @@ namespace Interactivity
 
             async Task CheckMessageAsync(SocketMessage s)
             {
-                if (s.Channel != channel)
+                if (s.Channel != channel ||
+                    s.Author.Id == Client.CurrentUser.Id)
                 {
                     return;
                 }
-                if (s.Author.Id == Client.CurrentUser.Id)
-                {
-                    return;
-                }
-                if (await selection.HandleResponseAsync(Client, s).ConfigureAwait(false) == false)
+                if (!await selection.HandleResponseAsync(Client, s).ConfigureAwait(false))
                 {
                     return;
                 }
 
                 var sResult = await selection.ParseAsync(s, startTime).ConfigureAwait(false);
-                if (sResult.IsSpecified == false)
+                if (!sResult.IsSpecified)
                 {
                     return;
                 }
@@ -444,21 +431,18 @@ namespace Interactivity
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (m.Id != msg.Id)
+                if (m.Id != msg.Id ||
+                    r.UserId == Client.CurrentUser.Id)
                 {
                     return;
                 }
-                if (r.UserId == Client.CurrentUser.Id)
-                {
-                    return;
-                }
-                if (await selection.HandleResponseAsync(Client, r).ConfigureAwait(false) == false)
+                if (!await selection.HandleResponseAsync(Client, r).ConfigureAwait(false))
                 {
                     return;
                 }
 
                 var sResult = await selection.ParseAsync(r, startTime).ConfigureAwait(false);
-                if (sResult.IsSpecified == false)
+                if (!sResult.IsSpecified)
                 {
                     return;
                 }
@@ -519,35 +503,27 @@ namespace Interactivity
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (r.MessageId != msg.Id)
+                if (r.MessageId != msg.Id ||
+                    r.UserId == Client.CurrentUser.Id)
                 {
                     return;
                 }
-                if (r.UserId == Client.CurrentUser.Id)
-                {
-                    return;
-                }
-                if (!await paginator.HandleReactionAsync(Client, r).ConfigureAwait(false))
-                {
-                    return;
-                }
-                if (!paginator.Emotes.TryGetValue(r.Emote, out var action))
+                if (!await paginator.HandleReactionAsync(Client, r).ConfigureAwait(false) ||
+                    !paginator.Emotes.TryGetValue(r.Emote, out var action))
                 {
                     return;
                 }
                 if (action == PaginatorAction.Exit)
                 {
                     cancelSource.SetResult(true);
+                    return;
                 }
-                else
-                {
-                    bool refreshPage = await paginator.ApplyActionAsync(action).ConfigureAwait(false);
 
-                    if (refreshPage)
-                    {
-                        var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
-                        await msg.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
-                    }
+                bool refreshPage = await paginator.ApplyActionAsync(action).ConfigureAwait(false);
+                if (refreshPage)
+                {
+                    var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
+                    await msg.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                 }
             }
 
