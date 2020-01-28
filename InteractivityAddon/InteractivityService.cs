@@ -519,7 +519,7 @@ namespace Interactivity
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (r.Channel != channel)
+                if (r.MessageId != msg.Id)
                 {
                     return;
                 }
