@@ -4,7 +4,7 @@ on:
   push:
     branches:
     - master
-    - STAGING
+    - Staging
 
 jobs:
   Build-And-Publish:
@@ -16,7 +16,7 @@ jobs:
     - name: Setup .Net Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.0.100-preview8-013656'
+        dotnet-version: '3.1.100'
     - name: Build with dotnet
       run: dotnet pack ./InteractivityAddon --output Packages
     - name: Push to Nuget
