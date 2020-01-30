@@ -70,7 +70,7 @@ namespace Interactivity.Pagination
         #region Methods
         internal async Task<bool> HandleReactionAsync(BaseSocketClient client, SocketReaction reaction)
         {
-            bool valid = await RunChecksAsync(client, reaction).ConfigureAwait(false) && (IsUserRestricted || Users.Any(x => x.Id == reaction.UserId));
+            bool valid = await RunChecksAsync(client, reaction).ConfigureAwait(false) && (!IsUserRestricted || Users.Any(x => x.Id == reaction.UserId));
 
             if (Deletion.HasFlag(DeletionOptions.Invalids) && !valid)
             {
