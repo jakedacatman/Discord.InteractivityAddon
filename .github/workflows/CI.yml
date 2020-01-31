@@ -4,7 +4,6 @@ on:
   push:
     branches:
     - master
-    - Staging
 
 jobs:
   Build-And-Publish:
