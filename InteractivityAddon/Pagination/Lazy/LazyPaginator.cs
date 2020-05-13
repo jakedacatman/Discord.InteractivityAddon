@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -41,5 +42,8 @@ namespace Interactivity.Pagination
 
             return page;
         }
+
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction) 
+            => Task.FromResult(Emotes.Keys.Any(x => x.Equals(reaction.Emote)));
     }
 }
