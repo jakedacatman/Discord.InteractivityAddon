@@ -93,6 +93,18 @@ namespace Interactivity.Pagination
             Footer = footer;
             return this;
         }
+        public PaginatorBuilder WithDefaultEmotes()
+        {
+            Emotes.Clear();
+
+            Emotes.Add(new Emoji("◀"), PaginatorAction.Backward);
+            Emotes.Add(new Emoji("▶"), PaginatorAction.Forward);
+            Emotes.Add(new Emoji("⏮"), PaginatorAction.SkipToStart);
+            Emotes.Add(new Emoji("⏭"), PaginatorAction.SkipToEnd);
+            Emotes.Add(new Emoji("🛑"), PaginatorAction.Exit);
+
+            return this;
+        }
         #endregion
     }
 }

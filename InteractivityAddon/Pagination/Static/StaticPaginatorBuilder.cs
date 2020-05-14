@@ -52,16 +52,7 @@ namespace Interactivity.Pagination
         public new StaticPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed) => base.WithTimoutedEmbed(embed) as StaticPaginatorBuilder;
         public new StaticPaginatorBuilder WithDeletion(DeletionOptions deletion) => base.WithDeletion(deletion) as StaticPaginatorBuilder;
         public new StaticPaginatorBuilder WithFooter(PaginatorFooter footer) => base.WithFooter(footer) as StaticPaginatorBuilder;
-        public StaticPaginatorBuilder WithDefaultEmotes()
-        {
-            Emotes.Add(new Emoji("◀"), PaginatorAction.Backward);
-            Emotes.Add(new Emoji("▶"), PaginatorAction.Forward);
-            Emotes.Add(new Emoji("⏮"), PaginatorAction.SkipToStart);
-            Emotes.Add(new Emoji("⏭"), PaginatorAction.SkipToEnd);
-            Emotes.Add(new Emoji("🛑"), PaginatorAction.Exit);
-
-            return this;
-        }
+        public new StaticPaginatorBuilder WithDefaultEmotes() => base.WithDefaultEmotes() as StaticPaginatorBuilder;
         public StaticPaginatorBuilder WithPages(params PageBuilder[] pages)
         {
             Pages = pages.ToList();

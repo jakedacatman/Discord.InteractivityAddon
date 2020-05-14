@@ -60,16 +60,7 @@ namespace Interactivity.Pagination
         public new LazyPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed) => base.WithTimoutedEmbed(embed) as LazyPaginatorBuilder;
         public new LazyPaginatorBuilder WithDeletion(DeletionOptions deletion) => base.WithDeletion(deletion) as LazyPaginatorBuilder;
         public new LazyPaginatorBuilder WithFooter(PaginatorFooter footer) => base.WithFooter(footer) as LazyPaginatorBuilder;
-        public LazyPaginatorBuilder WithDefaultEmotes()
-        {
-            Emotes.Add(new Emoji("⏮"), PaginatorAction.SkipToStart);
-            Emotes.Add(new Emoji("◀"), PaginatorAction.Backward);
-            Emotes.Add(new Emoji("▶"), PaginatorAction.Forward);
-            Emotes.Add(new Emoji("⏭"), PaginatorAction.SkipToEnd);
-            Emotes.Add(new Emoji("🛑"), PaginatorAction.Exit);
-
-            return this;
-        }
+        public new LazyPaginatorBuilder WithDefaultEmotes() => base.WithDefaultEmotes() as LazyPaginatorBuilder;
         public LazyPaginatorBuilder WithPageFactory(Func<int, Task<PageBuilder>> pagefactory)
         {
             PageFactory = pagefactory;
