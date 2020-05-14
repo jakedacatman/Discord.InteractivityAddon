@@ -93,7 +93,7 @@ namespace Interactivity.Pagination
             Footer = footer;
             return this;
         }
-        public PaginatorBuilder WithDefaultEmotes()
+        protected PaginatorBuilder WithDefaultEmotes()
         {
             Emotes.Clear();
 
