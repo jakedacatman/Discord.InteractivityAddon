@@ -52,20 +52,83 @@ namespace Interactivity.Pagination
         #endregion
 
         #region WithValue
-        public new LazyPaginatorBuilder WithUsers(params SocketUser[] users) => base.WithUsers(users) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithUsers(IEnumerable<SocketUser> users) => base.WithUsers(users) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithEmotes(Dictionary<IEmote, PaginatorAction> emotes) => base.WithEmotes(emotes) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder AddEmote(PaginatorAction action, IEmote emote) => base.AddEmote(action, emote) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithCancelledEmbed(EmbedBuilder embed) => base.WithCancelledEmbed(embed) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed) => base.WithTimoutedEmbed(embed) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithDeletion(DeletionOptions deletion) => base.WithDeletion(deletion) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithFooter(PaginatorFooter footer) => base.WithFooter(footer) as LazyPaginatorBuilder;
-        public new LazyPaginatorBuilder WithDefaultEmotes() => base.WithDefaultEmotes() as LazyPaginatorBuilder;
+        /// <summary>
+        /// Sets the users who can interact with the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithUsers(params SocketUser[] users) 
+            => base.WithUsers(users) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the users who can interact with the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithUsers(IEnumerable<SocketUser> users) 
+            => base.WithUsers(users) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the emotes and their related action of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithEmotes(Dictionary<IEmote, PaginatorAction> emotes) 
+            => base.WithEmotes(emotes) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Adds an emote related to a action to the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder AddEmote(PaginatorAction action, IEmote emote) 
+            => base.AddEmote(action, emote) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after cancellation.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithCancelledEmbed(EmbedBuilder embed) 
+            => base.WithCancelledEmbed(embed) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after a timeout.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed) 
+            => base.WithTimoutedEmbed(embed) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets what the <see cref="Paginator"/> should delete.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithDeletion(DeletionOptions deletion) 
+            => base.WithDeletion(deletion) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the footer in the <see cref="Embed"/> of the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithFooter(PaginatorFooter footer) 
+            => base.WithFooter(footer) as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Clears all existing Emote-Action-Pairs and adds the standard Emote-Action-Pairs to the <see cref="Paginator"/>.
+        /// </summary>
+        /// <returns></returns>
+        public new LazyPaginatorBuilder WithDefaultEmotes() 
+            => base.WithDefaultEmotes() as LazyPaginatorBuilder;
+
+        /// <summary>
+        /// Sets the PageFactory of the <see cref="LazyPaginator"/>.
+        /// </summary>
+        /// <returns></returns>
         public LazyPaginatorBuilder WithPageFactory(Func<int, Task<PageBuilder>> pagefactory)
         {
             PageFactory = pagefactory;
             return this;
         }
+
+        /// <summary>
+        /// Sets the maximum page index of the <see cref="LazyPaginator"/>.
+        /// </summary>
+        /// <returns></returns>
         public LazyPaginatorBuilder WithMaxPage(int maxPage)
         {
             MaxPage = maxPage;

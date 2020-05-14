@@ -9,7 +9,7 @@ namespace Interactivity.Pagination
     {
         #region Fields
         /// <summary>
-        /// Gets or sets a list of users who can interact with the <see cref="Paginator"/>.
+        /// Gets or sets the users who can interact with the <see cref="Paginator"/>.
         /// </summary>
         public List<SocketUser> Users { get; set; } = new List<SocketUser>();
 
