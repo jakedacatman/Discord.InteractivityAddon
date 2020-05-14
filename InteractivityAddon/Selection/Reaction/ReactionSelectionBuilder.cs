@@ -106,9 +106,9 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the values to select from.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithValues(List<T> values)
+        public ReactionSelectionBuilder<T> WithValues(IEnumerable<T> values)
         {
-            Values = values;
+            Values = values.ToList();
             return this;
         }
 
@@ -124,7 +124,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithUsers(params SocketUser[] users)
+        public ReactionSelectionBuilder<T> WithUsers(IEnumerable<SocketUser> users)
         {
             Users = users.ToList();
             return this;
@@ -133,9 +133,9 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithUsers(List<SocketUser> users)
+        public ReactionSelectionBuilder<T> WithUsers(params SocketUser[] users)
         {
-            Users = users;
+            Users = users.ToList();
             return this;
         }
 
@@ -187,9 +187,9 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the emotes which are used to select values.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithEmotes(List<IEmote> emotes)
+        public ReactionSelectionBuilder<T> WithEmotes(IEnumerable<IEmote> emotes)
         {
-            Emotes = emotes;
+            Emotes = emotes.ToList();
             return this;
         }
 

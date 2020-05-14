@@ -107,9 +107,9 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the values to select from.
         /// </summary>
-        public MessageSelectionBuilder<T> WithValues(List<T> values)
+        public MessageSelectionBuilder<T> WithValues(IEnumerable<T> values)
         {
-            Values = values;
+            Values = values.ToList();
             return this;
         }
 
@@ -125,7 +125,7 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public MessageSelectionBuilder<T> WithUsers(params SocketUser[] users)
+        public MessageSelectionBuilder<T> WithUsers(IEnumerable<SocketUser> users)
         {
             Users = users.ToList();
             return this;
@@ -134,9 +134,9 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
         /// </summary>
-        public MessageSelectionBuilder<T> WithUsers(List<SocketUser> users)
+        public MessageSelectionBuilder<T> WithUsers(params SocketUser[] users)
         {
-            Users = users;
+            Users = users.ToList();
             return this;
         }
 
