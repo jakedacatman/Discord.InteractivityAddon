@@ -14,7 +14,7 @@ namespace Interactivity.Pagination
         public IReadOnlyCollection<Page> Pages { get; }
 
         /// <summary>
-        /// Gets the maximum page of the <see cref="Paginator"/>.
+        /// Gets the maximum page index of the <see cref="Paginator"/>.
         /// </summary>
         public override int MaxPageIndex => Pages.Count - 1;
 
