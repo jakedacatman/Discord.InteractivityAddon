@@ -24,12 +24,12 @@ namespace Interactivity.Pagination
 
         internal LazyPaginator(IReadOnlyCollection<SocketUser> users, IReadOnlyDictionary<IEmote, PaginatorAction> emotes,
             Embed cancelledEmbed, Embed timeoutedEmbed, DeletionOptions deletion,
-            Func<int, Task<Page>> pageFactory, int startPage, int maxPage)
+            Func<int, Task<Page>> pageFactory, int startPage, int maxPageIndex)
             : base(users, emotes, cancelledEmbed, timeoutedEmbed, deletion, startPage)
         {
             CachedPages = new ConcurrentDictionary<int, Page>();
             PageFactory = pageFactory;
-            MaxPageIndex = maxPage;
+            MaxPageIndex = maxPageIndex;
         }
 
         public override async Task<Page> GetOrLoadPageAsync(int pageNumber)

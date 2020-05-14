@@ -21,7 +21,7 @@ namespace Interactivity.Pagination
         /// <summary>
         /// Gets or sets the maximum page of the <see cref="Paginator"/>.
         /// </summary>
-        public int MaxPage { get; set; }
+        public int MaxPageIndex { get; set; }
         #endregion
 
         #region Build
@@ -39,13 +39,13 @@ namespace Interactivity.Pagination
                                      Deletion,
                                      AddPaginatorFooterAsync,
                                      startPage,
-                                     MaxPage);
+                                     MaxPageIndex);
 
             async Task<Page> AddPaginatorFooterAsync(int page)
             {
                 var builder = await PageFactory.Invoke(page).ConfigureAwait(false);
 
-                return builder?.WithPaginatorFooter(Footer, page, MaxPage, Users)
+                return builder?.WithPaginatorFooter(Footer, page, MaxPageIndex, Users)
                                .Build();
             }
         }
@@ -129,9 +129,9 @@ namespace Interactivity.Pagination
         /// Sets the maximum page index of the <see cref="LazyPaginator"/>.
         /// </summary>
         /// <returns></returns>
-        public LazyPaginatorBuilder WithMaxPage(int maxPage)
+        public LazyPaginatorBuilder WithMaxPageIndex(int maxPageIndex)
         {
-            MaxPage = maxPage;
+            MaxPageIndex = maxPageIndex;
             return this;
         }
         #endregion
