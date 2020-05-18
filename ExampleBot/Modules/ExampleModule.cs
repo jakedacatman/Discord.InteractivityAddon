@@ -39,7 +39,7 @@ namespace ExampleBot_Qmmands.Modules
             var paginator = new LazyPaginatorBuilder()
                 .WithUsers(Context.User)
                 .WithPageFactory(PageFactory)
-                .WithMaxPage(100)
+                .WithMaxPageIndex(100)
                 .WithFooter(PaginatorFooter.PageNumber | PaginatorFooter.Users)
                 .WithDefaultEmotes()
                 .Build();
