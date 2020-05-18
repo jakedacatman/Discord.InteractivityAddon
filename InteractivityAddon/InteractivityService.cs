@@ -270,7 +270,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
             var confirmationSource = new TaskCompletionSource<InteractivityResult<bool>>();
@@ -282,11 +282,27 @@ namespace Interactivity
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(confirmation.Content.Text, embed: confirmation.Content.Embed).ConfigureAwait(false);
+            if (message != null)
+            {
+                if (message.Author != Client.CurrentUser)
+                {
+                    throw new ArgumentException("Message author not current user!");
+                }
+
+                await message.ModifyAsync(x =>
+                {
+                    x.Content = confirmation.Content.Text;
+                    x.Embed = confirmation.Content.Embed;
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                message = await channel.SendMessageAsync(confirmation.Content.Text, embed: confirmation.Content.Embed).ConfigureAwait(false);
+            }
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
             {
-                if (reaction.MessageId != msg.Id ||
+                if (reaction.MessageId != message.Id ||
                     reaction.UserId == Client.CurrentUser.Id)
                 {
                     return;
@@ -313,7 +329,7 @@ namespace Interactivity
             {
                 Client.ReactionAdded += CheckReactionAsync;
 
-                await msg.AddReactionsAsync(confirmation.Emotes).ConfigureAwait(false);
+                await message.AddReactionsAsync(confirmation.Emotes).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(confirmationTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
                 var result = task_result == confirmationTask
@@ -324,16 +340,16 @@ namespace Interactivity
 
                 if (confirmation.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
                 {
-                    await msg.DeleteAsync().ConfigureAwait(false);
+                    await message.DeleteAsync().ConfigureAwait(false);
                 }
                 else if (result.IsCancelled == true)
                 {
-                    await msg.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
+                    await message.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
                 }
 
                 else if (result.IsTimeouted == true)
                 {
-                    await msg.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
+                    await message.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
                 }
 
                 return result;
@@ -355,7 +371,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketMessage> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
         {
             var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
             var cancelSource = new TaskCompletionSource<bool>();
@@ -366,8 +382,24 @@ namespace Interactivity
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
-            var startTime = msg.Timestamp.UtcDateTime;
+            if (message != null)
+            {
+                if (message.Author != Client.CurrentUser)
+                {
+                    throw new ArgumentException("Message author not current user!");
+                }
+
+                await message.ModifyAsync(x =>
+                {
+                    x.Embed = selection.SelectionEmbed;
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                message = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+            }
+
+            var startTime = message.Timestamp.UtcDateTime;
 
             async Task CheckMessageAsync(SocketMessage s)
             {
@@ -394,7 +426,7 @@ namespace Interactivity
             {
                 Client.MessageReceived += CheckMessageAsync;
 
-                await selection.InitializeMessageAsync(msg);
+                await selection.InitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
 
                 var result = task_result == selectionTask
@@ -405,15 +437,15 @@ namespace Interactivity
 
                 if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
                 {
-                    await msg.DeleteAsync().ConfigureAwait(false);
+                    await message.DeleteAsync().ConfigureAwait(false);
                 }
                 else if (result.IsCancelled == true)
                 {
-                    await msg.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
+                    await message.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
                 }
                 else if (result.IsTimeouted == true)
                 {
-                    await msg.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
+                    await message.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
                 }
 
                 return result;
@@ -435,7 +467,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketReaction> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -448,11 +480,26 @@ namespace Interactivity
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            var msg = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+            if (message != null)
+            {
+                if (message.Author != Client.CurrentUser)
+                {
+                    throw new ArgumentException("Message author not current user!");
+                }
+
+                await message.ModifyAsync(x =>
+                {
+                    x.Embed = selection.SelectionEmbed;
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                message = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+            }
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (m.Id != msg.Id ||
+                if (m.Id != message.Id ||
                     r.UserId == Client.CurrentUser.Id)
                 {
                     return;
@@ -475,7 +522,7 @@ namespace Interactivity
             {
                 Client.ReactionAdded += CheckReactionAsync;
 
-                await selection.InitializeMessageAsync(msg);
+                await selection.InitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
 
                 var result = task_result == selectionTask
@@ -486,15 +533,15 @@ namespace Interactivity
 
                 if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
                 {
-                    await msg.DeleteAsync().ConfigureAwait(false);
+                    await message.DeleteAsync().ConfigureAwait(false);
                 }
                 else if (result.IsCancelled == true)
                 {
-                    await msg.ModifyAsync(x => { x.Embed = selection.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
+                    await message.ModifyAsync(x => { x.Embed = selection.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
                 else if (result.IsTimeouted == true)
                 {
-                    await msg.ModifyAsync(x => { x.Embed = selection.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
+                    await message.ModifyAsync(x => { x.Embed = selection.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
 
                 return result;
@@ -512,10 +559,11 @@ namespace Interactivity
         /// <param name="paginator">The <see cref="Paginator"/> to send.</param>
         /// <param name="channel">The <see cref="IMessageChannel"/> to send the <see cref="Paginator"/> to.</param>
         /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
+        /// <param name="message">The message to modify to display the <see cref="Paginator"/>.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
         {
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -526,12 +574,29 @@ namespace Interactivity
 
             var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
 
-            var msg = await channel.SendMessageAsync(text: page.Text, embed: page.Embed).ConfigureAwait(false);
-            var startTime = msg.Timestamp.UtcDateTime;
+            if (message != null)
+            {
+                if (message.Author != Client.CurrentUser)
+                {
+                    throw new ArgumentException("Message author not current user!");
+                }
+
+                await message.ModifyAsync(x =>
+                {
+                    x.Content = page.Text;
+                    x.Embed = page.Embed;
+                }).ConfigureAwait(false);
+            }
+            else
+            {
+                message = await channel.SendMessageAsync(text: page.Text, embed: page.Embed).ConfigureAwait(false);
+            }
+
+            var startTime = message.Timestamp.UtcDateTime;
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
             {
-                if (r.MessageId != msg.Id ||
+                if (r.MessageId != message.Id ||
                     r.UserId == Client.CurrentUser.Id)
                 {
                     return;
@@ -551,14 +616,14 @@ namespace Interactivity
                 if (refreshPage)
                 {
                     var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
-                    await msg.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
+                    await message.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                 }
             }
             try
             {
                 Client.ReactionAdded += CheckReactionAsync;
 
-                await paginator.InitializeMessageAsync(msg);
+                await paginator.InitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(timeoutTask, cancelTask).ConfigureAwait(false);
 
                 var result = task_result == timeoutTask
@@ -567,15 +632,15 @@ namespace Interactivity
 
                 if (paginator.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
                 {
-                    await msg.DeleteAsync().ConfigureAwait(false);
+                    await message.DeleteAsync().ConfigureAwait(false);
                 }
                 else if (result.IsCancelled == true)
                 {
-                    await msg.ModifyAsync(x => { x.Embed = paginator.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
+                    await message.ModifyAsync(x => { x.Embed = paginator.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
                 else if (result.IsTimeouted == true)
                 {
-                    await msg.ModifyAsync(x => { x.Embed = paginator.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
+                    await message.ModifyAsync(x => { x.Embed = paginator.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
 
                 return result;
