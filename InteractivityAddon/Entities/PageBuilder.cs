@@ -58,7 +58,7 @@ namespace Interactivity
         /// <returns></returns>
         public static PageBuilder FromEmbed(Embed embed)
             => new PageBuilder()
-                .WithColor((sys.Color) embed.Color)
+                .WithColor(embed.Color ?? Discord.Color.Default)
                 .WithDescription(embed.Description)
                 .WithTitle(embed.Title)
                 .WithThumbnailUrl(embed.Thumbnail?.Url)
@@ -72,7 +72,7 @@ namespace Interactivity
         /// <returns></returns>
         public static PageBuilder FromEmbedBuilder(EmbedBuilder builder)
             => new PageBuilder()
-                .WithColor((sys.Color) builder.Color)
+                .WithColor(builder.Color ?? Discord.Color.Default)
                 .WithDescription(builder.Description)
                 .WithTitle(builder.Title)
                 .WithThumbnailUrl(builder.ThumbnailUrl)
