@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Discord.WebSocket;
 
 namespace Interactivity.Extensions
@@ -10,12 +11,14 @@ namespace Interactivity.Extensions
             var channel = reaction.Channel;
             var message = reaction.Message.IsSpecified
                 ? reaction.Message.Value
-                :await channel.GetMessageAsync(reaction.MessageId).ConfigureAwait(false) as SocketUserMessage;
-            var user = reaction.User.IsSpecified 
-                ? reaction.User.Value
-                : client.GetUser(reaction.UserId);
+                : await channel.GetMessageAsync(reaction.MessageId).ConfigureAwait(false) as SocketUserMessage;
 
-            await message.RemoveReactionAsync(reaction.Emote, user).ConfigureAwait(false);
+            if (message == null)
+            {
+                throw new InvalidOperationException("Could not load the paginator message to an emote! Try increasing your Message Cache");
+            }
+
+            await message.RemoveReactionAsync(reaction.Emote, reaction.UserId).ConfigureAwait(false);
         }
     }
 }
