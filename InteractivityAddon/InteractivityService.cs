@@ -26,10 +26,11 @@ namespace Interactivity
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
         public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null)
         {
-            Client = client;
+            Client = client ?? throw new ArgumentNullException("client cannot be null");
             UptimeStartTime = DateTime.Now;
 
             DefaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(45);
+
             if (DefaultTimeout <= TimeSpan.Zero)
             {
                 throw new Exception("Timespan cannot be negative or zero");
