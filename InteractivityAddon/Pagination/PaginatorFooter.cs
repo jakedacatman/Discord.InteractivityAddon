@@ -3,7 +3,7 @@
 namespace Interactivity.Pagination
 {
     /// <summary>
-    /// Specifies which contents should be displayed in the footer of a <see cref="PaginatorBuilderOld"/>.
+    /// Specifies which contents should be displayed in the footer of a <see cref="PaginatorBuilder"/>.
     /// </summary>
     [Flags]
     public enum PaginatorFooter
@@ -19,7 +19,7 @@ namespace Interactivity.Pagination
         PageNumber = 2,
 
         /// <summary>
-        /// Displays the users who can interact with the <see cref="PaginatorOld"/>.
+        /// Displays the users who can interact with the <see cref="Paginator"/>.
         /// </summary>
         Users = 4,
     }
