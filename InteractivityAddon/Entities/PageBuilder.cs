@@ -45,6 +45,11 @@ namespace Interactivity
         public string ImageUrl { get; set; } = null;
 
         /// <summary>
+        ///     Gets or sets the <see cref="EmbedAuthorBuilder" /> of an <see cref="Embed"/>.
+        /// </summary>
+        public EmbedAuthorBuilder Author { get; set; } = null;
+
+        /// <summary>
         /// Gets or sets the Fields of the <see cref="PageBuilder"/>.
         /// </summary>
         public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
@@ -146,6 +151,57 @@ namespace Interactivity
         }
 
         /// <summary>
+        ///     Sets the <see cref="EmbedAuthorBuilder" /> of an <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="author">The author builder class containing the author field properties.</param>
+        /// <returns></returns>
+        public PageBuilder WithAuthor(EmbedAuthorBuilder author)
+        {
+            Author = author;
+            return this;
+        }
+
+        /// <summary>
+        ///     Sets the author field of an <see cref="PageBuilder" /> with the provided properties.
+        /// </summary>
+        /// <param name="action">The delegate containing the author field properties.</param>
+        /// <returns></returns>
+        public PageBuilder WithAuthor(Action<EmbedAuthorBuilder> action)
+        {
+            var author = new EmbedAuthorBuilder();
+            action(author);
+            Author = author;
+            return this;
+        }
+
+        /// <summary>
+        ///     Sets the author field of an <see cref="PageBuilder" /> with the provided name, icon URL, and URL.
+        /// </summary>
+        /// <param name="name">The title of the author field.</param>
+        /// <param name="iconUrl">The icon URL of the author field.</param>
+        /// <param name="url">The URL of the author field.</param>
+        /// <returns></returns>
+        public PageBuilder WithAuthor(string name, string iconUrl = null, string url = null)
+        {
+            var author = new EmbedAuthorBuilder
+            {
+                Name = name,
+                IconUrl = iconUrl,
+                Url = url
+            };
+            Author = author;
+            return this;
+        }
+
+        /// <summary> 
+        /// Fills the page author field with the provided user's full username and avatar URL. 
+        /// </summary>
+        /// <param name="user">The user to put into the author.</param>
+        /// <returns></returns>
+        public PageBuilder WithAuthor(IUser user) 
+            => WithAuthor($"{user.Username}#{user.Discriminator}", user.GetAvatarUrl());
+
+        /// <summary>
         /// Sets the Fields of the <see cref="PageBuilder"/>.
         /// </summary>
         /// <param name="fields"></param>
@@ -227,13 +283,14 @@ namespace Interactivity
 
         public Page Build(string defaultText = null, sys.Color? defaultColor = null,
             string defaultDescription = null, string defaultTitle = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
-            List<EmbedFieldBuilder> defaultFields = null)
+            EmbedAuthorBuilder defaultAuthor = null, List<EmbedFieldBuilder> defaultFields = null)
             => new Page(Text ?? defaultText,
                 Color ?? defaultColor,
                 Description ?? defaultDescription,
                 Title ?? defaultTitle,
                 ThumbnailUrl ?? defaultThumbnailUrl,
                 ImageUrl ?? defaultImageUrl,
+                Author ?? defaultAuthor,
                 Fields ?? defaultFields,
                 Footer);
     }

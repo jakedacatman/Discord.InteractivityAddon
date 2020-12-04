@@ -32,6 +32,7 @@ namespace Interactivity
                 Description = Embed.Description,
                 Fields = Embed.Fields.Select(x => x.ToBuilder()).ToList(),
                 ImageUrl = Embed.Image?.Url,
+                Author = Embed.Author?.ToBuilder(),
                 ThumbnailUrl = Embed.Thumbnail?.Url,
                 Title = Embed.Title,
                 Text = Text
@@ -39,24 +40,9 @@ namespace Interactivity
 
         internal Page(string text = null, sys.Color? color = null,
             string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null,
-            List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
+            EmbedAuthorBuilder author = null, List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
         {
             Text = text;
-            fields ??= new List<EmbedFieldBuilder>();
-            footer ??= new EmbedFooterBuilder();
-
-            if (color == null &&
-                description == null &&
-                title == null &&
-                thumbnailUrl == null &&
-                imageUrl == null &&
-                fields.Count == 0 &&
-                footer.IconUrl == null &&
-                footer.Text == null)
-            {
-                return;
-            }
-
             Embed = new EmbedBuilder()
             {
                 Color = (Color?) color,
@@ -65,7 +51,8 @@ namespace Interactivity
                 ThumbnailUrl = thumbnailUrl,
                 ImageUrl = imageUrl,
                 Fields = fields ?? new List<EmbedFieldBuilder>(),
-                Footer = footer ?? new EmbedFooterBuilder()
+                Footer = footer ?? new EmbedFooterBuilder(),
+                Author = author
             }
             .Build();
         }
