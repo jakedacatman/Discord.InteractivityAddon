@@ -63,7 +63,7 @@ namespace ExampleBot_Qmmands.Modules
                 new PageBuilder().WithTitle("am"),
                 new PageBuilder().WithTitle("cool"),
                 new PageBuilder().WithTitle(":sunglasses:"),
-                new PageBuilder().WithText("I am cool :crown:")
+                new PageBuilder().WithText("I am cool :crown:").WithAuthor(Context.User)
             };
 
             var paginator = new StaticPaginatorBuilder()
