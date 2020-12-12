@@ -43,6 +43,20 @@ namespace Interactivity
             EmbedAuthorBuilder author = null, List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
         {
             Text = text;
+
+            if (color == null &&
+                description == null &&
+                title == null &&
+                thumbnailUrl == null &&
+                imageUrl == null &&
+                fields.Count == 0 &&
+                footer == null &&
+                author == null)
+            {
+                Embed = null;
+                return;
+            }
+
             Embed = new EmbedBuilder()
             {
                 Color = (Color?) color,
@@ -50,8 +64,8 @@ namespace Interactivity
                 Title = title,
                 ThumbnailUrl = thumbnailUrl,
                 ImageUrl = imageUrl,
-                Fields = fields ?? new List<EmbedFieldBuilder>(),
-                Footer = footer ?? new EmbedFooterBuilder(),
+                Fields = fields,
+                Footer = footer,
                 Author = author
             }
             .Build();

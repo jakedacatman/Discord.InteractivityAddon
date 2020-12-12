@@ -54,7 +54,7 @@ namespace Interactivity
         /// </summary>
         public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
 
-        internal EmbedFooterBuilder Footer { get; set; } = new EmbedFooterBuilder();
+        internal EmbedFooterBuilder Footer { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
@@ -250,12 +250,12 @@ namespace Interactivity
         {
             if (footer.HasFlag(PaginatorFooter.None))
             {
-                Footer = new EmbedFooterBuilder();
                 return this;
             }
 
             if (footer.HasFlag(PaginatorFooter.Users))
             {
+                Footer = new EmbedFooterBuilder();
                 if (users.Count == 0)
                 {
                     Footer.Text += "Interactors : Everyone\n";
@@ -291,7 +291,7 @@ namespace Interactivity
                 ThumbnailUrl ?? defaultThumbnailUrl,
                 ImageUrl ?? defaultImageUrl,
                 Author ?? defaultAuthor,
-                Fields ?? defaultFields,
+                Fields ?? defaultFields ?? new List<EmbedFieldBuilder>(),
                 Footer);
     }
 }
