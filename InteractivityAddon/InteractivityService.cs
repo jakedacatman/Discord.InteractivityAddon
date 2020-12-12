@@ -310,11 +310,11 @@ namespace Interactivity
                 }
                 if (!confirmation.GetFilter().Invoke(reaction))
                 {
-                    await confirmation.GetActions().Invoke(reaction, true).ConfigureAwait(false);
+                    await confirmation.GetActions().Invoke(reaction, false).ConfigureAwait(false);
                     return;
                 }
 
-                await confirmation.GetActions().Invoke(reaction, false).ConfigureAwait(false);
+                await confirmation.GetActions().Invoke(reaction, true).ConfigureAwait(false);
 
                 if (reaction.Emote.Equals(confirmation.ConfirmEmote))
                 {
@@ -342,15 +342,21 @@ namespace Interactivity
                 if (confirmation.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
                 {
                     await message.DeleteAsync().ConfigureAwait(false);
+                    return result;
                 }
-                else if (result.IsCancelled == true)
+
+                if (result.IsCancelled == true)
                 {
                     await message.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
                 }
-
                 else if (result.IsTimeouted == true)
                 {
                     await message.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
+                }
+
+                if (confirmation.Deletion.HasFlag(DeletionOptions.Valid))
+                {
+                    await message.RemoveAllReactionsAsync();
                 }
 
                 return result;

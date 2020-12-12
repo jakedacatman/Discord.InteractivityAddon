@@ -44,9 +44,10 @@ namespace Interactivity.Confirmation
 
         /// <summary>
         /// Gets or sets what the <see cref="Confirmation"/> should delete.
+        /// Valid will delete all reactions after a result has been captured.
         /// </summary>
-        public DeletionOptions Deletion { get; set; } = DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids;
-
+        public DeletionOptions Deletion { get; set; } = DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids | DeletionOptions.Valid;
+         
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
         public Confirmation Build()

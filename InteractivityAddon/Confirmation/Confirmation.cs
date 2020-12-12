@@ -68,7 +68,7 @@ namespace Interactivity.Confirmation
         internal Func<SocketReaction, bool, Task> GetActions()
             => async (reaction, valid) =>
         {
-            if ((Deletion.HasFlag(DeletionOptions.Valid) && valid) || (Deletion.HasFlag(DeletionOptions.Invalids) && !valid))
+            if (Deletion.HasFlag(DeletionOptions.Invalids) && !valid)
             {
                 await reaction.Message.Value.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
             }
