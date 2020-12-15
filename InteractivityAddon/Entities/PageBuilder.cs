@@ -54,7 +54,7 @@ namespace Interactivity
         /// </summary>
         public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
 
-        internal EmbedFooterBuilder Footer { get; set; }
+        internal EmbedFooterBuilder Footer { get; set; } = null;
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
@@ -253,9 +253,9 @@ namespace Interactivity
                 return this;
             }
 
+            Footer = new EmbedFooterBuilder();
             if (footer.HasFlag(PaginatorFooter.Users))
             {
-                Footer = new EmbedFooterBuilder();
                 if (users.Count == 0)
                 {
                     Footer.Text += "Interactors : Everyone\n";
@@ -272,7 +272,6 @@ namespace Interactivity
                     Footer.Text += $"Interactors : {string.Join(", ", users)}";
                 }
             }
-
             if (footer.HasFlag(PaginatorFooter.PageNumber))
             {
                 Footer.Text += $"Page {page + 1}/{totalPages + 1}";
