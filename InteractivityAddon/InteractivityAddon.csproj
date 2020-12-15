@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Discord.InteractivityAddon</AssemblyName>
     <RootNamespace>Interactivity</RootNamespace>
-    <Version>2.2.0.0-rc7</Version>
+    <Version>2.2.0.0-rc8</Version>
     <RepositoryUrl>https://github.com/Playwo/Discord.InteractivityAddon</RepositoryUrl>
     <AssemblyVersion>2.2.0.0</AssemblyVersion>
     <FileVersion>2.2.0.0</FileVersion>
@@ -35,8 +35,8 @@ Moreover it includes support for any command framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Core" Version="2.3.0-dev-20201201.2" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="2.3.0-dev-20201201.2" />
+    <PackageReference Include="Discord.Net.Core" Version="2.3.0-dev-20201214.8" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.3.0-dev-20201214.8" />
     <PackageReference Include="Qommon" Version="1.0.1" />
   </ItemGroup>
 
