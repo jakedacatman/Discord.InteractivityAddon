@@ -47,7 +47,7 @@ namespace Interactivity.Confirmation
         /// Valid will delete all reactions after a result has been captured.
         /// </summary>
         public DeletionOptions Deletion { get; set; } = DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids | DeletionOptions.Valid;
-         
+
         internal IEmote[] Emotes => new IEmote[] { ConfirmEmote, DeclineEmote };
 
         public Confirmation Build()
@@ -68,19 +68,6 @@ namespace Interactivity.Confirmation
         public ConfirmationBuilder WithContent(PageBuilder content)
         {
             Content = content;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the content to be displayed in the <see cref="Confirmation"/>. 
-        /// The embed is converted to a Page, some fields may get lost!
-        /// </summary>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        public ConfirmationBuilder WithContent(string text = "", EmbedBuilder embed  = null)
-        {
-            Content = PageBuilder.FromEmbedBuilder(embed)
-                .WithText(text);
             return this;
         }
 
