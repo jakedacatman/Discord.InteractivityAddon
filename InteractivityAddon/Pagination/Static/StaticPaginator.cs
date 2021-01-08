@@ -29,7 +29,7 @@ namespace Interactivity.Pagination
         public override Task<Page> GetOrLoadPageAsync(int page)
             => Task.FromResult(Pages.ElementAt(page));
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction)
             => Task.FromResult(Emotes.Keys.Any(x => x.Equals(reaction.Emote)));
     }
 }

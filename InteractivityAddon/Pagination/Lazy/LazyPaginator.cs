@@ -43,7 +43,7 @@ namespace Interactivity.Pagination
             return page;
         }
 
-        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction) 
+        public override Task<bool> RunChecksAsync(BaseSocketClient client, SocketReaction reaction)
             => Task.FromResult(Emotes.Keys.Any(x => x.Equals(reaction.Emote)));
     }
 }

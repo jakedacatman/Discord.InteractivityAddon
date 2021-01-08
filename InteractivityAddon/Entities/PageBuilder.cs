@@ -54,7 +54,10 @@ namespace Interactivity
         /// </summary>
         public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
 
-        internal EmbedFooterBuilder Footer { get; set; } = null;
+        /// <summary>
+        /// Gets or sets the Footer of the see <see cref="PageBuilder"/>.
+        /// </summary>
+        public EmbedFooterBuilder Footer { get; set; } = null;
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="Embed"/>.
@@ -68,7 +71,9 @@ namespace Interactivity
                 .WithTitle(embed.Title)
                 .WithThumbnailUrl(embed.Thumbnail?.Url)
                 .WithImageUrl(embed.Image?.Url)
-                .WithFields(embed.Fields.Select(x => x.ToBuilder()));
+                .WithAuthor(embed.Author?.ToBuilder())
+                .WithFields(embed.Fields.Select(x => x.ToBuilder()))
+                .WithFooter(embed.Footer?.ToBuilder());
 
         /// <summary>
         /// Creates a new <see cref="PageBuilder"/> from an <see cref="EmbedBuilder"/>.
@@ -82,7 +87,9 @@ namespace Interactivity
                 .WithTitle(builder.Title)
                 .WithThumbnailUrl(builder.ThumbnailUrl)
                 .WithImageUrl(builder.ImageUrl)
-                .WithFields(builder.Fields);
+                .WithAuthor(builder.Author)
+                .WithFields(builder.Fields)
+                .WithFooter(builder.Footer);
 
         /// <summary>
         /// Sets the Text of the <see cref="PageBuilder"/>.
@@ -193,12 +200,12 @@ namespace Interactivity
             return this;
         }
 
-        /// <summary> 
-        /// Fills the page author field with the provided user's full username and avatar URL. 
+        /// <summary>
+        /// Fills the page author field with the provided user's full username and avatar URL.
         /// </summary>
         /// <param name="user">The user to put into the author.</param>
         /// <returns></returns>
-        public PageBuilder WithAuthor(IUser user) 
+        public PageBuilder WithAuthor(IUser user)
             => WithAuthor($"{user.Username}#{user.Discriminator}", user.GetAvatarUrl());
 
         /// <summary>
@@ -246,6 +253,45 @@ namespace Interactivity
             return this;
         }
 
+        /// <summary>
+        /// Sets the <see cref="EmbedFooterBuilder"/> of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="footer"></param>
+        /// <returns></returns>
+        public PageBuilder WithFooter(EmbedFooterBuilder footer)
+        {
+            Footer = footer;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="EmbedFooterBuilder"/> of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="iconUrl"></param>
+        /// <returns></returns>
+        public PageBuilder WithFooter(string text, string iconUrl = null)
+        {
+            Footer = new EmbedFooterBuilder()
+            {
+                Text = text,
+                IconUrl = iconUrl
+            };
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="EmbedFooterBuilder"/> of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public PageBuilder WithFooter(Action<EmbedFooterBuilder> action)
+        {
+            Footer = new EmbedFooterBuilder();
+            action.Invoke(Footer);
+            return this;
+        }
+
         internal PageBuilder WithPaginatorFooter(PaginatorFooter footer, int page, int totalPages, IList<SocketUser> users)
         {
             if (footer.HasFlag(PaginatorFooter.None))
@@ -282,7 +328,7 @@ namespace Interactivity
 
         public Page Build(string defaultText = null, sys.Color? defaultColor = null,
             string defaultDescription = null, string defaultTitle = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
-            EmbedAuthorBuilder defaultAuthor = null, List<EmbedFieldBuilder> defaultFields = null)
+            EmbedAuthorBuilder defaultAuthor = null, List<EmbedFieldBuilder> defaultFields = null, EmbedFooterBuilder defaultFooter = null)
             => new Page(Text ?? defaultText,
                 Color ?? defaultColor,
                 Description ?? defaultDescription,
@@ -291,6 +337,6 @@ namespace Interactivity
                 ImageUrl ?? defaultImageUrl,
                 Author ?? defaultAuthor,
                 Fields ?? defaultFields ?? new List<EmbedFieldBuilder>(),
-                Footer);
+                Footer ?? defaultFooter);
     }
 }

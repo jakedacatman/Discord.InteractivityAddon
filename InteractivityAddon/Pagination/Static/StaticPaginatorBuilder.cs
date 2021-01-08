@@ -44,67 +44,68 @@ namespace Interactivity.Pagination
         }
 
         #region WithValue
+
         /// <summary>
         /// Sets the users who can interact with the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithUsers(params SocketUser[] users) 
+        public new StaticPaginatorBuilder WithUsers(params SocketUser[] users)
             => base.WithUsers(users) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets the users who can interact with the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithUsers(IEnumerable<SocketUser> users) 
+        public new StaticPaginatorBuilder WithUsers(IEnumerable<SocketUser> users)
             => base.WithUsers(users) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets the emotes and their related action of the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithEmotes(Dictionary<IEmote, PaginatorAction> emotes) 
+        public new StaticPaginatorBuilder WithEmotes(Dictionary<IEmote, PaginatorAction> emotes)
             => base.WithEmotes(emotes) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Adds an emote related to a action to the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder AddEmote(PaginatorAction action, IEmote emote) 
+        public new StaticPaginatorBuilder AddEmote(PaginatorAction action, IEmote emote)
             => base.AddEmote(action, emote) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after cancellation.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithCancelledEmbed(EmbedBuilder embed) 
+        public new StaticPaginatorBuilder WithCancelledEmbed(EmbedBuilder embed)
             => base.WithCancelledEmbed(embed) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets the <see cref="Embed"/> which the <see cref="Paginator"/> gets modified to after a timeout.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed) 
+        public new StaticPaginatorBuilder WithTimoutedEmbed(EmbedBuilder embed)
             => base.WithTimoutedEmbed(embed) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets what the <see cref="Paginator"/> should delete.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithDeletion(DeletionOptions deletion) 
+        public new StaticPaginatorBuilder WithDeletion(DeletionOptions deletion)
             => base.WithDeletion(deletion) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Sets the footer in the <see cref="Embed"/> of the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithFooter(PaginatorFooter footer) 
+        public new StaticPaginatorBuilder WithFooter(PaginatorFooter footer)
             => base.WithFooter(footer) as StaticPaginatorBuilder;
 
         /// <summary>
         /// Clears all existing Emote-Action-Pairs and adds the standard Emote-Action-Pairs to the <see cref="Paginator"/>.
         /// </summary>
         /// <returns></returns>
-        public new StaticPaginatorBuilder WithDefaultEmotes() 
+        public new StaticPaginatorBuilder WithDefaultEmotes()
             => base.WithDefaultEmotes() as StaticPaginatorBuilder;
 
         /// <summary>
@@ -136,6 +137,7 @@ namespace Interactivity.Pagination
             Pages.Add(page);
             return this;
         }
-        #endregion
+
+        #endregion WithValue
     }
 }
