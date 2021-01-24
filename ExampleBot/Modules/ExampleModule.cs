@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -77,7 +78,7 @@ namespace ExampleBot_Qmmands.Modules
         }
 
         [Command("delete")]
-        public async Task ExampleReactAsync()
+        public async Task ExampleSendAndDeleteAsync()
         {
             Interactivity.DelayedSendMessageAndDeleteAsync(Context.Channel, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20), "How are you? :D");
 
@@ -107,14 +108,19 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExampleReactionSelectionAsync()
         {
             var builder = new ReactionSelectionBuilder<string>()
-                .WithValues("Hi", "How", "Hey", "Huh?!")
-                .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
+                .WithSelectables(new Dictionary<Emoji, string>()
+                {
+                    [new Emoji("💵")] = "Hi",
+                    [new Emoji("🍭")] = "How",
+                    [new Emoji("😩")] = "Hey",
+                    [new Emoji("💠")] = "Huh?!"
+                })
                 .WithUsers(Context.User)
                 .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
-            if (result.IsSuccess == true)
+            if (result.IsSuccess)
             {
                 await Context.Channel.SendMessageAsync(result.Value.ToString());
             }
@@ -124,13 +130,13 @@ namespace ExampleBot_Qmmands.Modules
         public async Task ExampleMessageSelectionAsync()
         {
             var builder = new MessageSelectionBuilder<string>()
-                .WithValues("Hi", "How", "Hey", "Huh?!")
+                .WithSelectables("Hi", "How", "Hey", "Huh?!")
                 .WithUsers(Context.User)
                 .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
 
             var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
-            if (result.IsSuccess == true)
+            if (result.IsSuccess)
             {
                 await Context.Channel.SendMessageAsync(result.Value.ToString());
             }

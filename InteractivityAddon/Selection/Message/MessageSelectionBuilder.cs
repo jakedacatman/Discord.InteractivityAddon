@@ -8,27 +8,48 @@ using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
-    /// <summary>
-    /// Represents a builder class for making a <see cref="MessageSelection{T}"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of values to select from</typeparam>
-    public sealed class MessageSelectionBuilder<T> : SelectionBuilder<T, SocketMessage>
+    public class MessageSelectionBuilder<TValue> : BaseMessageSelectionBuilder<TValue>
     {
-        #region Fields
         /// <summary>
-        /// Gets or sets the function to convert the values into possibilites.
+        /// Gets or sets the items to select from.
         /// </summary>
-        public Func<T, string> StringConverter { get; set; } = x => x.ToString();
+        public List<TValue> Selectables { get; set; }
 
         /// <summary>
-        /// Gets or sets the cancel display name if cancel is enabled in the <see cref="MessageSelection{T}"/>.
+        /// Gets or sets the function to convert the values into text.
         /// </summary>
-        public string CancelDisplayName { get; set; } = "Cancel";
+        public Func<TValue, string> StringConverter { get; set; } = x => x.ToString();
 
         /// <summary>
-        /// Gets or sets whether the <see cref="Selection{T, T1}"/> allows for cancellation.
+        /// Gets or sets the title of the selection.
+        /// </summary>
+        public string Title { get; set; } = "Select one of these";
+
+        /// <summary>
+        /// Gets or sets whether the selection allows for cancellation.
         /// </summary>
         public bool AllowCancel { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the message shown for cancel.
+        /// Only works if <see cref="AllowCancel"/> is set to <see cref="true"/>.
+        /// </summary>
+        public string CancelMessage { get; set; } = "Cancel";
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which is sent into the channel.
+        /// </summary>
+        public PageBuilder SelectionPage { get; set; } = new PageBuilder().WithColor(Color.Blue);
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which will be shown on cancellation.
+        /// </summary>
+        public PageBuilder CancelledPage { get; set; } = null;
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which will be shown on a timeout.
+        /// </summary>
+        public PageBuilder TimeoutedPage { get; set; } = null;
 
         /// <summary>
         /// Gets or sets whether the selectionembed will be added by a default value visualizer.
@@ -36,168 +57,177 @@ namespace Interactivity.Selection
         public bool EnableDefaultSelectionDescription { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the title of the <see cref="Selection{T, T1}"/>.
-        /// </summary>
-        public string Title { get; set; } = "Select one of these";
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a new <see cref="MessageSelectionBuilder{T}"/> with default values.
+        /// Creates a new <see cref="ReactionSelectionBuilder{TValue}"/> with default values.
         /// </summary>
         public MessageSelectionBuilder() { }
 
         /// <summary>
-        /// Creates a new <see cref="MessageSelectionBuilder{T}"/> with default values.
+        /// Creates a new <see cref="ReactionSelectionBuilder{TValue}"/> with default values.
         /// </summary>
-        public static MessageSelectionBuilder<T> Default() => new MessageSelectionBuilder<T>();
-        #endregion
+        public static MessageSelectionBuilder<TValue> Default => new MessageSelectionBuilder<TValue>();
 
-        #region Build
-        /// <summary>
-        /// Build the <see cref="MessageSelectionBuilder{T}"/> to a immutable <see cref="MessageSelection{T}"/>.
-        /// </summary>
-        /// <returns></returns>
-        public override Selection<T, SocketMessage> Build()
+        public override BaseMessageSelection<TValue> Build()
         {
-            if (Values.Count == 0)
+            if (Selectables == null)
             {
-                throw new InvalidOperationException("Your Selection needs at least one value");
+                throw new ArgumentException(nameof(Selectables));
+            }
+            if (Selectables.Count == 0)
+            {
+                throw new InvalidOperationException("You need at least one selectable");
             }
 
-            var possibilities = new List<string>();
-            var sBuilder = new StringBuilder();
+            var selectableDictionary = new Dictionary<string[], TValue>();
+            var descriptionBuilder = new StringBuilder();
 
-            for (int i = 0; i < Values.Count; i++)
+            for (int i = 0; i < Selectables.Count; i++)
             {
-                string possibility = StringConverter.Invoke(Values[i]);
-                sBuilder.AppendLine($"#{i + 1} - {possibility}");
-                possibilities.Add($"{i + 1}");
-                possibilities.Add($"#{i + 1}");
-                possibilities.Add(possibility);
-                possibilities.Add($"#{i + 1} - {possibility}");
-            }
-            if (AllowCancel == true)
-            {
-                sBuilder.Append($"#{Values.Count + 1} - {CancelDisplayName}");
-                possibilities.Add($"{Values.Count + 1}");
-                possibilities.Add($"#{Values.Count + 1}");
-                possibilities.Add(CancelDisplayName);
-                possibilities.Add($"#{Values.Count + 1} - {CancelDisplayName}");
-            }
+                var selectable = Selectables[i];
+                string text = StringConverter.Invoke(selectable);
+                selectableDictionary.Add(new string[]
+                {
+                    $"{i + 1}",
+                    $"#{i + 1}",
+                    text,
+                    $"#{i + 1} - {text}"
+                },
+                selectable);
 
-            if (EnableDefaultSelectionDescription == true)
-            {
-                SelectionEmbed.AddField(Title, sBuilder.ToString());
+                if (EnableDefaultSelectionDescription)
+                {
+                    descriptionBuilder.AppendLine($"#{i + 1} - {text}");
+                }
             }
 
-            return new MessageSelection<T>(
-                Values?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
-                Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
-                SelectionEmbed?.Build() ?? throw new ArgumentNullException(nameof(SelectionEmbed)),
-                CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
-                TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
-                Deletion,
-                possibilities?.AsReadOnlyCollection(),
-                CancelDisplayName);
+            if (AllowCancel)
+            {
+                selectableDictionary.Add(new string[]
+                {
+                    $"{Selectables.Count + 1}",
+                    $"#{Selectables.Count + 1}",
+                    CancelMessage,
+                    $"#{Selectables.Count + 1} - {CancelMessage}"
+                },
+                default);
+
+                if (EnableDefaultSelectionDescription)
+                {
+                    descriptionBuilder.Append($"#{Selectables.Count + 1} - {CancelMessage}");
+                }
+            }
+
+            if (EnableDefaultSelectionDescription)
+            {
+                SelectionPage.AddField(Title, descriptionBuilder.ToString());
+            }
+
+            return new MessageSelection<TValue>(
+                selectableDictionary.AsReadOnlyDictionary(),
+                Users?.AsReadOnlyCollection() ?? throw new ArgumentException(nameof(Users)),
+                SelectionPage?.Build() ?? throw new ArgumentNullException(nameof(SelectionPage)),
+                CancelledPage?.Build(),
+                TimeoutedPage?.Build(),
+                AllowCancel,
+                CancelMessage,
+                Deletion
+                );
         }
-        #endregion
 
-        #region WithValue
         /// <summary>
-        /// Sets the values to select from.
+        /// Sets the items to select from.
         /// </summary>
-        public MessageSelectionBuilder<T> WithValues(IEnumerable<T> values)
+        public MessageSelectionBuilder<TValue> WithSelectables(IEnumerable<TValue> selectables)
         {
-            Values = values.ToList();
+            Selectables = selectables.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets the values to select from.
+        /// Sets the items to select from.
         /// </summary>
-        public MessageSelectionBuilder<T> WithValues(params T[] values)
+        public MessageSelectionBuilder<TValue> WithSelectables(params TValue[] selectables)
         {
-            Values = values.ToList();
+            Selectables = selectables.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
+        /// Sets the users who can interact with the selection.
         /// </summary>
-        public MessageSelectionBuilder<T> WithUsers(IEnumerable<SocketUser> users)
+        public MessageSelectionBuilder<TValue> WithUsers(IEnumerable<SocketUser> users)
         {
             Users = users.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
+        /// Sets the users who can interact with the selection.
         /// </summary>
-        public MessageSelectionBuilder<T> WithUsers(params SocketUser[] users)
+        public MessageSelectionBuilder<TValue> WithUsers(params SocketUser[] users)
         {
             Users = users.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets what the <see cref="Selection{T, T1}"/> should delete.
+        /// Sets what the selection should delete.
         /// </summary>
-        public MessageSelectionBuilder<T> WithDeletion(DeletionOptions deletion)
+        public MessageSelectionBuilder<TValue> WithDeletion(DeletionOptions deletion)
         {
             Deletion = deletion;
             return this;
         }
 
         /// <summary>
-        /// Sets the selection embed of the <see cref="Selection{T, T1}"/>.
+        /// Sets the selection embed of the selection.
         /// </summary>
-        public MessageSelectionBuilder<T> WithSelectionEmbed(EmbedBuilder embed)
+        public MessageSelectionBuilder<TValue> WithSelectionEmbed(PageBuilder selectionPage)
         {
-            SelectionEmbed = embed;
+            SelectionPage = selectionPage;
             return this;
         }
 
         /// <summary>
-        /// Sets the embed which the selection embed gets modified to after the <see cref="Selection{T, T1}"/> has been cancelled.
+        /// Sets the embed which the selection embed gets modified to after the selection has been cancelled.
         /// </summary>
-        public MessageSelectionBuilder<T> WithCancelledEmbed(EmbedBuilder cancelledEmbed)
+        public MessageSelectionBuilder<TValue> WithCancelledEmbed(PageBuilder cancelledPage)
         {
-            CancelledEmbed = cancelledEmbed;
+            CancelledPage = cancelledPage;
             return this;
         }
 
         /// <summary>
-        /// Sets the embed which the selection embed gets modified to after the <see cref="Selection{T, T1}"/> has timed out.
+        /// Sets the embed which the selection embed gets modified to after the selection has timed out.
         /// </summary>
-        public MessageSelectionBuilder<T> WithTimeoutedEmbed(EmbedBuilder timeoutedEmbed)
+        public MessageSelectionBuilder<TValue> WithTimeoutedEmbed(PageBuilder timeoutedPage)
         {
-            TimeoutedEmbed = timeoutedEmbed;
+            TimeoutedPage = timeoutedPage;
             return this;
         }
 
         /// <summary>
         /// Sets the function to convert the values into possibilites.
         /// </summary>
-        public MessageSelectionBuilder<T> WithStringConverter(Func<T, string> stringConverter)
+        public MessageSelectionBuilder<TValue> WithStringConverter(Func<TValue, string> stringConverter)
         {
             StringConverter = stringConverter;
             return this;
         }
 
         /// <summary>
-        /// Sets the cancel display name if cancel is enabled in the <see cref="MessageSelection{T}"/>.
+        /// Sets the message shown for cancel.
+        /// Only works if <see cref="AllowCancel"/> is set to <see cref="true"/>.
         /// </summary>
-        public MessageSelectionBuilder<T> WithCancelDisplayName(string cancelDisplayName)
+        public MessageSelectionBuilder<TValue> WithCancelDisplayName(string cancelMessage)
         {
-            CancelDisplayName = cancelDisplayName;
+            CancelMessage = cancelMessage;
             return this;
         }
 
         /// <summary>
-        /// Sets whether the <see cref="Selection{T, T1}"/> allows for cancellation.
+        /// Sets whether the selection allows for cancellation.
         /// </summary>
-        public MessageSelectionBuilder<T> WithAllowCancel(bool allowCancel)
+        public MessageSelectionBuilder<TValue> WithAllowCancel(bool allowCancel)
         {
             AllowCancel = allowCancel;
             return this;
@@ -206,20 +236,19 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets whether the selectionembed will be added by a default value visualizer.
         /// </summary>
-        public MessageSelectionBuilder<T> WithEnableDefaultSelectionDescription(bool enableDefaultSelectionDescription)
+        public MessageSelectionBuilder<TValue> WithEnableDefaultSelectionDescription(bool enableDefaultSelectionDescription)
         {
             EnableDefaultSelectionDescription = enableDefaultSelectionDescription;
             return this;
         }
 
         /// <summary>
-        /// Sets the title of the <see cref="Selection{T, T1}"/>.
+        /// Sets the title of the selection.
         /// </summary>
-        public MessageSelectionBuilder<T> WithTitle(string title)
+        public MessageSelectionBuilder<TValue> WithTitle(string title)
         {
             Title = title;
             return this;
         }
-        #endregion
     }
 }

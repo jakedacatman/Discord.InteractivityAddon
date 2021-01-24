@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Extensions;
 using Interactivity.Pagination;
 using Interactivity.Selection;
 
@@ -368,120 +370,24 @@ namespace Interactivity
         }
 
         /// <summary>
-        /// Sends a user selection into a discord channel.
+        /// Sends a reaction selection to the given message channel.
         /// </summary>
-        /// <typeparam name="T">The type of values the user can select from.</typeparam>
-        /// <typeparam name="TAppearance">The appearance class of the selection</typeparam>
-        /// <param name="selection">The selection to send in the channel.</param>
-        /// <param name="channel">The <see cref="IMessageChannel"/> to send the selection to.</param>
-        /// <param name="timeout">The time until the selection times out.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
+        /// <typeparam name="TValue">The value type of the selection</typeparam>
+        /// <param name="selection">The selection object</param>
+        /// <param name="channel">The channel to send the selection to</param>
+        /// <param name="timeout">The time until the selection times out</param>
+        /// <param name="message">A message to be used for the selection instead of a new one</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
         /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketMessage> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
-        {
-            var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
-            var cancelSource = new TaskCompletionSource<bool>();
-
-            token.Register(() => cancelSource.SetResult(true));
-
-            var selectionTask = selectionSource.Task;
-            var cancelTask = cancelSource.Task;
-            var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
-
-            if (message != null)
-            {
-                if (message.Author != Client.CurrentUser)
-                {
-                    throw new ArgumentException("Message author not current user!");
-                }
-
-                await message.ModifyAsync(x =>
-                {
-                    x.Embed = selection.SelectionEmbed;
-                }).ConfigureAwait(false);
-            }
-            else
-            {
-                message = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
-            }
-
-            var startTime = message.Timestamp.UtcDateTime;
-
-            async Task CheckMessageAsync(SocketMessage s)
-            {
-                if (s.Channel != channel ||
-                    s.Author.Id == Client.CurrentUser.Id)
-                {
-                    return;
-                }
-                if (!await selection.HandleResponseAsync(Client, s).ConfigureAwait(false))
-                {
-                    return;
-                }
-
-                var sResult = await selection.ParseAsync(s, startTime).ConfigureAwait(false);
-                if (!sResult.IsSpecified)
-                {
-                    return;
-                }
-
-                selectionSource.SetResult(sResult.Value);
-            }
-
-            try
-            {
-                Client.MessageReceived += CheckMessageAsync;
-
-                await selection.InitializeMessageAsync(message).ConfigureAwait(false);
-                var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
-
-                var result = task_result == selectionTask
-                                    ? await selectionTask.ConfigureAwait(false)
-                                    : task_result == timeoutTask
-                                        ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
-                                        : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
-
-                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
-                {
-                    await message.DeleteAsync().ConfigureAwait(false);
-                }
-                else if (result.IsCancelled == true)
-                {
-                    await message.ModifyAsync(x => x.Embed = selection.CancelledEmbed).ConfigureAwait(false);
-                }
-                else if (result.IsTimeouted == true)
-                {
-                    await message.ModifyAsync(x => x.Embed = selection.TimeoutedEmbed).ConfigureAwait(false);
-                }
-
-                return result;
-            }
-            finally
-            {
-                Client.MessageReceived -= CheckMessageAsync;
-            }
-        }
-
-        /// <summary>
-        /// Sends a user selection into a discord channel.
-        /// </summary>
-        /// <typeparam name="T">The type of values the user can select from.</typeparam>
-        /// <typeparam name="TAppearance">The appearance class of the selection</typeparam>
-        /// <param name="selection">The selection to send in the channel.</param>
-        /// <param name="channel">The <see cref="IMessageChannel"/> to send the selection to.</param>
-        /// <param name="timeout">The time until the selection times out.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the selection.</param>
-        /// <returns></returns>
-        public async Task<InteractivityResult<T>> SendSelectionAsync<T>(Selection<T, SocketReaction> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
+        public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseReactionSelection<TValue> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
 
-            var selectionSource = new TaskCompletionSource<InteractivityResult<T>>();
+            var selectionSource = new TaskCompletionSource<InteractivityResult<TValue>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            token.Register(() => cancelSource.SetResult(true));
+            cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var selectionTask = selectionSource.Task;
             var cancelTask = cancelSource.Task;
@@ -491,17 +397,14 @@ namespace Interactivity
             {
                 if (message.Author != Client.CurrentUser)
                 {
-                    throw new ArgumentException("Message author not current user!");
+                    throw new ArgumentException("Cannot use message from different user!");
                 }
 
-                await message.ModifyAsync(x =>
-                {
-                    x.Embed = selection.SelectionEmbed;
-                }).ConfigureAwait(false);
+                await selection.InternalModifyMessageAsync(message).ConfigureAwait(false); ;
             }
             else
             {
-                message = await channel.SendMessageAsync(embed: selection.SelectionEmbed).ConfigureAwait(false);
+                message = await selection.InternalSendMessageAsync(channel).ConfigureAwait(false);
             }
 
             async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
@@ -511,44 +414,51 @@ namespace Interactivity
                 {
                     return;
                 }
-                if (!await selection.HandleResponseAsync(Client, r).ConfigureAwait(false))
+                if (!selection.InternalShouldProcess(r))
                 {
+                    if (selection.Deletion.HasFlag(DeletionOptions.Invalids))
+                    {
+                        await r.DeleteAsync(Client).ConfigureAwait(false);
+                    }
                     return;
                 }
 
-                var sResult = await selection.ParseAsync(r, startTime).ConfigureAwait(false);
-                if (!sResult.IsSpecified)
+                var selectedValue = selection.InternalParseValue(r);
+                if (!selectedValue.IsSpecified)
                 {
+                    cancelSource.SetResult(true);
                     return;
                 }
+                var result = new InteractivityResult<TValue>(selectedValue.Value, DateTimeOffset.UtcNow - startTime, false, false);
 
-                selectionSource.SetResult(sResult.Value);
+                if (selection.Deletion.HasFlag(DeletionOptions.Valid))
+                {
+                    await r.DeleteAsync(Client).ConfigureAwait(false);
+                }
+
+                selectionSource.SetResult(result);
             }
 
             try
             {
                 Client.ReactionAdded += CheckReactionAsync;
 
-                await selection.InitializeMessageAsync(message).ConfigureAwait(false);
+                await selection.InternalInitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
 
                 var result = task_result == selectionTask
                                     ? await selectionTask.ConfigureAwait(false)
                                     : task_result == timeoutTask
-                                        ? new InteractivityResult<T>(default, timeout ?? DefaultTimeout, true, false)
-                                        : new InteractivityResult<T>(default, DateTime.UtcNow - startTime, false, true);
+                                        ? new InteractivityResult<TValue>(default, timeout ?? DefaultTimeout, true, false)
+                                        : new InteractivityResult<TValue>(default, DateTime.UtcNow - startTime, false, true);
 
-                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
                 {
                     await message.DeleteAsync().ConfigureAwait(false);
                 }
-                else if (result.IsCancelled == true)
+                else
                 {
-                    await message.ModifyAsync(x => { x.Embed = selection.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
-                }
-                else if (result.IsTimeouted == true)
-                {
-                    await message.ModifyAsync(x => { x.Embed = selection.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
+                    await selection.InternalCloseMessageAsync(message, result).ConfigureAwait(false);
                 }
 
                 return result;
@@ -559,6 +469,104 @@ namespace Interactivity
             }
         }
 
+        /// <summary>
+        /// Sends a message selection to the given message channel.
+        /// </summary>
+        /// <typeparam name="TValue">The value type of the selection</typeparam>
+        /// <param name="selection">The selection object</param>
+        /// <param name="channel">The channel to send the selection to</param>
+        /// <param name="timeout">The time until the selection times out</param>
+        /// <param name="message">A message to be used for the selection instead of a new one</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
+        /// <returns></returns>
+        public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseMessageSelection<TValue> selection, IMessageChannel channel,
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
+        {
+            var startTime = DateTime.UtcNow;
+
+            var selectionSource = new TaskCompletionSource<InteractivityResult<TValue>>();
+            var cancelSource = new TaskCompletionSource<bool>();
+
+            cancellationToken.Register(() => cancelSource.SetResult(true));
+
+            var selectionTask = selectionSource.Task;
+            var cancelTask = cancelSource.Task;
+            var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
+
+            if (message != null)
+            {
+                if (message.Author != Client.CurrentUser)
+                {
+                    throw new ArgumentException("Cannot use message from different user!");
+                }
+
+                await selection.InternalModifyMessageAsync(message).ConfigureAwait(false); ;
+            }
+            else
+            {
+                message = await selection.InternalSendMessageAsync(channel).ConfigureAwait(false);
+            }
+
+            async Task CheckMessageAsync(SocketMessage m)
+            {
+                if (m.Author == Client.CurrentUser)
+                {
+                    return;
+                }
+                if (!selection.InternalShouldProcess(m))
+                {
+                    if (selection.Deletion.HasFlag(DeletionOptions.Invalids))
+                    {
+                        await m.DeleteAsync().ConfigureAwait(false);
+                    }
+                    return;
+                }
+
+                var selectedValue = selection.InternalParseValue(m);
+                if (!selectedValue.IsSpecified)
+                {
+                    cancelSource.SetResult(true);
+                    return;
+                }
+                var result = new InteractivityResult<TValue>(selectedValue.Value, DateTimeOffset.UtcNow - startTime, false, false);
+
+                if (selection.Deletion.HasFlag(DeletionOptions.Valid))
+                {
+                    await m.DeleteAsync().ConfigureAwait(false);
+                }
+
+                selectionSource.SetResult(result);
+            }
+
+            try
+            {
+                Client.MessageReceived += CheckMessageAsync;
+
+                await selection.InternalInitializeMessageAsync(message).ConfigureAwait(false);
+                var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
+
+                var result = task_result == selectionTask
+                                    ? await selectionTask.ConfigureAwait(false)
+                                    : task_result == timeoutTask
+                                        ? new InteractivityResult<TValue>(default, timeout ?? DefaultTimeout, true, false)
+                                        : new InteractivityResult<TValue>(default, DateTime.UtcNow - startTime, false, true);
+
+                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+                {
+                    await message.DeleteAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    await selection.InternalCloseMessageAsync(message, result).ConfigureAwait(false);
+                }
+
+                return result;
+            }
+            finally
+            {
+                Client.MessageReceived -= CheckMessageAsync;
+            }
+        }
 
         /// <summary>
         /// Sends a page with multiple pages which the user can move through via reactions.

@@ -8,22 +8,17 @@ using Interactivity.Extensions;
 
 namespace Interactivity.Selection
 {
-    /// <summary>
-    /// Represents a builder class for making a <see cref="ReactionSelection{T}"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of values to select from</typeparam>
-    public sealed class ReactionSelectionBuilder<T> : SelectionBuilder<T, SocketReaction>
+    public sealed class ReactionSelectionBuilder<TValue> : BaseReactionSelectionBuilder<TValue>
     {
-        #region Fields
         /// <summary>
-        /// Gets or sets the emotes which are used to select values.
+        /// Gets or sets the items to select from.
         /// </summary>
-        public List<IEmote> Emotes { get; set; } = new List<IEmote>();
+        public Dictionary<IEmote, TValue> Selectables { get; set; } = new Dictionary<IEmote, TValue>();
 
         /// <summary>
-        /// Gets or sets the function to convert the values into possibilites.
+        /// Gets or sets the function to convert the values into display text.
         /// </summary>
-        public Func<T, string> StringConverter { get; set; } = x => x.ToString();
+        public Func<TValue, string> StringConverter { get; set; } = x => x.ToString();
 
         /// <summary>
         /// Gets or sets the title of the selection.
@@ -31,172 +26,161 @@ namespace Interactivity.Selection
         public string Title { get; set; } = "Select one of these:";
 
         /// <summary>
-        /// Gets or sets whether the <see cref="Selection{T, T1}"/> allows for cancellation.
+        /// Gets whether the selection allows for cancellation.
         /// </summary>
         public bool AllowCancel { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets the cancel emote if cancel is enabled in the <see cref="ReactionSelection{T}"/>.
+        /// Gets the emote used for cancelling.
+        /// Only works if <see cref="AllowCancel"/> is set to <see cref="true"/>.
         /// </summary>
         public IEmote CancelEmote { get; set; } = new Emoji("❌");
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which is sent into the channel.
+        /// </summary>
+        public PageBuilder SelectionPage { get; set; } = new PageBuilder().WithColor(Color.Blue);
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which will be shown on cancellation.
+        /// </summary>
+        public PageBuilder CancelledPage { get; set; } = null;
+
+        /// <summary>
+        /// Gets the <see cref="Page"/> which will be shown on a timeout.
+        /// </summary>
+        public PageBuilder TimeoutedPage { get; set; } = null;
 
         /// <summary>
         /// Gets or sets whether the selectionembed will be added by a default value visualizer.
         /// </summary>
         public bool EnableDefaultSelectionDescription { get; set; } = true;
-        #endregion
 
-        #region Constructor
         /// <summary>
-        /// Creates a new <see cref="ReactionSelectionBuilder{T}"/> with default values.
+        /// Creates a new <see cref="ReactionSelectionBuilder{TValue}"/> with default values.
         /// </summary>
-        public ReactionSelectionBuilder()
+        public ReactionSelectionBuilder() { }
+
+        /// <summary>
+        /// Creates a new <see cref="ReactionSelectionBuilder{TValue}"/> with default values.
+        /// </summary>
+        public static ReactionSelectionBuilder<TValue> Default => new ReactionSelectionBuilder<TValue>();
+
+        public override BaseReactionSelection<TValue> Build()
         {
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="ReactionSelectionBuilder{T}"/> with default values.
-        /// </summary>
-        public static ReactionSelectionBuilder<T> Default => new ReactionSelectionBuilder<T>();
-        #endregion
-
-        #region Build
-        /// <summary>
-        /// Build the <see cref="ReactionSelectionBuilder{T}"/> to a immutable <see cref="ReactionSelection{T}"/>.
-        /// </summary>
-        /// <returns></returns>
-        public override Selection<T, SocketReaction> Build()
-        {
-            if (Emotes.Count < Values.Count)
+            if (Selectables == null)
             {
-                throw new InvalidOperationException("Value count larger than emote count! Please add more Emotes to the selection!");
+                throw new ArgumentException(nameof(Selectables));
             }
-            if (Emotes.Contains(CancelEmote) == true)
+            if (Selectables.Count == 0)
             {
-                throw new InvalidOperationException("Please remove the cancel emote from the selection emotes!");
+                throw new InvalidOperationException("You need at least one selectable");
+            }
+            if (AllowCancel && Selectables.Keys.Contains(CancelEmote))
+            {
+                throw new InvalidOperationException("Found duplicate emotes! (Cancel Emote)");
+            }
+            if (Selectables.Distinct().Count() != Selectables.Count)
+            {
+                throw new InvalidOperationException("Found duplicate emotes!");
+            }
+            if (AllowCancel && CancelEmote == null)
+            {
+                throw new ArgumentNullException(nameof(CancelEmote));
             }
 
             if (EnableDefaultSelectionDescription == true)
             {
                 var builder = new StringBuilder();
 
-                for (int i = 0; i < Values.Count; i++)
+                foreach (var selectable in Selectables)
                 {
-                    string possibility = StringConverter.Invoke(Values[i]);
-                    builder.AppendLine($"{Emotes[i]} - {possibility}");
+                    string option = StringConverter.Invoke(selectable.Value);
+                    builder.AppendLine($"{selectable.Key} - {option}");
                 }
 
-                SelectionEmbed.AddField(Title, builder.ToString());
+                SelectionPage.AddField(Title, builder.ToString());
             }
 
-            return new ReactionSelection<T>(
-                Values?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Values)),
-                Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
-                SelectionEmbed?.Build() ?? throw new ArgumentNullException(nameof(SelectionEmbed)),
-                CancelledEmbed?.Build() ?? throw new ArgumentNullException(nameof(CancelledEmbed)),
-                TimeoutedEmbed?.Build() ?? throw new ArgumentNullException(nameof(TimeoutedEmbed)),
-                Deletion,
-                Emotes?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Emotes)),
-                CancelEmote ?? throw new ArgumentNullException(nameof(CancelEmote)),
-                AllowCancel);
-        }
-        #endregion
-
-        #region WithValue
-        /// <summary>
-        /// Sets the values to select from.
-        /// </summary>
-        public ReactionSelectionBuilder<T> WithValues(IEnumerable<T> values)
-        {
-            Values = values.ToList();
-            return this;
+            return new ReactionSelection<TValue>(
+                Selectables.AsReadOnlyDictionary(),
+                Users?.AsReadOnlyCollection() ?? throw new ArgumentException(nameof(Users)),
+                SelectionPage?.Build() ?? throw new ArgumentNullException(nameof(SelectionPage)),
+                CancelledPage?.Build(),
+                TimeoutedPage?.Build(),
+                AllowCancel,
+                CancelEmote,
+                Deletion
+                );
         }
 
         /// <summary>
         /// Sets the values to select from.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithValues(params T[] values)
+        public ReactionSelectionBuilder<TValue> WithSelectables<TKey>(IDictionary<TKey, TValue> selectables) where TKey : IEmote
         {
-            Values = values.ToList();
+            Selectables = selectables.ToDictionary(x => x.Key as IEmote, x => x.Value);
             return this;
         }
 
         /// <summary>
-        /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
+        /// Sets the users who can interact with the selection.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithUsers(IEnumerable<SocketUser> users)
+        public ReactionSelectionBuilder<TValue> WithUsers(IEnumerable<SocketUser> users)
         {
             Users = users.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets the users who can interact with the <see cref="Selection{T, T1}"/>.
+        /// Sets the users who can interact with the selection.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithUsers(params SocketUser[] users)
+        public ReactionSelectionBuilder<TValue> WithUsers(params SocketUser[] users)
         {
             Users = users.ToList();
             return this;
         }
 
         /// <summary>
-        /// Sets what the <see cref="Selection{T, T1}"/> should delete.
+        /// Sets what the selection should delete.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithDeletion(DeletionOptions deletion)
+        public ReactionSelectionBuilder<TValue> WithDeletion(DeletionOptions deletion)
         {
             Deletion = deletion;
             return this;
         }
 
         /// <summary>
-        /// Sets the selection embed of the <see cref="Selection{T, T1}"/>.
+        /// Sets the selection embed of the selection.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithSelectionEmbed(EmbedBuilder embed)
+        public ReactionSelectionBuilder<TValue> WithSelectionEmbed(PageBuilder selectionPage)
         {
-            SelectionEmbed = embed;
+            SelectionPage = selectionPage;
             return this;
         }
 
         /// <summary>
-        /// Sets the embed which the selection embed gets modified to after the <see cref="Selection{T, T1}"/> has been cancelled.
+        /// Sets the embed which the selection embed gets modified to after the selection has been cancelled.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithCancelledEmbed(EmbedBuilder cancelledEmbed)
+        public ReactionSelectionBuilder<TValue> WithCancelledEmbed(PageBuilder cancelledPage)
         {
-            CancelledEmbed = cancelledEmbed;
+            CancelledPage = cancelledPage;
             return this;
         }
 
         /// <summary>
-        /// Sets the embed which the selection embed gets modified to after the <see cref="Selection{T, T1}"/> has timed out.
+        /// Sets the embed which the selection embed gets modified to after the selection has timed out.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithTimeoutedEmbed(EmbedBuilder timeoutedEmbed)
+        public ReactionSelectionBuilder<TValue> WithTimeoutedEmbed(PageBuilder timeoutedPage)
         {
-            TimeoutedEmbed = timeoutedEmbed;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the emotes which are used to select values.
-        /// </summary>
-        public ReactionSelectionBuilder<T> WithEmotes(params IEmote[] emotes)
-        {
-            Emotes = emotes.Distinct().ToList();
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the emotes which are used to select values.
-        /// </summary>
-        public ReactionSelectionBuilder<T> WithEmotes(IEnumerable<IEmote> emotes)
-        {
-            Emotes = emotes.ToList();
+            TimeoutedPage = timeoutedPage;
             return this;
         }
 
         /// <summary>
         /// Sets the function to convert the values into possibilites.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithStringConverter(Func<T, string> stringConverter)
+        public ReactionSelectionBuilder<TValue> WithStringConverter(Func<TValue, string> stringConverter)
         {
             StringConverter = stringConverter;
             return this;
@@ -205,25 +189,26 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets the title of the selection.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithTitle(string title)
+        public ReactionSelectionBuilder<TValue> WithTitle(string title)
         {
             Title = title;
             return this;
         }
 
         /// <summary>
-        /// Sets whether the <see cref="Selection{T, T1}"/> allows for cancellation.
+        /// Gets whether the selection allows for cancellation.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithAllowCancel(bool allowCancel)
+        public ReactionSelectionBuilder<TValue> WithAllowCancel(bool allowCancel)
         {
             AllowCancel = allowCancel;
             return this;
         }
 
         /// <summary>
-        /// Sets the cancel emote if cancel is enabled in the <see cref="ReactionSelection{T}"/>.
+        /// Gets the emote used for cancelling.
+        /// Only works if <see cref="AllowCancel"/> is set to <see cref="true"/>.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithCancelEmote(IEmote cancelEmote)
+        public ReactionSelectionBuilder<TValue> WithCancelEmote(IEmote cancelEmote)
         {
             CancelEmote = cancelEmote;
             return this;
@@ -232,11 +217,10 @@ namespace Interactivity.Selection
         /// <summary>
         /// Sets whether the selectionembed will be added by a default value visualizer.
         /// </summary>
-        public ReactionSelectionBuilder<T> WithEnableDefaultSelectionDescription(bool enableDefaultSelectionDescription)
+        public ReactionSelectionBuilder<TValue> WithEnableDefaultSelectionDescription(bool enableDefaultSelectionDescription)
         {
             EnableDefaultSelectionDescription = enableDefaultSelectionDescription;
             return this;
         }
-        #endregion
     }
 }

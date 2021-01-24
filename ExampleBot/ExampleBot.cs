@@ -40,7 +40,6 @@ namespace ExampleBot_Qmmands
             };
             Commands.CommandErrored += (result, ctx, provider) =>
             {
-
                 Console.WriteLine(result.Exception.ToString());
 
                 return Task.CompletedTask;

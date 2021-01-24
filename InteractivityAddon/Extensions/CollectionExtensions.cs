@@ -15,22 +15,5 @@ namespace Interactivity.Extensions
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
             => new ReadOnlyDictionary<TKey, TValue>(dictionary);
-
-        public static int FindIndex<T>(this IEnumerable<T> collection, Predicate<T> match)
-        {
-            int i = 0;
-
-            foreach (var item in collection)
-            {
-                if (match.Invoke(item))
-                {
-                    return i;
-                }
-
-                i++;
-            }
-
-            return -1;
-        }
     }
 }

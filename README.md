@@ -57,17 +57,23 @@ public async Task ExampleReplyNextMessageAsync()
 ### Example: Selection
 ```cs
 [Command("select")]
-public async Task ExampleSelectionAsync()
+public async Task ExampleReactionSelectionAsync()
 {
     var builder = new ReactionSelectionBuilder<string>()
-        .WithValues("Hi", "How", "Hey", "Huh?!")
-        .WithEmotes(new Emoji("💵"), new Emoji("🍭"), new Emoji("😩"), new Emoji("💠"))
+        .WithSelectables(new Dictionary<IEmote, string>()
+        {
+            [new Emoji("💵")] = "Hi",
+            [new Emoji("🍭")] = "How",
+            [new Emoji("😩")] = "Hey",
+            [new Emoji("💠")] = "Huh?!"
+        })
         .WithUsers(Context.User)
-        .WithDeletion(DeletionOption.AfterCapturedContext | DeletionOption.Invalids);
+        .WithDeletion(DeletionOptions.AfterCapturedContext | DeletionOptions.Invalids);
 
     var result = await Interactivity.SendSelectionAsync(builder.Build(), Context.Channel, TimeSpan.FromSeconds(50));
 
-    if (result.IsSuccess == true) {
+    if (result.IsSuccess)
+    {
         await Context.Channel.SendMessageAsync(result.Value.ToString());
     }
 }
