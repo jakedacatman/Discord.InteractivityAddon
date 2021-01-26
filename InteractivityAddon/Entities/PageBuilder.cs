@@ -34,7 +34,6 @@ namespace Interactivity
         /// </summary>
         public string Title { get; set; } = null;
 
-
         /// <summary>
         /// Gets or sets the Url of the <see cref="PageBuilder"/>.
         /// </summary>
