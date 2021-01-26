@@ -35,11 +35,12 @@ namespace Interactivity
                 Author = Embed.Author?.ToBuilder(),
                 ThumbnailUrl = Embed.Thumbnail?.Url,
                 Title = Embed.Title,
+                Url = Embed.Url,
                 Text = Text
             };
 
         internal Page(string text = null, sys.Color? color = null,
-            string description = null, string title = null, string thumbnailUrl = null, string imageUrl = null,
+            string description = null, string title = null, string url = null, string thumbnailUrl = null, string imageUrl = null,
             EmbedAuthorBuilder author = null, List<EmbedFieldBuilder> fields = null, EmbedFooterBuilder footer = null)
         {
             Text = text;
@@ -47,6 +48,7 @@ namespace Interactivity
             if (color == null &&
                 description == null &&
                 title == null &&
+                url == null &&
                 thumbnailUrl == null &&
                 imageUrl == null &&
                 fields.Count == 0 &&
@@ -62,6 +64,7 @@ namespace Interactivity
                 Color = (Color?) color,
                 Description = description,
                 Title = title,
+                Url = url,
                 ThumbnailUrl = thumbnailUrl,
                 ImageUrl = imageUrl,
                 Fields = fields,
@@ -80,6 +83,7 @@ namespace Interactivity
             => new Page(color: embed.Color,
                 description: embed.Description,
                 title: embed.Title,
+                url: embed.Url,
                 thumbnailUrl: embed.Thumbnail?.Url,
                 imageUrl: embed.Image?.Url,
                 fields: embed.Fields.Select(x => x.ToBuilder()).ToList());
@@ -93,6 +97,7 @@ namespace Interactivity
             => new Page(color: builder.Color,
                 description: builder.Description,
                 title: builder.Title,
+                url: builder.Url,
                 thumbnailUrl: builder.ThumbnailUrl,
                 imageUrl: builder.ImageUrl,
                 fields: builder.Fields);

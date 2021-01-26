@@ -34,6 +34,12 @@ namespace Interactivity
         /// </summary>
         public string Title { get; set; } = null;
 
+
+        /// <summary>
+        /// Gets or sets the Url of the <see cref="PageBuilder"/>.
+        /// </summary>
+        public string Url { get; set; } = null;
+
         /// <summary>
         /// Gets or sets the Thumbnailurl of the <see cref="PageBuilder"/>.
         /// </summary>
@@ -69,6 +75,7 @@ namespace Interactivity
                 .WithColor(embed.Color ?? Discord.Color.Default)
                 .WithDescription(embed.Description)
                 .WithTitle(embed.Title)
+                .WithUrl(embed.Url)
                 .WithThumbnailUrl(embed.Thumbnail?.Url)
                 .WithImageUrl(embed.Image?.Url)
                 .WithAuthor(embed.Author?.ToBuilder())
@@ -85,6 +92,7 @@ namespace Interactivity
                 .WithColor(builder.Color ?? Discord.Color.Default)
                 .WithDescription(builder.Description)
                 .WithTitle(builder.Title)
+                .WithUrl(builder.Url)
                 .WithThumbnailUrl(builder.ThumbnailUrl)
                 .WithImageUrl(builder.ImageUrl)
                 .WithAuthor(builder.Author)
@@ -132,6 +140,17 @@ namespace Interactivity
         public PageBuilder WithTitle(string title)
         {
             Title = title;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the Url of the <see cref="PageBuilder"/>.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public PageBuilder WithUrl(string url)
+        {
+            Url = url;
             return this;
         }
 
@@ -327,12 +346,13 @@ namespace Interactivity
         }
 
         public Page Build(string defaultText = null, sys.Color? defaultColor = null,
-            string defaultDescription = null, string defaultTitle = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
+            string defaultDescription = null, string defaultTitle = null, string defaultUrl = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
             EmbedAuthorBuilder defaultAuthor = null, List<EmbedFieldBuilder> defaultFields = null, EmbedFooterBuilder defaultFooter = null)
             => new Page(Text ?? defaultText,
                 Color ?? defaultColor,
                 Description ?? defaultDescription,
                 Title ?? defaultTitle,
+                Url ?? defaultUrl,
                 ThumbnailUrl ?? defaultThumbnailUrl,
                 ImageUrl ?? defaultImageUrl,
                 Author ?? defaultAuthor,
