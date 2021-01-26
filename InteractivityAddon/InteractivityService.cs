@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -20,16 +19,18 @@ namespace Interactivity
 
         public TimeSpan DefaultTimeout { get; }
         public DateTime UptimeStartTime { get; private set; }
+        public bool RunOnGateway { get; }
 
         /// <summary>
         /// Creates a new instance of <see cref="InteractivityService"/>.
         /// </summary>
         /// <param name="client">Your instance of <see cref="BaseSocketClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
-        public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null)
+        public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
         {
             Client = client ?? throw new ArgumentNullException("client cannot be null");
             UptimeStartTime = DateTime.Now;
+            RunOnGateway = runOnGateway;
 
             DefaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(45);
 
@@ -44,8 +45,8 @@ namespace Interactivity
         /// </summary>
         /// <param name="client">Your instance of <see cref="DiscordSocketClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
-        public InteractivityService(DiscordSocketClient client, TimeSpan? defaultTimeout = null)
-            : this((BaseSocketClient) client, defaultTimeout)
+        public InteractivityService(DiscordSocketClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
+            : this((BaseSocketClient) client, defaultTimeout, runOnGateway)
         {
         }
 
@@ -54,8 +55,8 @@ namespace Interactivity
         /// </summary>
         /// <param name="client">Your instance of <see cref="DiscordShardedClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
-        public InteractivityService(DiscordShardedClient client, TimeSpan? defaultTimeout = null)
-            : this((BaseSocketClient) client, defaultTimeout)
+        public InteractivityService(DiscordShardedClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
+            : this((BaseSocketClient) client, defaultTimeout, runOnGateway)
         {
         }
 
@@ -83,7 +84,8 @@ namespace Interactivity
         /// <param name="options">The options to be used when sending the request.</param>
         /// <returns></returns>
         public void DelayedSendMessageAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null)
+            => _ = Task.Run(async () =>
             {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendMessageAsync(text, isTTS, embed, options).ConfigureAwait(false);
@@ -105,7 +107,8 @@ namespace Interactivity
         /// <returns></returns>
         public void DelayedSendFileAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
             string filepath = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null)
+            => _ = Task.Run(async () =>
             {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendFileAsync(filepath, text, isTTS, embed, options).ConfigureAwait(false);
@@ -157,7 +160,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Predicate<SocketReaction> filter = null, Func<SocketReaction, bool, Task> actions = null,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -188,9 +191,21 @@ namespace Interactivity
                 await actions.Invoke(reaction, false).ConfigureAwait(false);
                 reactionSource.SetResult(new InteractivityResult<SocketReaction>(reaction, DateTime.UtcNow - startTime, false, false));
             }
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckReactionAsync(m, c, r);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckReactionAsync(m, c, r));
+                }
+            }
+
             try
             {
-                Client.ReactionAdded += CheckReactionAsync;
+                Client.ReactionAdded += HandleReactionAsync;
 
                 var result = await Task.WhenAny(reactionTask, cancelTask, timeoutTask).ConfigureAwait(false);
 
@@ -202,7 +217,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.ReactionAdded -= CheckReactionAsync;
+                Client.ReactionAdded -= HandleReactionAsync;
             }
         }
 
@@ -215,7 +230,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Predicate<SocketMessage> filter = null, Func<SocketMessage, bool, Task> actions = null,
-            TimeSpan? timeout = null, CancellationToken token = default)
+            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -246,10 +261,21 @@ namespace Interactivity
                 await actions.Invoke(s, false).ConfigureAwait(false);
                 messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - UptimeStartTime, false, false));
             }
+            async Task HandleMessageAsync(SocketMessage m)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckMessageAsync(m);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckMessageAsync(m));
+                }
+            }
 
             try
             {
-                Client.MessageReceived += CheckMessageAsync;
+                Client.MessageReceived += HandleMessageAsync;
 
                 var result = await Task.WhenAny(messageTask, timeoutTask, cancelTask).ConfigureAwait(false);
 
@@ -261,7 +287,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.MessageReceived -= CheckMessageAsync;
+                Client.MessageReceived -= HandleMessageAsync;
             }
         }
 
@@ -273,7 +299,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken token = default)
         {
             var startTime = DateTime.UtcNow;
             var confirmationSource = new TaskCompletionSource<InteractivityResult<bool>>();
@@ -327,10 +353,21 @@ namespace Interactivity
                     confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
                 }
             }
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckReactionAsync(m, c, r);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckReactionAsync(m, c, r));
+                }
+            }
 
             try
             {
-                Client.ReactionAdded += CheckReactionAsync;
+                Client.ReactionAdded += HandleReactionAsync;
 
                 await message.AddReactionsAsync(confirmation.Emotes).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(confirmationTask, cancelTask, timeoutTask).ConfigureAwait(false);
@@ -365,7 +402,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.ReactionAdded -= CheckReactionAsync;
+                Client.ReactionAdded -= HandleReactionAsync;
             }
         }
 
@@ -380,7 +417,7 @@ namespace Interactivity
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
         /// <returns></returns>
         public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseReactionSelection<TValue> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -438,10 +475,21 @@ namespace Interactivity
 
                 selectionSource.SetResult(result);
             }
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckReactionAsync(m, c, r);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckReactionAsync(m, c, r));
+                }
+            }
 
             try
             {
-                Client.ReactionAdded += CheckReactionAsync;
+                Client.ReactionAdded += HandleReactionAsync;
 
                 await selection.InternalInitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
@@ -465,7 +513,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.ReactionAdded -= CheckReactionAsync;
+                Client.ReactionAdded -= HandleReactionAsync;
             }
         }
 
@@ -480,7 +528,7 @@ namespace Interactivity
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
         /// <returns></returns>
         public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseMessageSelection<TValue> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -537,10 +585,21 @@ namespace Interactivity
 
                 selectionSource.SetResult(result);
             }
+            async Task HandleMessageAsync(SocketMessage m)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckMessageAsync(m);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckMessageAsync(m));
+                }
+            }
 
             try
             {
-                Client.MessageReceived += CheckMessageAsync;
+                Client.MessageReceived += HandleMessageAsync;
 
                 await selection.InternalInitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(selectionTask, timeoutTask, cancelTask).ConfigureAwait(false);
@@ -564,7 +623,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.MessageReceived -= CheckMessageAsync;
+                Client.MessageReceived -= HandleMessageAsync;
             }
         }
 
@@ -578,7 +637,7 @@ namespace Interactivity
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken token = default)
         {
             var cancelSource = new TaskCompletionSource<bool>();
 
@@ -634,9 +693,21 @@ namespace Interactivity
                     await message.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                 }
             }
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            {
+                if (runOnGateway ?? RunOnGateway)
+                {
+                    await CheckReactionAsync(m, c, r);
+                }
+                else
+                {
+                    _ = Task.Run(() => CheckReactionAsync(m, c, r));
+                }
+            }
+
             try
             {
-                Client.ReactionAdded += CheckReactionAsync;
+                Client.ReactionAdded += HandleReactionAsync;
 
                 await paginator.InitializeMessageAsync(message).ConfigureAwait(false);
                 var task_result = await Task.WhenAny(timeoutTask, cancelTask).ConfigureAwait(false);
@@ -662,7 +733,7 @@ namespace Interactivity
             }
             finally
             {
-                Client.ReactionAdded -= CheckReactionAsync;
+                Client.ReactionAdded -= HandleReactionAsync;
             }
         }
     }

@@ -89,7 +89,7 @@ namespace ExampleBot_Qmmands
             return services
                 .AddSingleton(Client)
                 .AddSingleton(new CommandService(new CommandServiceConfiguration { CaseSensitive = false, IgnoreExtraArguments = false, DefaultRunMode = RunMode.Parallel }))
-                .AddSingleton(new InteractivityService(Client, TimeSpan.FromSeconds(20)))
+                .AddSingleton(new InteractivityService(Client, TimeSpan.FromSeconds(20), false))
                 .BuildServiceProvider();
         }
     }
