@@ -16,9 +16,17 @@ namespace Interactivity
     public sealed class InteractivityService
     {
         private BaseSocketClient Client { get; }
+        private DateTime UptimeStartTime { get; set; }
 
+        /// <summary>
+        /// The default timeout for interactivity actions provided by this service.
+        /// </summary>
         public TimeSpan DefaultTimeout { get; }
-        public DateTime UptimeStartTime { get; private set; }
+
+        /// <summary>
+        /// Whether to run the internal event handlers used for interactivity in a seperate task.
+        /// This should be used to prevent blocking the gateway during high loads.
+        /// </summary>
         public bool RunOnGateway { get; }
 
         /// <summary>
@@ -26,6 +34,7 @@ namespace Interactivity
         /// </summary>
         /// <param name="client">Your instance of <see cref="BaseSocketClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
         {
             Client = client ?? throw new ArgumentNullException("client cannot be null");
@@ -45,6 +54,7 @@ namespace Interactivity
         /// </summary>
         /// <param name="client">Your instance of <see cref="DiscordSocketClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         public InteractivityService(DiscordSocketClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
             : this((BaseSocketClient) client, defaultTimeout, runOnGateway)
         {
@@ -55,6 +65,7 @@ namespace Interactivity
         /// </summary>
         /// <param name="client">Your instance of <see cref="DiscordShardedClient"/>.</param>
         /// <param name="defaultTimeout">The default timeout for this <see cref="InteractivityService"/>.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         public InteractivityService(DiscordShardedClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
             : this((BaseSocketClient) client, defaultTimeout, runOnGateway)
         {
@@ -131,7 +142,8 @@ namespace Interactivity
         /// <returns></returns>
         public void DelayedSendFileAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
             Stream filestream = null, string filename = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) => _ = Task.Run(async () =>
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) 
+            => _ = Task.Run(async () =>
             {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
                 var msg = await channel.SendFileAsync(filestream, filename, text, isTTS, embed, options).ConfigureAwait(false);
@@ -145,7 +157,8 @@ namespace Interactivity
         /// <param name="msg">The message to delete</param>
         /// <param name="deleteDelay">The time to wait before deleting the message</param>
         /// <returns></returns>
-        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null) => _ = Task.Run(async () =>
+        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null) 
+            => _ = Task.Run(async () =>
         {
             await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);
             await msg.DeleteAsync().ConfigureAwait(false);
@@ -157,6 +170,7 @@ namespace Interactivity
         /// <param name="filter">The <see cref="Predicate{SocketReaction}"/> which the reaction has to pass.</param>
         /// <param name="actions">The <see cref="ActionCollection{SocketReaction}"/> which gets executed to incoming reactions.</param>
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Predicate<SocketReaction> filter = null, Func<SocketReaction, bool, Task> actions = null,
@@ -227,6 +241,7 @@ namespace Interactivity
         /// <param name="filter">The <see cref="Criteria{SocketMessage}"/> which the message has to pass.</param>
         /// <param name="actions">The <see cref="ActionCollection{SocketMessage}"/> which gets executed to incoming messages.</param>
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Predicate<SocketMessage> filter = null, Func<SocketMessage, bool, Task> actions = null,
@@ -296,6 +311,7 @@ namespace Interactivity
         /// </summary>
         /// <param name="confirmation">The <see cref="Confirmation.Confirmation"/> containing required informations about the confirmation.</param>
         /// <param name="timeout">The time before the confirmation returns a timeout result.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
@@ -414,6 +430,7 @@ namespace Interactivity
         /// <param name="channel">The channel to send the selection to</param>
         /// <param name="timeout">The time until the selection times out</param>
         /// <param name="message">A message to be used for the selection instead of a new one</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
         /// <returns></returns>
         public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseReactionSelection<TValue> selection, IMessageChannel channel,
@@ -525,6 +542,7 @@ namespace Interactivity
         /// <param name="channel">The channel to send the selection to</param>
         /// <param name="timeout">The time until the selection times out</param>
         /// <param name="message">A message to be used for the selection instead of a new one</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection</param>
         /// <returns></returns>
         public async Task<InteractivityResult<TValue>> SendSelectionAsync<TValue>(BaseMessageSelection<TValue> selection, IMessageChannel channel,
@@ -634,6 +652,7 @@ namespace Interactivity
         /// <param name="channel">The <see cref="IMessageChannel"/> to send the <see cref="Paginator"/> to.</param>
         /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
         /// <param name="message">The message to modify to display the <see cref="Paginator"/>.</param>
+        /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
         /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
