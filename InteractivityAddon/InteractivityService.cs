@@ -171,10 +171,10 @@ namespace Interactivity
         /// <param name="actions">The <see cref="ActionCollection{SocketReaction}"/> which gets executed to incoming reactions.</param>
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
         /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketReaction>> NextReactionAsync(Predicate<SocketReaction> filter = null, Func<SocketReaction, bool, Task> actions = null,
-            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken token = default)
+            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -184,7 +184,7 @@ namespace Interactivity
             var reactionSource = new TaskCompletionSource<InteractivityResult<SocketReaction>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            token.Register(() => cancelSource.SetResult(true));
+            cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var reactionTask = reactionSource.Task;
             var cancelTask = cancelSource.Task;
@@ -242,10 +242,10 @@ namespace Interactivity
         /// <param name="actions">The <see cref="ActionCollection{SocketMessage}"/> which gets executed to incoming messages.</param>
         /// <param name="timeout">The time to wait before the methods retuns a timeout result.</param>
         /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the request.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the request.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<SocketMessage>> NextMessageAsync(Predicate<SocketMessage> filter = null, Func<SocketMessage, bool, Task> actions = null,
-            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken token = default)
+            TimeSpan? timeout = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
 
@@ -255,7 +255,7 @@ namespace Interactivity
             var messageSource = new TaskCompletionSource<InteractivityResult<SocketMessage>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            token.Register(() => cancelSource.SetResult(true));
+            cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var messageTask = messageSource.Task;
             var cancelTask = cancelSource.Task;
@@ -312,16 +312,16 @@ namespace Interactivity
         /// <param name="confirmation">The <see cref="Confirmation.Confirmation"/> containing required informations about the confirmation.</param>
         /// <param name="timeout">The time before the confirmation returns a timeout result.</param>
         /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the confirmation.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<bool>> SendConfirmationAsync(Confirmation.Confirmation confirmation, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var startTime = DateTime.UtcNow;
             var confirmationSource = new TaskCompletionSource<InteractivityResult<bool>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            token.Register(() => cancelSource.SetResult(true));
+            cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var confirmationTask = confirmationSource.Task;
             var cancelTask = cancelSource.Task;
@@ -653,14 +653,14 @@ namespace Interactivity
         /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
         /// <param name="message">The message to modify to display the <see cref="Paginator"/>.</param>
         /// <param name="runOnGateway">Whether to run the internal event handlers used for interactivity in a seperate task.</param>
-        /// <param name="token">The <see cref="CancellationToken"/> to cancel the paginator.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns></returns>
         public async Task<InteractivityResult<object>> SendPaginatorAsync(Paginator paginator, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken token = default)
+            TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var cancelSource = new TaskCompletionSource<bool>();
 
-            token.Register(() => cancelSource.SetResult(true));
+            cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
