@@ -449,7 +449,7 @@ namespace Interactivity
 
             if (message != null)
             {
-                if (message.Author != Client.CurrentUser)
+                if (selection is ReactionSelection<TValue> && message.Author != Client.CurrentUser)
                 {
                     throw new ArgumentException("Cannot use message from different user!");
                 }
@@ -561,7 +561,7 @@ namespace Interactivity
 
             if (message != null)
             {
-                if (message.Author != Client.CurrentUser)
+                if (selection is MessageSelection<TValue> && message.Author != Client.CurrentUser)
                 {
                     throw new ArgumentException("Cannot use message from different user!");
                 }
