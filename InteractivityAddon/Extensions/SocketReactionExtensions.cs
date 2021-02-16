@@ -11,7 +11,7 @@ namespace Interactivity.Extensions
             var channel = reaction.Channel;
             var message = reaction.Message.IsSpecified
                 ? reaction.Message.Value
-                : await channel.GetMessageAsync(reaction.MessageId).ConfigureAwait(false) as SocketUserMessage;
+                : await channel.GetMessageAsync(reaction.MessageId).ConfigureAwait(false);
 
             if (message == null)
             {
