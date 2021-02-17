@@ -400,11 +400,11 @@ namespace Interactivity
                     return result;
                 }
 
-                if (result.IsCancelled == true)
+                if (result.IsCancelled && confirmation.CancelledEmbed != null)
                 {
                     await message.ModifyAsync(x => x.Embed = confirmation.CancelledEmbed).ConfigureAwait(false);
                 }
-                else if (result.IsTimeouted == true)
+                else if (result.IsTimeouted && confirmation.TimeoutedEmbed != null)
                 {
                     await message.ModifyAsync(x => x.Embed = confirmation.TimeoutedEmbed).ConfigureAwait(false);
                 }
@@ -739,11 +739,11 @@ namespace Interactivity
                 {
                     await message.DeleteAsync().ConfigureAwait(false);
                 }
-                else if (result.IsCancelled == true)
+                else if (result.IsCancelled && paginator.CancelledEmbed != null)
                 {
                     await message.ModifyAsync(x => { x.Embed = paginator.CancelledEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
-                else if (result.IsTimeouted == true)
+                else if (result.IsTimeouted && paginator.TimeoutedEmbed != null)
                 {
                     await message.ModifyAsync(x => { x.Embed = paginator.TimeoutedEmbed; x.Content = null; }).ConfigureAwait(false);
                 }
