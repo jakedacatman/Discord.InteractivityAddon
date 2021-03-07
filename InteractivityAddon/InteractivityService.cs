@@ -16,7 +16,6 @@ namespace Interactivity
     public sealed class InteractivityService
     {
         private BaseSocketClient Client { get; }
-        private DateTime UptimeStartTime { get; set; }
 
         /// <summary>
         /// The default timeout for interactivity actions provided by this service.
@@ -38,7 +37,6 @@ namespace Interactivity
         public InteractivityService(BaseSocketClient client, TimeSpan? defaultTimeout = null, bool runOnGateway = true)
         {
             Client = client ?? throw new ArgumentNullException("client cannot be null");
-            UptimeStartTime = DateTime.Now;
             RunOnGateway = runOnGateway;
 
             DefaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(45);
@@ -70,18 +68,6 @@ namespace Interactivity
             : this((BaseSocketClient) client, defaultTimeout, runOnGateway)
         {
         }
-
-        /// <summary>
-        /// Get the time passed since the uptime counter started.
-        /// </summary>
-        /// <returns></returns>
-        public TimeSpan GetUptime() => DateTime.Now - UptimeStartTime;
-
-        /// <summary>
-        /// Resets the uptime counter.
-        /// </summary>
-        public void ResetUptime()
-            => UptimeStartTime = DateTime.Now;
 
         /// <summary>
         /// Sends a message to a channel delayed and deletes it after another delay.
@@ -274,7 +260,7 @@ namespace Interactivity
                 }
 
                 await actions.Invoke(s, false).ConfigureAwait(false);
-                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - UptimeStartTime, false, false));
+                messageSource.SetResult(new InteractivityResult<SocketMessage>(s, s.Timestamp - startTime, false, false));
             }
             async Task HandleMessageAsync(SocketMessage m)
             {
