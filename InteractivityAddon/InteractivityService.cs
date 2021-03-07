@@ -170,7 +170,7 @@ namespace Interactivity
             var reactionSource = new TaskCompletionSource<InteractivityResult<SocketReaction>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var reactionTask = reactionSource.Task;
             var cancelTask = cancelSource.Task;
@@ -241,7 +241,7 @@ namespace Interactivity
             var messageSource = new TaskCompletionSource<InteractivityResult<SocketMessage>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var messageTask = messageSource.Task;
             var cancelTask = cancelSource.Task;
@@ -289,6 +289,7 @@ namespace Interactivity
             finally
             {
                 Client.MessageReceived -= HandleMessageAsync;
+                cancellationRegistration.Dispose();
             }
         }
 
@@ -307,7 +308,7 @@ namespace Interactivity
             var confirmationSource = new TaskCompletionSource<InteractivityResult<bool>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var confirmationTask = confirmationSource.Task;
             var cancelTask = cancelSource.Task;
@@ -405,6 +406,7 @@ namespace Interactivity
             finally
             {
                 Client.ReactionAdded -= HandleReactionAsync;
+                cancellationRegistration.Dispose();
             }
         }
 
@@ -427,7 +429,7 @@ namespace Interactivity
             var selectionSource = new TaskCompletionSource<InteractivityResult<TValue>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var selectionTask = selectionSource.Task;
             var cancelTask = cancelSource.Task;
@@ -517,6 +519,7 @@ namespace Interactivity
             finally
             {
                 Client.ReactionAdded -= HandleReactionAsync;
+                cancellationRegistration.Dispose();
             }
         }
 
@@ -539,7 +542,7 @@ namespace Interactivity
             var selectionSource = new TaskCompletionSource<InteractivityResult<TValue>>();
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var selectionTask = selectionSource.Task;
             var cancelTask = cancelSource.Task;
@@ -628,6 +631,7 @@ namespace Interactivity
             finally
             {
                 Client.MessageReceived -= HandleMessageAsync;
+                cancellationRegistration.Dispose();
             }
         }
 
@@ -646,7 +650,7 @@ namespace Interactivity
         {
             var cancelSource = new TaskCompletionSource<bool>();
 
-            cancellationToken.Register(() => cancelSource.SetResult(true));
+            var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
@@ -739,6 +743,7 @@ namespace Interactivity
             finally
             {
                 Client.ReactionAdded -= HandleReactionAsync;
+                cancellationRegistration.Dispose();
             }
         }
     }
