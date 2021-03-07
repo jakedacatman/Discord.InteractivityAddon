@@ -83,7 +83,10 @@ namespace Interactivity.Selection
 
         protected override async Task CloseMessageAsync(IUserMessage message, InteractivityResult<TValue> result)
         {
-            await message.RemoveAllReactionsAsync();
+            //the remove all reactions endpoint requires the user to have the manage messages permission
+            //the user wont have this in a DM channel and calling this will throw HttpExceptions
+            if (message.Channel is not IDMChannel)
+                await message.RemoveAllReactionsAsync();
 
             if (result.IsCancelled && CancelledPage != null)
             {
