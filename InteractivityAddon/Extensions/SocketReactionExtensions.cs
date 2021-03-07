@@ -6,7 +6,7 @@ namespace Interactivity.Extensions
 {
     internal static partial class Extensions
     {
-        public static async Task DeleteAsync(this SocketReaction reaction, BaseSocketClient client)
+        public static async Task DeleteAsync(this SocketReaction reaction)
         {
             var channel = reaction.Channel;
             var message = reaction.Message.IsSpecified
