@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Interactivity.Entities;
 using Interactivity.Extensions;
 using Interactivity.Pagination;
 using Interactivity.Selection;
@@ -649,11 +650,12 @@ namespace Interactivity
             TimeSpan? timeout = null, IUserMessage message = null, bool? runOnGateway = null, CancellationToken cancellationToken = default)
         {
             var cancelSource = new TaskCompletionSource<bool>();
+            var timeoutProvider = new TimeoutProvider(timeout ?? DefaultTimeout);
 
             var cancellationRegistration = cancellationToken.Register(() => cancelSource.SetResult(true));
 
             var cancelTask = cancelSource.Task;
-            var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
+            var timeoutTask = timeoutProvider.WaitAsync();
 
             var page = await paginator.GetOrLoadCurrentPageAsync().ConfigureAwait(false);
 
@@ -695,6 +697,7 @@ namespace Interactivity
                     return;
                 }
 
+                timeoutProvider.Reset();
                 bool refreshPage = await paginator.ApplyActionAsync(action).ConfigureAwait(false);
                 if (refreshPage)
                 {
@@ -744,6 +747,7 @@ namespace Interactivity
             {
                 Client.ReactionAdded -= HandleReactionAsync;
                 cancellationRegistration.Dispose();
+                timeoutProvider.Dispose();
             }
         }
     }
