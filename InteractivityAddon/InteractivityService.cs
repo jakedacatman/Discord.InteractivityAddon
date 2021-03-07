@@ -128,7 +128,7 @@ namespace Interactivity
         /// <returns></returns>
         public void DelayedSendFileAndDeleteAsync(IMessageChannel channel, TimeSpan? sendDelay = null, TimeSpan? deleteDelay = null,
             Stream filestream = null, string filename = null,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null) 
+            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null)
             => _ = Task.Run(async () =>
             {
                 await Task.Delay(sendDelay ?? TimeSpan.Zero).ConfigureAwait(false);
@@ -143,7 +143,7 @@ namespace Interactivity
         /// <param name="msg">The message to delete</param>
         /// <param name="deleteDelay">The time to wait before deleting the message</param>
         /// <returns></returns>
-        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null) 
+        public void DelayedDeleteMessageAsync(IMessage msg, TimeSpan? deleteDelay = null)
             => _ = Task.Run(async () =>
         {
             await Task.Delay(deleteDelay ?? DefaultTimeout).ConfigureAwait(false);

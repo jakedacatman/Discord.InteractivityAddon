@@ -122,8 +122,8 @@ namespace Interactivity.Selection
             }
 
             return new MessageSelection<TValue>(
-                selectableDictionary.AsReadOnlyDictionary(),
-                Users?.AsReadOnlyCollection() ?? throw new ArgumentException(nameof(Users)),
+                selectableDictionary.AsReadOnly(),
+                Users?.AsReadOnly() ?? throw new ArgumentException(nameof(Users)),
                 SelectionPage?.Build() ?? throw new ArgumentNullException(nameof(SelectionPage)),
                 CancelledPage?.Build(),
                 TimeoutedPage?.Build(),

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using Discord.WebSocket;
-using Interactivity.Extensions;
 
 namespace Interactivity.Confirmation
 {
@@ -53,7 +52,7 @@ namespace Interactivity.Confirmation
         public Confirmation Build()
             => new Confirmation(
                 Content?.Build() ?? throw new ArgumentNullException(nameof(Content)),
-                Users?.AsReadOnlyCollection() ?? throw new ArgumentNullException(nameof(Users)),
+                Users?.AsReadOnly() ?? throw new ArgumentNullException(nameof(Users)),
                 ConfirmEmote ?? throw new ArgumentNullException(nameof(ConfirmEmote)),
                 DeclineEmote ?? throw new ArgumentNullException(nameof(DeclineEmote)),
                 TimeoutedEmbed?.Build(),

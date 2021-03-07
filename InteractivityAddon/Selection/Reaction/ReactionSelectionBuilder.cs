@@ -103,8 +103,8 @@ namespace Interactivity.Selection
             }
 
             return new ReactionSelection<TValue>(
-                Selectables.AsReadOnlyDictionary(),
-                Users?.AsReadOnlyCollection() ?? throw new ArgumentException(nameof(Users)),
+                Selectables.AsReadOnly(),
+                Users?.AsReadOnly() ?? throw new ArgumentException(nameof(Users)),
                 SelectionPage?.Build() ?? throw new ArgumentNullException(nameof(SelectionPage)),
                 CancelledPage?.Build(),
                 TimeoutedPage?.Build(),
