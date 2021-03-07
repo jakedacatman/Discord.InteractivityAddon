@@ -344,18 +344,7 @@ namespace Interactivity
             return this;
         }
 
-        public Page Build(string defaultText = null, sys.Color? defaultColor = null,
-            string defaultDescription = null, string defaultTitle = null, string defaultUrl = null, string defaultThumbnailUrl = null, string defaultImageUrl = null,
-            EmbedAuthorBuilder defaultAuthor = null, List<EmbedFieldBuilder> defaultFields = null, EmbedFooterBuilder defaultFooter = null)
-            => new Page(Text ?? defaultText,
-                Color ?? defaultColor,
-                Description ?? defaultDescription,
-                Title ?? defaultTitle,
-                Url ?? defaultUrl,
-                ThumbnailUrl ?? defaultThumbnailUrl,
-                ImageUrl ?? defaultImageUrl,
-                Author ?? defaultAuthor,
-                Fields ?? defaultFields ?? new List<EmbedFieldBuilder>(),
-                Footer ?? defaultFooter);
+        public Page Build()
+            => new Page(Text, Color, Description, Title, Url, ThumbnailUrl, ImageUrl, Author, Fields ?? new List<EmbedFieldBuilder>(), Footer);
     }
 }
