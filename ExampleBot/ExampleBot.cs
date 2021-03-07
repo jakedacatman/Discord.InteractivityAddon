@@ -64,7 +64,7 @@ namespace ExampleBot_Qmmands
 
                 var context = new ExampleCommandContext(msg);
 
-                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string usedPrefix, out string cmd) == true)
+                if (!CommandUtilities.HasAnyPrefix(msg.Content, new[] { "!" }, StringComparison.OrdinalIgnoreCase, out string usedPrefix, out string cmd))
                 {
                     return;
                 }

@@ -89,7 +89,7 @@ namespace Interactivity.Selection
                 throw new ArgumentNullException(nameof(CancelEmote));
             }
 
-            if (EnableDefaultSelectionDescription == true)
+            if (EnableDefaultSelectionDescription)
             {
                 var builder = new StringBuilder();
 

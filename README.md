@@ -44,7 +44,7 @@ public async Task ExampleReplyNextMessageAsync()
 {
     var result = await Interactivity.NextMessageAsync(x => x.Author == Context.User);
 
-    if (result.IsSuccess == true) {
+    if (result.IsSuccess) {
         Interactivity.DelayedSendMessageAndDeleteAsync(
                         Context.Channel,
                         deleteDelay: TimeSpan.FromSeconds(20), 
@@ -114,7 +114,7 @@ public async Task ConfirmAsync()
 
     var result = await Interactivity.SendConfirmationAsync(request, Context.Channel);
 
-    if (result.Value == true)
+    if (result.Value)
     {
         await Context.Channel.SendMessageAsync("Confirmed :thumbsup:!");
     }

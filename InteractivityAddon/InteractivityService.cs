@@ -617,7 +617,7 @@ namespace Interactivity
                                         ? new InteractivityResult<TValue>(default, timeout ?? DefaultTimeout, true, false)
                                         : new InteractivityResult<TValue>(default, DateTime.UtcNow - startTime, false, true);
 
-                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+                if (selection.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
                 {
                     await message.DeleteAsync().ConfigureAwait(false);
                 }
@@ -725,7 +725,7 @@ namespace Interactivity
                                 ? new InteractivityResult<object>(default, timeout ?? DefaultTimeout, true, false)
                                 : new InteractivityResult<object>(default, DateTime.UtcNow - startTime, false, true);
 
-                if (paginator.Deletion.HasFlag(DeletionOptions.AfterCapturedContext) == true)
+                if (paginator.Deletion.HasFlag(DeletionOptions.AfterCapturedContext))
                 {
                     await message.DeleteAsync().ConfigureAwait(false);
                 }
