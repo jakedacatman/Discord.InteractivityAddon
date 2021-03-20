@@ -21,7 +21,7 @@ Make sure to use the preview version of this package if you are planning to use 
  - Fully customizable selection from a list of objects
    - Works with messages or reactions
    - Makes user input easy
-   - Get more customizability by creating your own child of the `Selection` & `SelectionBuilder` classes
+   - Get more customizability by creating your own child of the `BaseMessageSelection` / `BaseReactionSelection` classes
  - Confirmation
  - Uptime counter
  
