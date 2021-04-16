@@ -124,3 +124,13 @@ public async Task ConfirmAsync()
     }
 }
 ```
+
+## Troubleshooting
+
+ >  A MessageReceived handler is blocking the gateway task.
+
+If you are getting this error and you are using interactivity in commands running on the gateway task, make sure your commands are running asynchronously (eg. by using RunMode = RunMode.Async).
+
+ > You are not getting any errors but all interactive calls don't yield results and time out.
+
+Make sure to use the same client for instantiating the `InteractivityService` that is also used throughout your application.
