@@ -23,7 +23,6 @@ Make sure to use the preview version of this package if you are planning to use 
    - Makes user input easy
    - Get more customizability by creating your own child of the `BaseMessageSelection` / `BaseReactionSelection` classes
  - Confirmation
- - Uptime counter
  
 ## Usage
 To properly use the features this addon provides you need to add the `InteractivityService` to your service provider.
