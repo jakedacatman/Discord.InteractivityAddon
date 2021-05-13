@@ -74,11 +74,11 @@ namespace Interactivity.Pagination
 
             if (Deletion.HasFlag(DeletionOptions.Invalids) && !valid)
             {
-                await reaction.DeleteAsync().ConfigureAwait(false);
+                await client.Rest.RemoveReactionAsync(reaction).ConfigureAwait(false);
             }
             if (Deletion.HasFlag(DeletionOptions.Valid) && valid)
             {
-                await reaction.DeleteAsync().ConfigureAwait(false);
+                await client.Rest.RemoveReactionAsync(reaction).ConfigureAwait(false);
             }
 
             return valid;

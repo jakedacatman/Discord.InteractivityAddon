@@ -458,7 +458,7 @@ namespace Interactivity
                 {
                     if (selection.Deletion.HasFlag(DeletionOptions.Invalids))
                     {
-                        await r.DeleteAsync().ConfigureAwait(false);
+                        await Client.Rest.RemoveReactionAsync(r).ConfigureAwait(false);
                     }
                     return;
                 }
@@ -473,7 +473,7 @@ namespace Interactivity
 
                 if (selection.Deletion.HasFlag(DeletionOptions.Valid))
                 {
-                    await r.DeleteAsync().ConfigureAwait(false);
+                    await Client.Rest.RemoveReactionAsync(r).ConfigureAwait(false);
                 }
 
                 selectionSource.SetResult(result);
