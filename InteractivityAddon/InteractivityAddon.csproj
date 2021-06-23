@@ -5,7 +5,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>Discord.InteractivityAddon</AssemblyName>
     <RootNamespace>Interactivity</RootNamespace>
-    <Version>2.4.1-dev-20210513.1</Version>
+    <Version>2.4.1-preview-20210624.1</Version>
     <RepositoryUrl>https://github.com/Playwo/Discord.InteractivityAddon</RepositoryUrl>
     <AssemblyVersion>2.4.1</AssemblyVersion>
     <FileVersion>2.4.1</FileVersion>
@@ -37,8 +37,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Core" Version="2.4.0-dev-20210508.2" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="2.4.0-dev-20210508.2" />
+    <PackageReference Include="Discord.Net.Core" Version="3.0.0-dev-20210617.3" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210617.3" />
   </ItemGroup>
 
   <ItemGroup>

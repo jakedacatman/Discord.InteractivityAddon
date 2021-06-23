@@ -174,7 +174,7 @@ namespace Interactivity
             var cancelTask = cancelSource.Task;
             var timeoutTask = Task.Delay(timeout ?? DefaultTimeout);
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction reaction)
             {
                 if (reaction.UserId == Client.CurrentUser.Id)
                 {
@@ -189,7 +189,7 @@ namespace Interactivity
                 await actions.Invoke(reaction, false).ConfigureAwait(false);
                 reactionSource.SetResult(new InteractivityResult<SocketReaction>(reaction, DateTime.UtcNow - startTime, false, false));
             }
-            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (runOnGateway ?? RunOnGateway)
                 {
@@ -330,7 +330,7 @@ namespace Interactivity
                 message = await channel.SendMessageAsync(confirmation.Content.Text, embed: confirmation.Content.Embed).ConfigureAwait(false);
             }
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction reaction)
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction reaction)
             {
                 if (reaction.MessageId != message.Id ||
                     reaction.UserId == Client.CurrentUser.Id)
@@ -354,7 +354,7 @@ namespace Interactivity
                     confirmationSource.SetResult(new InteractivityResult<bool>(false, DateTime.UtcNow - startTime, false, true));
                 }
             }
-            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (runOnGateway ?? RunOnGateway)
                 {
@@ -447,7 +447,7 @@ namespace Interactivity
                 message = await selection.InternalSendMessageAsync(channel).ConfigureAwait(false);
             }
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (m.Id != message.Id ||
                     r.UserId == Client.CurrentUser.Id)
@@ -478,7 +478,7 @@ namespace Interactivity
 
                 selectionSource.SetResult(result);
             }
-            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (runOnGateway ?? RunOnGateway)
                 {
@@ -676,7 +676,7 @@ namespace Interactivity
 
             var startTime = message.Timestamp.UtcDateTime;
 
-            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task CheckReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (r.MessageId != message.Id ||
                     r.UserId == Client.CurrentUser.Id)
@@ -702,7 +702,7 @@ namespace Interactivity
                     await message.ModifyAsync(x => { x.Embed = page.Embed; x.Content = page.Text; }).ConfigureAwait(false);
                 }
             }
-            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, ISocketMessageChannel c, SocketReaction r)
+            async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> m, Cacheable<IMessageChannel, ulong> c, SocketReaction r)
             {
                 if (runOnGateway ?? RunOnGateway)
                 {
