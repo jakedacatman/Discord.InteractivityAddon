@@ -37,8 +37,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Core" Version="3.0.0-dev-20210617.3" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210617.3" />
+    <PackageReference Include="Discord.Net.Core" Version="3.0.0-dev-20210822.1" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210822.1" />
   </ItemGroup>
 
   <ItemGroup>
